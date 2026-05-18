@@ -1,0 +1,15 @@
+{
+  "order": {
+    "orderEmails": [
+      "Jvanderhoff06@gmail.com",
+      "b.reilly03@gmail.com",
+      "glowdailynutrition@gmail.com"
+    ],
+    "mailtoSubjectPrefix": "GlowDaily Tea Kit Order",
+    "unitLabel": "tea kit"
+  },
+  "fulfillment": {
+    "pickupOptions": ["Pickup"],
+    "deliveryOptions": ["Delivery"]
+  }
+}

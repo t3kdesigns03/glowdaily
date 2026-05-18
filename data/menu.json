@@ -1,0 +1,51 @@
+{
+  "site": {
+    "name": "GlowDaily Nutrition",
+    "tagline": "Herbal vitamin tea blends",
+    "heroLine1": "Your daily cup of",
+    "heroLine2": "Get Stuff Done",
+    "heroSub": "Loaded tea kits with clean energy, mental clarity, and flavor you'll actually crave. Order weekly favorites for pickup or delivery."
+  },
+  "nutritionPerKit": {
+    "caloriesRange": "45-85 cal",
+    "carbsRange": "6-10 carbs",
+    "sugarNote": "Low sugar",
+    "caffeineMgRange": "160-285mg caffeine",
+    "highlights": [
+      "Clean energy",
+      "Mental clarity & focus",
+      "No crash",
+      "Electrolytes",
+      "Antioxidant support",
+      "Vitamins B6 & B12",
+      "Boosts metabolism"
+    ]
+  },
+  "combos": [
+    { "id": "combo-cherry-blue", "name": "Cherry / Blue Blast", "flavors": ["Cherry", "Blue Blast"], "badge": "Fan favorite" },
+    { "id": "combo-wild-berry", "name": "Wild Berry / Cotton Candy / Lemonade / Strawberry Starburst", "flavors": ["Wild Berry", "Cotton Candy", "Lemonade", "Strawberry Starburst"], "badge": "Best seller" },
+    { "id": "combo-pom-wild", "name": "Pomegranate / Wild Berry", "flavors": ["Pomegranate", "Wild Berry"] },
+    { "id": "combo-pina-daq", "name": "Pina Colada / Strawberry Daquiri", "flavors": ["Pina Colada", "Strawberry Daquiri"] },
+    { "id": "combo-cherry-apple", "name": "Cherry / Green Apple", "flavors": ["Cherry", "Green Apple"] }
+  ],
+  "items": [
+    { "id": "cotton-candy", "name": "Cotton Candy", "category": "Popular" },
+    { "id": "cherry", "name": "Cherry", "category": "Popular" },
+    { "id": "blue-raspberry", "name": "Blue Raspberry", "category": "Singles" },
+    { "id": "blue-blast", "name": "Blue Blast", "category": "Popular" },
+    { "id": "pomegranate", "name": "Pomegranate", "category": "Popular" },
+    { "id": "pina-colada", "name": "Pina Colada", "category": "Popular" },
+    { "id": "lemonade", "name": "Lemonade", "category": "Popular" },
+    { "id": "strawberry-lemonade", "name": "Strawberry Lemonade", "category": "Singles" },
+    { "id": "strawberry-starburst", "name": "Strawberry Starburst", "category": "Popular" },
+    { "id": "wild-berry", "name": "Wild Berry", "category": "Popular" },
+    { "id": "cranberry", "name": "Cranberry", "category": "Singles" },
+    { "id": "prickly-pear", "name": "Prickly Pear", "category": "Singles" },
+    { "id": "rainbow-candy", "name": "Rainbow Candy", "category": "Singles" },
+    { "id": "strawberry", "name": "Strawberry", "category": "Singles" },
+    { "id": "blackberry", "name": "Blackberry", "category": "Singles" },
+    { "id": "strawberry-kiwi", "name": "Strawberry Kiwi", "category": "Singles" },
+    { "id": "strawberry-daquiri", "name": "Strawberry Daquiri", "category": "Popular" },
+    { "id": "green-apple", "name": "Green Apple", "category": "Popular" }
+  ]
+}
