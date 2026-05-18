@@ -1,0 +1,16 @@
+# Accidental nested clone (do not commit)
+/glowdaily/
+/_remove_glowdaily/
+
+# Duplicate media at repo root (use assets/ only)
+/*.jpg
+/*.jpeg
+/*.png
+/*.svg
+/*.gif
+/*.webp
+
+# OS / editor
+Thumbs.db
+.DS_Store
+*.swp
