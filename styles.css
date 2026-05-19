@@ -571,6 +571,42 @@ a:hover {
   letter-spacing: -0.02em;
 }
 
+/* Benefits gallery (pamphlet photos) */
+.benefits-gallery {
+  padding: 48px 0 56px;
+  background: linear-gradient(180deg, var(--white) 0%, var(--cream) 100%);
+}
+
+.benefits-photos {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 24px;
+  margin: 0;
+}
+
+@media (min-width: 768px) {
+  .benefits-photos {
+    grid-template-columns: 1fr 1fr;
+    gap: 28px;
+    align-items: start;
+  }
+}
+
+.benefits-photo {
+  margin: 0;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-md);
+  background: var(--white);
+}
+
+.benefits-photo img {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
 .check-list {
   margin: 0;
   padding: 0;

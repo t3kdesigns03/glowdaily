@@ -4,7 +4,7 @@
     "tagline": "Herbal vitamin tea blends",
     "heroLine1": "Your daily cup of",
     "heroLine2": "Get Stuff Done",
-    "heroSub": "Loaded tea kits with clean energy, mental clarity, and flavor you'll actually crave. Order weekly favorites for pickup or delivery."
+    "heroSub": "Loaded tea kits with less than 1g sugar, clean energy, mental clarity, and flavor you'll actually crave. Order weekly for pickup or delivery."
   },
   "nutritionPerKit": {
     "caloriesRange": "45-85 cal",
@@ -12,6 +12,7 @@
     "sugarNote": "<1g sugar",
     "caffeineMgRange": "160-285mg caffeine",
     "highlights": [
+      "Less than 1g sugar per kit",
       "Clean energy",
       "Mental clarity & focus",
       "No crash",
