@@ -1,16 +1,16 @@
 const $ = (sel, root = document) => root.querySelector(sel);
 
 const GRADIENTS = [
-  ["#ff6b9d", "#ffc371"],
-  ["#4facfe", "#00f2fe"],
-  ["#a855f7", "#ec4899"],
-  ["#f97316", "#fbbf24"],
-  ["#22c55e", "#86efac"],
-  ["#06b6d4", "#3b82f6"],
-  ["#e11d48", "#fb7185"],
-  ["#14b8a6", "#134e4a"],
-  ["#8b5cf6", "#c4b5fd"],
-  ["#f43f5e", "#fda4af"]
+  ["#00b4d8", "#48cae4"],
+  ["#0096c7", "#90e0ef"],
+  ["#48cae4", "#ffd166"],
+  ["#0077b6", "#00b4d8"],
+  ["#ffb703", "#ffd166"],
+  ["#fb8500", "#ffb703"],
+  ["#06d6a0", "#48cae4"],
+  ["#118ab2", "#073b4c"],
+  ["#ef476f", "#ffd166"],
+  ["#8338ec", "#48cae4"]
 ];
 
 function escapeHtml(str) {
@@ -144,6 +144,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     const sticky = $("#stickyCart");
     if (sticky) sticky.hidden = total === 0;
+    document.body.classList.toggle("has-sticky-cart", total > 0);
 
     const hint = $("#cartEmptyHint");
     const lines = $("#cartLines");
@@ -294,9 +295,50 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   const orderType = $("#orderType");
   const addressLabel = $("#addressLabel");
-  orderType?.addEventListener("change", () => {
-    const isDelivery = orderType.value === "Delivery";
+  const orderAddress = $("#orderAddress");
+
+  function syncDeliveryFields() {
+    const isDelivery = orderType?.value === "Delivery";
     if (addressLabel) addressLabel.style.opacity = isDelivery ? "1" : "0.65";
+    if (orderAddress) {
+      orderAddress.required = Boolean(isDelivery);
+      orderAddress.setAttribute("aria-required", isDelivery ? "true" : "false");
+    }
+  }
+
+  orderType?.addEventListener("change", syncDeliveryFields);
+  syncDeliveryFields();
+
+  const menuToggle = $("#menuToggle");
+  const mobileNav = $("#mobileNav");
+  const navBackdrop = $("#navBackdrop");
+
+  function setNavOpen(open) {
+    if (!menuToggle || !mobileNav) return;
+    menuToggle.setAttribute("aria-expanded", open ? "true" : "false");
+    menuToggle.setAttribute("aria-label", open ? "Close menu" : "Open menu");
+    mobileNav.classList.toggle("is-open", open);
+    mobileNav.hidden = !open;
+    document.body.classList.toggle("nav-open", open);
+    if (navBackdrop) {
+      navBackdrop.hidden = !open;
+      navBackdrop.setAttribute("aria-hidden", open ? "false" : "true");
+    }
+  }
+
+  menuToggle?.addEventListener("click", () => {
+    const open = menuToggle.getAttribute("aria-expanded") !== "true";
+    setNavOpen(open);
+  });
+
+  navBackdrop?.addEventListener("click", () => setNavOpen(false));
+
+  mobileNav?.querySelectorAll("a").forEach((link) => {
+    link.addEventListener("click", () => setNavOpen(false));
+  });
+
+  window.addEventListener("resize", () => {
+    if (window.matchMedia("(min-width: 768px)").matches) setNavOpen(false);
   });
 
   $("#orderForm")?.addEventListener("submit", (e) => {

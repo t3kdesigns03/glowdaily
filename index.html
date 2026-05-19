@@ -2,7 +2,9 @@
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#007991" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="description" content="GlowDaily Nutrition - Herbal loaded tea kits. Clean energy, vivid flavors, pickup and delivery." />
     <title>GlowDaily Nutrition | Loaded Tea Kits</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -10,6 +12,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,600;1,600&family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="./styles.css" />
     <link rel="icon" href="./assets/GlowDailyNutritionLogo.png" type="image/png" />
+    <link rel="preload" href="./assets/fbglowdailycoverimage.jpg" as="image" />
   </head>
   <body>
     <div class="announce">
@@ -19,20 +22,44 @@
     <header class="site-header" id="top">
       <div class="header-inner">
         <a class="logo" href="#top">
-          <img src="./assets/GlowDailyNutritionLogo.png" alt="" width="52" height="52" />
+          <img src="./assets/GlowDailyNutritionLogo.png" alt="GlowDaily Nutrition" width="48" height="48" />
           <span class="logo-text">GlowDaily <em>Nutrition</em></span>
         </a>
-        <nav class="nav" aria-label="Primary">
+        <nav class="nav nav--desktop" aria-label="Primary">
           <a href="#about">Why GlowDaily</a>
           <a href="#menu">Flavors</a>
           <a href="#order">Order</a>
         </nav>
-        <a class="nav-cta" href="#order">View cart <span class="cart-pill" id="headerCartCount">0</span></a>
+        <div class="header-actions">
+          <a class="nav-cta nav-cta--header" href="#order">
+            <span class="nav-cta-label">Cart</span>
+            <span class="cart-pill" id="headerCartCount">0</span>
+          </a>
+          <button
+            type="button"
+            class="menu-toggle"
+            id="menuToggle"
+            aria-expanded="false"
+            aria-controls="mobileNav"
+            aria-label="Open menu"
+          >
+            <span class="menu-toggle-bar"></span>
+            <span class="menu-toggle-bar"></span>
+            <span class="menu-toggle-bar"></span>
+          </button>
+        </div>
       </div>
+      <nav class="nav-mobile" id="mobileNav" aria-label="Mobile" hidden>
+        <a href="#about">Why GlowDaily</a>
+        <a href="#menu">Flavors</a>
+        <a href="#order">Order</a>
+      </nav>
     </header>
 
-    <main>
-      <section class="hero">
+    <main id="main">
+      <section class="hero" id="hero">
+        <div class="hero-glow" aria-hidden="true"></div>
+        <div class="hero-sparkles" aria-hidden="true"></div>
         <div class="hero-inner">
           <div class="hero-copy">
             <p class="eyebrow" id="heroEyebrow">Your daily cup of</p>
@@ -43,19 +70,19 @@
             <div class="hero-stats" id="heroStats" aria-label="Nutrition per kit"></div>
             <div class="hero-actions">
               <a class="btn btn-primary" href="#menu">Shop flavors</a>
-              <a class="btn btn-ghost" href="#about">See benefits</a>
+              <a class="btn btn-ghost btn-ghost--hero" href="#about">See benefits</a>
             </div>
           </div>
-          <div class="hero-visual" aria-hidden="true">
-            <div class="cup-scene">
-              <div class="cup-glow"></div>
-              <div class="cup">
-                <div class="cup-liquid"></div>
-              </div>
-              <div class="cup-leaf cup-leaf--l"></div>
-              <div class="cup-leaf cup-leaf--r"></div>
-            </div>
-            <p class="hero-visual-caption">Loaded tea kit</p>
+          <div class="hero-visual">
+            <img
+              class="hero-cover"
+              src="./assets/fbglowdailycoverimage.jpg"
+              alt="GlowDaily Nutrition — radiant loaded tea branding"
+              width="800"
+              height="450"
+              decoding="async"
+              fetchpriority="high"
+            />
           </div>
         </div>
       </section>
@@ -183,7 +210,7 @@
                 </label>
               </div>
               <div class="form-actions">
-                <button type="submit" class="btn btn-primary btn-lg">Send order request</button>
+                <button type="submit" class="btn btn-primary btn-lg btn-block">Send order request</button>
               </div>
               <p class="toast" id="orderToast" role="status"></p>
             </form>
@@ -207,9 +234,10 @@
     </footer>
 
     <aside class="sticky-cart" id="stickyCart" hidden>
-      <p><strong id="stickyCartCount">0</strong> kits in cart</p>
+      <p class="sticky-cart-text"><strong id="stickyCartCount">0</strong> kits in cart</p>
       <a class="btn btn-primary btn-sm" href="#order">Checkout</a>
     </aside>
+    <div class="nav-backdrop" id="navBackdrop" hidden aria-hidden="true"></div>
 
     <dialog class="modal" id="orderModal">
       <div class="modal-card">
