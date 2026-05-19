@@ -549,6 +549,28 @@ a:hover {
   font-size: 1.05rem;
 }
 
+.sugar-callout {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 6px;
+  margin: 0 0 20px;
+  padding: 10px 16px;
+  background: var(--gradient-brand-soft);
+  border: 1px solid rgba(0, 180, 216, 0.28);
+  border-radius: 999px;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--teal-deep);
+  box-shadow: var(--shadow-sm);
+}
+
+.sugar-callout strong {
+  font-size: 1.35rem;
+  font-weight: 800;
+  color: var(--teal);
+  letter-spacing: -0.02em;
+}
+
 .check-list {
   margin: 0;
   padding: 0;
