@@ -908,15 +908,35 @@ function Orders({ ingredients, products, orders, setOrders, setTransactions }) {
     const id = `ORD-${String(orders.length+1).padStart(3,'0')}`;
     const newOrder = { ...ord, id };
     setOrders(p => [newOrder, ...p]);
-    // Auto-log income transaction when order is created (unless backordered)
+
+    const newTxns = [];
+
+    // Auto-log income unless backordered
     if (!ord.isBackorder && ord.status !== 'Backordered') {
-      setTransactions(p => [{
+      newTxns.push({
         id: `TXN-${Date.now()}`,
         date: ord.date, type: 'income', category: 'Sales',
         amount: ord.total,
         description: `${id} — ${ord.customer} (${ord.items.map(i=>`${i.qty}× ${i.name}`).join(', ')})`
-      }, ...p]);
+      });
     }
+
+    // Auto-log COGS if order is created as Delivered
+    if (ord.status === 'Delivered') {
+      const perKit = kitCost(ingredients, true);
+      const cogs = ord.items.reduce((sum, item) => {
+        const kits = item.isPack ? (item.packSize ?? 1) : 1;
+        return sum + item.qty * kits * perKit;
+      }, 0);
+      newTxns.push({
+        id: `COGS-${Date.now()}`,
+        date: ord.date, type: 'expense', category: 'Cost of Goods',
+        amount: cogs,
+        description: `COGS — ${ord.customer} (${id})`
+      });
+    }
+
+    if (newTxns.length) setTransactions(p => [...newTxns, ...p]);
   }
 
   function advanceStatus(ordId) {
