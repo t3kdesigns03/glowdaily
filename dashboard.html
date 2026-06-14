@@ -114,7 +114,7 @@ const INIT_PRODUCTS = [
   { id:15, name:"Bella-Rita",        emoji:"🍹", price:8.00, togoPrice:10.00, active:true },
   { id:16, name:"MadDogg",           emoji:"🐕", price:8.00, togoPrice:10.00, active:true },
   { id:17, name:"Robert Marlicious",     emoji:"🧃", price:8.00,  togoPrice:10.00, active:true },
-  { id:18, name:"12-Pack (Mix & Match)", emoji:"🎁", price:80.00, togoPrice:80.00, isPack:true, packSize:12, active:true },
+  { id:18, name:"Monthly 12-Pack", emoji:"🎁", price:80.00, togoPrice:80.00, isPack:true, packSize:12, active:true },
 ];
 
 // Start with no orders or transactions — log as you go
@@ -405,17 +405,7 @@ function AddOrderModal({ products, onAdd, onClose, existingOrder }) {
     const filled = items.filter(r => r.pid && +r.qty > 0);
     if (!filled.length) { alert('Add at least one item'); return; }
 
-    // Validate packs have all flavors chosen
-    for (const r of filled) {
-      const p = products.find(p => p.id === +r.pid);
-      if (p?.isPack) {
-        const chosen = Object.values(r.packFlavors || {}).reduce((s,n)=>s+n, 0);
-        if (chosen !== p.packSize) {
-          alert(`Please choose all ${p.packSize} flavors for the ${p.name} before saving.`);
-          return;
-        }
-      }
-    }
+    // No flavor validation needed — packs are pre-set monthly selections
 
     const valid = filled.map(r => {
       const p     = products.find(p => p.id === +r.pid);
@@ -500,14 +490,9 @@ function AddOrderModal({ products, onAdd, onClose, existingOrder }) {
                     </div>
                   )}
 
-                  {/* Flavor picker — appears when a pack product is selected */}
-                  {isPack && prod && (
-                    <PackFlavorPicker
-                      products={activeProducts}
-                      packSize={prod.packSize}
-                      flavors={row.packFlavors || {}}
-                      onChange={pf => setRow(i,'packFlavors',pf)}
-                    />
+                  {/* Pack note */}
+                  {isPack && (
+                    <p className="text-xs text-purple-500 px-1">🎁 Monthly selection — {prod?.packSize ?? 12} teas, customer's choice handled separately</p>
                   )}
                 </div>
               );
