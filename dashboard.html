@@ -375,15 +375,16 @@ function PackFlavorPicker({ products, packSize, flavors, onChange }) {
 //  ADD ORDER MODAL
 // ══════════════════════════════════════════════════════
 
-function AddOrderModal({ products, onAdd, onClose }) {
-  const [customer,    setCustomer]    = useState('');
-  const [date,        setDate]        = useState(today());
-  const [shipping,    setShipping]    = useState('Venmo Pickup');
-  const [tracking,    setTracking]    = useState('');
-  const [note,        setNote]        = useState('');
-  const [items,       setItems]       = useState([{pid:'',qty:1,type:'kit',packFlavors:{}}]);
-  const [isBackorder, setIsBackorder] = useState(false);
-  const [status,      setStatus]      = useState('Received');
+function AddOrderModal({ products, onAdd, onClose, existingOrder }) {
+  const isEdit = !!existingOrder;
+  const [customer,    setCustomer]    = useState(existingOrder?.customer    || '');
+  const [date,        setDate]        = useState(existingOrder?.date        || today());
+  const [shipping,    setShipping]    = useState(existingOrder?.shipping    || 'Venmo Pickup');
+  const [tracking,    setTracking]    = useState(existingOrder?.tracking    || '');
+  const [note,        setNote]        = useState(existingOrder?.note        || '');
+  const [items,       setItems]       = useState(existingOrder?.items?.map(i=>({pid:String(i.id),qty:i.qty,type:i.type||'kit',packFlavors:i.packFlavors||{}})) || [{pid:'',qty:1,type:'kit',packFlavors:{}}]);
+  const [isBackorder, setIsBackorder] = useState(existingOrder?.isBackorder || false);
+  const [status,      setStatus]      = useState(existingOrder?.status      || 'Received');
 
   const addRow = () => setItems(p => [...p, {pid:'',qty:1,type:'kit',packFlavors:{}}]);
   const delRow = i => setItems(p => p.filter((_,j) => j!==i));
@@ -425,12 +426,12 @@ function AddOrderModal({ products, onAdd, onClose }) {
       };
     });
 
-    onAdd({ customer: customer||'Anonymous', date, items: valid, total, shipping, tracking, note, status: isBackorder ? 'Backordered' : status, isBackorder });
+    onAdd({ ...(isEdit ? { id: existingOrder.id } : {}), customer: customer||'Anonymous', date, items: valid, total, shipping, tracking, note, status: isBackorder ? 'Backordered' : status, isBackorder });
     onClose();
   };
 
   return (
-    <Modal title={isBackorder ? '📋 Log Backorder' : '📦 New Order'} onClose={onClose} wide>
+    <Modal title={isEdit ? `✏️ Edit ${existingOrder.id}` : isBackorder ? '📋 Log Backorder' : '📦 New Order'} onClose={onClose} wide>
       <form onSubmit={handleSubmit} className="space-y-4">
 
         {/* Backorder toggle */}
@@ -540,7 +541,7 @@ function AddOrderModal({ products, onAdd, onClose }) {
         <div><Lbl>Note</Lbl><Input value={note} onChange={e=>setNote(e.target.value)} placeholder="Optional…"/></div>
 
         <button type="submit" className="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-3 rounded-2xl transition-colors text-base">
-          {isBackorder ? 'Log Backorder' : 'Create Order'}
+          {isEdit ? 'Save Changes' : isBackorder ? 'Log Backorder' : 'Create Order'}
         </button>
       </form>
     </Modal>
@@ -892,6 +893,7 @@ function Orders({ ingredients, products, orders, setOrders, setTransactions }) {
   const [search,   setSearch]   = useState('');
   const [showAdd,  setShowAdd]  = useState(false);
   const [expanded, setExpanded] = useState(null);
+  const [editing,  setEditing]  = useState(null);
 
   const FILTERS = ['All','Backordered','Received','Packed','Shipped','Delivered'];
 
@@ -937,6 +939,45 @@ function Orders({ ingredients, products, orders, setOrders, setTransactions }) {
     }
 
     if (newTxns.length) setTransactions(p => [...newTxns, ...p]);
+  }
+
+  function deleteOrder(ordId) {
+    if (!window.confirm(`Delete order ${ordId}? This will also remove its income and COGS entries.`)) return;
+    setOrders(p => p.filter(o => o.id !== ordId));
+    // Remove all transactions referencing this order
+    setTransactions(p => p.filter(t => !t.description.includes(ordId)));
+    if (expanded === ordId) setExpanded(null);
+  }
+
+  function saveEditedOrder(updatedOrd) {
+    const ordId = updatedOrd.id;
+    // Remove old transactions for this order, then re-add based on new data
+    setTransactions(p => p.filter(t => !t.description.includes(ordId)));
+    const newTxns = [];
+    if (!updatedOrd.isBackorder && updatedOrd.status !== 'Backordered') {
+      newTxns.push({
+        id: `TXN-${Date.now()}`,
+        date: updatedOrd.date, type: 'income', category: 'Sales',
+        amount: updatedOrd.total,
+        description: `${ordId} — ${updatedOrd.customer} (${updatedOrd.items.map(i=>`${i.qty}× ${i.name}`).join(', ')})`
+      });
+    }
+    if (updatedOrd.status === 'Delivered') {
+      const perKit = kitCost(ingredients, true);
+      const cogs = updatedOrd.items.reduce((sum, item) => {
+        const kits = item.isPack ? (item.packSize ?? 1) : 1;
+        return sum + item.qty * kits * perKit;
+      }, 0);
+      newTxns.push({
+        id: `COGS-${Date.now()}`,
+        date: updatedOrd.date, type: 'expense', category: 'Cost of Goods',
+        amount: cogs,
+        description: `COGS — ${updatedOrd.customer} (${ordId})`
+      });
+    }
+    setOrders(p => p.map(o => o.id === ordId ? updatedOrd : o));
+    if (newTxns.length) setTransactions(p => [...newTxns, ...p]);
+    setEditing(null);
   }
 
   function advanceStatus(ordId) {
@@ -1086,6 +1127,11 @@ function Orders({ ingredients, products, orders, setOrders, setTransactions }) {
                           Stock received — move to Received →
                         </button>
                       )}
+                      {/* Edit / Delete */}
+                      <div className="flex gap-2 pt-1">
+                        <button onClick={()=>setEditing(o)} className="flex-1 border border-gray-200 hover:border-emerald-400 text-gray-500 hover:text-emerald-600 text-sm font-semibold py-2 rounded-xl transition-colors">✏️ Edit</button>
+                        <button onClick={()=>deleteOrder(o.id)} className="flex-1 border border-red-100 hover:border-red-400 text-red-400 hover:text-red-600 text-sm font-semibold py-2 rounded-xl transition-colors">🗑️ Delete</button>
+                      </div>
                     </div>
                   )}
                 </div>
@@ -1095,6 +1141,7 @@ function Orders({ ingredients, products, orders, setOrders, setTransactions }) {
       }
 
       {showAdd && <AddOrderModal products={products} onAdd={addOrder} onClose={()=>setShowAdd(false)}/>}
+      {editing  && <AddOrderModal products={products} existingOrder={editing} onAdd={saveEditedOrder} onClose={()=>setEditing(null)}/>}
     </div>
   );
 }
