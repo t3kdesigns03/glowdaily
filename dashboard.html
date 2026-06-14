@@ -1043,6 +1043,13 @@ function Orders({ ingredients, products, orders, setOrders, setTransactions }) {
                       <div className="text-right ml-3 flex-shrink-0">
                         <p className="font-bold text-emerald-600">{fmt(o.total)}</p>
                         <span className={`text-xs px-2 py-0.5 rounded-full font-semibold ${STATUS_STYLE[o.status]}`}>{o.status}</span>
+                        {o.status === 'Delivered' && (() => {
+                          const perKit = kitCost(ingredients, true);
+                          const cogs = o.items.reduce((sum, item) => sum + item.qty * (item.isPack ? (item.packSize??1) : 1) * perKit, 0);
+                          const profit = o.total - cogs;
+                          const margin = o.total > 0 ? profit/o.total*100 : 0;
+                          return <p className="text-xs font-semibold text-purple-600 mt-0.5">{fmt(profit)} profit · {pct(margin)}</p>;
+                        })()}
                       </div>
                     </div>
                     <p className="text-xs text-gray-500 mt-2">{o.items.map(i=>`${i.qty}× ${i.name} ${i.type==='togo'?'🥤':'📦'}`).join(' · ')}</p>
@@ -1372,7 +1379,7 @@ function Margins({ ingredients, products, orders, transactions, setProducts }) {
 //  BOOKKEEPING PAGE
 // ══════════════════════════════════════════════════════
 
-function Bookkeeping({ transactions, setTransactions }) {
+function Bookkeeping({ transactions, setTransactions, ingredients }) {
   const [showAdd,    setShowAdd]    = useState(false);
   const [showExport, setShowExport] = useState(false);
   const [typeF,      setTypeF]      = useState('all');
@@ -1428,20 +1435,39 @@ function Bookkeeping({ transactions, setTransactions }) {
       <div className="bg-white rounded-2xl border shadow-sm divide-y">
         {visible.length === 0
           ? <Empty icon={transactions.length===0?'📒':'🔍'} text={transactions.length===0?'No transactions yet. Income is auto-logged when orders are created.':'No transactions match your filter.'}/>
-          : visible.map(t => (
-              <div key={t.id} className="flex items-center gap-3 px-4 py-3">
-                <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0 ${t.type==='income'?'bg-emerald-100 text-emerald-600':'bg-red-100 text-red-500'}`}>
-                  {t.type==='income'?'↑':'↓'}
+          : visible.map(t => {
+              // For income transactions, find matching COGS and calculate profit
+              let profit = null;
+              if (t.type === 'income') {
+                const ordMatch = t.description.match(/ORD-\d+/);
+                if (ordMatch) {
+                  const ordId = ordMatch[0];
+                  const cogs = transactions.find(x => x.type === 'expense' && x.description.includes(ordId));
+                  if (cogs) profit = t.amount - cogs.amount;
+                }
+              }
+              return (
+                <div key={t.id} className="flex items-center gap-3 px-4 py-3">
+                  <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0 ${t.type==='income'?'bg-emerald-100 text-emerald-600':'bg-red-100 text-red-500'}`}>
+                    {t.type==='income'?'↑':'↓'}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium text-gray-800 truncate">{t.description}</p>
+                    <p className="text-xs text-gray-400">{t.date} · {t.category}</p>
+                  </div>
+                  <div className="flex flex-col items-end gap-0.5 flex-shrink-0">
+                    <span className={`text-sm font-bold ${t.type==='income'?'text-emerald-600':'text-red-500'}`}>
+                      {t.type==='income'?'+':'−'}{fmt(t.amount)}
+                    </span>
+                    {profit !== null && (
+                      <span className={`text-xs font-semibold px-1.5 py-0.5 rounded-full ${profit>=0?'bg-emerald-50 text-emerald-600':'bg-red-50 text-red-500'}`}>
+                        profit {fmt(profit)} ({pct(profit/t.amount*100)})
+                      </span>
+                    )}
+                  </div>
                 </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-gray-800 truncate">{t.description}</p>
-                  <p className="text-xs text-gray-400">{t.date} · {t.category}</p>
-                </div>
-                <span className={`text-sm font-bold flex-shrink-0 ${t.type==='income'?'text-emerald-600':'text-red-500'}`}>
-                  {t.type==='income'?'+':'−'}{fmt(t.amount)}
-                </span>
-              </div>
-            ))
+              );
+            })
         }
       </div>
 
@@ -1655,7 +1681,7 @@ function App() {
     orders:      <Orders      ingredients={ingredients} products={products} orders={orders} setOrders={setOrders} setTransactions={setTransactions}/>,
     ingredients: <Ingredients ingredients={ingredients} setIngredients={setIngredients}/>,
     margins:     <Margins     ingredients={ingredients} products={products} orders={orders} transactions={transactions} setProducts={setProducts}/>,
-    books:       <Bookkeeping transactions={transactions} setTransactions={setTransactions}/>,
+    books:       <Bookkeeping transactions={transactions} setTransactions={setTransactions} ingredients={ingredients}/>,
   };
 
   return (
