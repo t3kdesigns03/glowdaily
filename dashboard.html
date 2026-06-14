@@ -1,0 +1,1745 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>GlowDaily Nutrition</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.2/babel.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+*{box-sizing:border-box}
+body{margin:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f8fafc}
+.scrollbar-hide::-webkit-scrollbar{display:none}
+.scrollbar-hide{-ms-overflow-style:none;scrollbar-width:none}
+</style>
+</head>
+<body>
+<div id="root"></div>
+
+<!--
+══════════════════════════════════════════════════════
+  SUPABASE SCHEMA  (paste into Supabase SQL Editor)
+══════════════════════════════════════════════════════
+
+create table ingredients (
+  id          bigint primary key generated always as identity,
+  name        text not null,
+  flavor      text,
+  sku         text,
+  size        text,
+  retail      numeric(8,2) not null default 0,
+  servings    integer not null default 1,
+  serving_label text,
+  stock       integer default 0,
+  threshold   integer default 1,
+  optional    boolean default false,
+  updated_at  timestamptz default now()
+);
+
+create table products (
+  id          bigint primary key generated always as identity,
+  name        text not null,
+  emoji       text default '🍵',
+  price       numeric(8,2) not null default 8.00,
+  active      boolean default true,
+  created_at  timestamptz default now()
+);
+
+create table orders (
+  id            text primary key,
+  date          date not null default current_date,
+  customer      text,
+  items         jsonb not null default '[]',
+  total         numeric(8,2) not null default 0,
+  status        text default 'Received',
+  is_backorder  boolean default false,
+  shipping      text,
+  tracking      text,
+  note          text,
+  created_at    timestamptz default now()
+);
+
+create table transactions (
+  id          text primary key,
+  date        date not null,
+  type        text not null,
+  category    text,
+  amount      numeric(8,2) not null,
+  description text,
+  created_at  timestamptz default now()
+);
+
+-- To connect Supabase replace useState hooks with:
+--   const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+--   const { data } = await supabase.from('orders').select('*').order('date',{ascending:false})
+══════════════════════════════════════════════════════
+-->
+
+<script type="text/babel">
+const { useState, useEffect, useRef, useMemo } = React;
+
+// ══════════════════════════════════════════════════════
+//  INITIAL DATA
+// ══════════════════════════════════════════════════════
+
+// Retail prices are ESTIMATES — update in the Ingredients page with your actual Herbalife prices.
+// Your wholesale cost = retail × 50% (Supervisor discount)
+const INIT_INGREDIENTS = [
+  { id:1, name:"Herbal Tea Concentrate", flavor:"Raspberry",          sku:"0189", size:"3.6 oz / 102g",      retail:34.70, servings:96,  servingLabel:"¼ tsp / kit",      stock:0, threshold:1, optional:false },
+  { id:2, name:"N-R-G Tea",              flavor:"Original",           sku:"0102", size:"2.12 oz / 60g",       retail:27.95, servings:80,  servingLabel:"¼ tsp / kit",      stock:0, threshold:1, optional:false },
+  { id:3, name:"Liftoff",                flavor:"Lemon-Lime Blast",   sku:"206K", size:"Box of 30 sticks",    retail:35.75, servings:30,  servingLabel:"1 stick / kit",    stock:0, threshold:2, optional:false },
+  { id:4, name:"Beverage Mix",           flavor:"Wild Berry",         sku:"3119", size:"9.88 oz / 280g",      retail:38.45, servings:133, servingLabel:"¾ tsp / kit",      stock:0, threshold:1, optional:false },
+  { id:5, name:"Collagen Beauty Booster",flavor:"Strawberry Lemonade",sku:"0831", size:"6.03 oz / 171g",      retail:77.00, servings:100, servingLabel:"½ tsp / kit (opt)",stock:0, threshold:1, optional:true  },
+];
+
+const INIT_PRODUCTS = [
+  { id:1,  name:"American Bomb Pop", emoji:"🎆", price:8.00, togoPrice:10.00, active:true },
+  { id:2,  name:"Galaxy Blast",      emoji:"🌌", price:8.00, togoPrice:10.00, active:true },
+  { id:3,  name:"County Fair",       emoji:"🎡", price:8.00, togoPrice:10.00, active:true },
+  { id:4,  name:"Orange Push Pop",   emoji:"🍊", price:8.00, togoPrice:10.00, active:true },
+  { id:5,  name:"Crazy Funhouse",    emoji:"🎪", price:8.00, togoPrice:10.00, active:true },
+  { id:6,  name:"Poison Apple",      emoji:"🍎", price:8.00, togoPrice:10.00, active:true },
+  { id:7,  name:"All the Pinks",     emoji:"🌸", price:8.00, togoPrice:10.00, active:true },
+  { id:8,  name:"Pom Berry",         emoji:"🍇", price:8.00, togoPrice:10.00, active:true },
+  { id:9,  name:"Chum Bucket",       emoji:"🫧", price:8.00, togoPrice:10.00, active:true },
+  { id:10, name:"Purple Passion",    emoji:"💜", price:8.00, togoPrice:10.00, active:true },
+  { id:11, name:"Cherri Sherri",     emoji:"🍒", price:8.00, togoPrice:10.00, active:true },
+  { id:12, name:"Tropical Sunrise",  emoji:"🌅", price:8.00, togoPrice:10.00, active:true },
+  { id:13, name:"Mario the Plumber", emoji:"🍄", price:8.00, togoPrice:10.00, active:true },
+  { id:14, name:"Mystery Machine",   emoji:"🔮", price:8.00, togoPrice:10.00, active:true },
+  { id:15, name:"Bella-Rita",        emoji:"🍹", price:8.00, togoPrice:10.00, active:true },
+  { id:16, name:"MadDogg",           emoji:"🐕", price:8.00, togoPrice:10.00, active:true },
+  { id:17, name:"Robert Marlicious",     emoji:"🧃", price:8.00,  togoPrice:10.00, active:true },
+  { id:18, name:"12-Pack (Mix & Match)", emoji:"🎁", price:80.00, togoPrice:80.00, isPack:true, packSize:12, active:true },
+];
+
+// Start with no orders or transactions — log as you go
+const INIT_ORDERS       = [];
+const INIT_TRANSACTIONS = [];
+
+// ══════════════════════════════════════════════════════
+//  PERSISTENCE  (localStorage — auto-saves on same PC;
+//  use Backup/Restore to move data to a different PC)
+// ══════════════════════════════════════════════════════
+
+const STORAGE_VERSION = '2.0';
+
+function loadState(key, fallback) {
+  try {
+    const raw = localStorage.getItem(`gd_${key}`);
+    return raw ? JSON.parse(raw) : fallback;
+  } catch { return fallback; }
+}
+function saveState(key, val) {
+  try { localStorage.setItem(`gd_${key}`, JSON.stringify(val)); } catch {}
+}
+
+// ══════════════════════════════════════════════════════
+//  UTILS
+// ══════════════════════════════════════════════════════
+
+const fmt   = n => `$${Number(n).toFixed(2)}`;
+const pct   = n => `${Number(n).toFixed(1)}%`;
+const today = () => new Date().toISOString().split('T')[0];
+const DISC  = 0.50; // Supervisor 50% wholesale discount
+
+// ── Supabase cloud sync ──────────────────────────────────
+const SUPABASE_URL = 'https://irfwztshbtgpcwewztgc.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_uEVhKSZ3EEMvtGTjossbSA_5ZasYfQ4';
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+async function loadFromCloud(key, fallback) {
+  try {
+    const { data, error } = await sb.from('gd_store').select('value').eq('key', key).maybeSingle();
+    if (error || !data) return fallback;
+    return data.value ?? fallback;
+  } catch { return fallback; }
+}
+
+async function saveToCloud(key, val) {
+  try {
+    await sb.from('gd_store').upsert({ key, value: val, updated_at: new Date().toISOString() }, { onConflict: 'key' });
+  } catch(e) { console.warn('Cloud save failed:', e); }
+}
+// ────────────────────────────────────────────────────────
+
+function kitCost(ingredients, withOptional = false) {
+  return ingredients
+    .filter(i => withOptional || !i.optional)
+    .reduce((s, i) => s + (i.retail * DISC) / i.servings, 0);
+}
+
+const CATS = ["Sales","Ingredients","Packaging","Supplies","Shipping","Marketing","Labor","Other"];
+
+const STATUS_STYLE = {
+  Received:    "bg-blue-100 text-blue-700",
+  Packed:      "bg-amber-100 text-amber-700",
+  Shipped:     "bg-purple-100 text-purple-700",
+  Delivered:   "bg-emerald-100 text-emerald-700",
+  Backordered: "bg-red-100 text-red-700",
+};
+
+const NEXT_STATUS = {
+  Received: "Packed",
+  Packed:   "Shipped",
+  Shipped:  "Delivered",
+};
+
+// Date range helpers
+function dateRangeStart(key) {
+  const d = new Date();
+  if (key === 'today')     return d.toISOString().split('T')[0];
+  if (key === 'week')      { d.setDate(d.getDate() - d.getDay()); return d.toISOString().split('T')[0]; }
+  if (key === 'month')     return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-01`;
+  if (key === 'lastmonth') return new Date(d.getFullYear(), d.getMonth()-1, 1).toISOString().split('T')[0];
+  return null;
+}
+function dateRangeEnd(key) {
+  if (key === 'lastmonth') { const d = new Date(); return new Date(d.getFullYear(), d.getMonth(), 0).toISOString().split('T')[0]; }
+  return today();
+}
+
+// ══════════════════════════════════════════════════════
+//  SHARED UI
+// ══════════════════════════════════════════════════════
+
+function Lbl({ children }) {
+  return <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">{children}</p>;
+}
+
+function Input({ ...props }) {
+  return <input {...props} className={`w-full border rounded-xl px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-emerald-400 ${props.className||''}`}/>;
+}
+
+function Sel({ children, ...props }) {
+  return <select {...props} className="w-full border rounded-xl px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-emerald-400 bg-white">{children}</select>;
+}
+
+function Btn({ children, variant='primary', ...props }) {
+  const cls = variant === 'primary'
+    ? 'bg-emerald-500 hover:bg-emerald-600 text-white'
+    : variant === 'outline'
+    ? 'border border-gray-200 text-gray-600 hover:bg-gray-50 bg-white'
+    : 'bg-red-500 hover:bg-red-600 text-white';
+  return <button {...props} className={`px-4 py-2 rounded-xl font-semibold text-sm transition-colors ${cls} ${props.className||''} disabled:opacity-40`}>{children}</button>;
+}
+
+function Modal({ title, onClose, children, wide }) {
+  return (
+    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center">
+      <div className="absolute inset-0 bg-black/50" onClick={onClose}/>
+      <div className={`relative bg-white w-full ${wide?'max-w-2xl':'max-w-md'} rounded-t-2xl sm:rounded-2xl shadow-2xl max-h-[92vh] overflow-y-auto z-10`}>
+        <div className="flex items-center justify-between px-5 py-4 border-b sticky top-0 bg-white z-10">
+          <h2 className="font-bold text-gray-800">{title}</h2>
+          <button onClick={onClose} className="w-8 h-8 flex items-center justify-center rounded-full bg-gray-100 text-gray-400 hover:bg-gray-200 text-sm">✕</button>
+        </div>
+        <div className="p-5">{children}</div>
+      </div>
+    </div>
+  );
+}
+
+function Empty({ icon, text }) {
+  return (
+    <div className="text-center py-16 flex flex-col items-center gap-2">
+      <span className="text-4xl">{icon}</span>
+      <p className="text-gray-400 text-sm">{text}</p>
+    </div>
+  );
+}
+
+// ══════════════════════════════════════════════════════
+//  CHARTS
+// ══════════════════════════════════════════════════════
+
+function WeekBarChart({ orders }) {
+  const ref = useRef(null); const chart = useRef(null);
+  useEffect(() => {
+    const data = Array.from({length:7}, (_, i) => {
+      const d = new Date(); d.setDate(d.getDate() - (6 - i));
+      const ds = d.toISOString().split('T')[0];
+      return { label: d.toLocaleDateString('en-US',{weekday:'short'}), rev: orders.filter(o=>o.date===ds).reduce((s,o)=>s+o.total,0) };
+    });
+    if (chart.current) chart.current.destroy();
+    chart.current = new Chart(ref.current.getContext('2d'), {
+      type: 'bar',
+      data: { labels: data.map(d=>d.label), datasets: [{ data: data.map(d=>d.rev), backgroundColor: 'rgba(16,185,129,0.85)', borderRadius: 6, borderSkipped: false }] },
+      options: { responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}}, scales:{ y:{beginAtZero:true,ticks:{callback:v=>`$${v}`},grid:{color:'rgba(0,0,0,0.04)'}}, x:{grid:{display:false}} } }
+    });
+    return () => chart.current?.destroy();
+  }, [orders]);
+  return <div style={{height:160}}><canvas ref={ref}/></div>;
+}
+
+function FlavorChart({ orders }) {
+  const ref = useRef(null); const chart = useRef(null);
+  const map = useMemo(() => {
+    const m = {};
+    orders.forEach(o => o.items.forEach(i => { m[i.name] = (m[i.name]||0) + i.qty; }));
+    return m;
+  }, [orders]);
+  const sorted = Object.entries(map).sort((a,b)=>b[1]-a[1]).slice(0,7);
+
+  useEffect(() => {
+    if (!sorted.length) return;
+    if (chart.current) chart.current.destroy();
+    chart.current = new Chart(ref.current.getContext('2d'), {
+      type: 'doughnut',
+      data: { labels: sorted.map(s=>s[0]), datasets: [{ data: sorted.map(s=>s[1]), backgroundColor: ['#10b981','#8b5cf6','#f59e0b','#ef4444','#3b82f6','#ec4899','#06b6d4'], borderWidth: 2, borderColor:'#fff' }] },
+      options: { responsive:true, maintainAspectRatio:false, plugins:{ legend:{ position:'bottom', labels:{boxWidth:11,font:{size:10},padding:6} } }, cutout:'60%' }
+    });
+    return () => chart.current?.destroy();
+  }, [sorted]);
+
+  if (!sorted.length) return <div className="h-48 flex items-center justify-center text-sm text-gray-300">Orders will appear here</div>;
+  return <div style={{height:200}}><canvas ref={ref}/></div>;
+}
+
+// ══════════════════════════════════════════════════════
+//  PACK FLAVOR PICKER
+// ══════════════════════════════════════════════════════
+
+function PackFlavorPicker({ products, packSize, flavors, onChange }) {
+  const total     = Object.values(flavors).reduce((s,n) => s+n, 0);
+  const remaining = packSize - total;
+  const nonPack   = products.filter(p => p.active && !p.isPack);
+
+  function adjust(id, delta) {
+    const cur = flavors[id] || 0;
+    if (delta > 0 && remaining <= 0) return;
+    const next = Math.max(0, cur + delta);
+    const updated = { ...flavors, [id]: next };
+    if (next === 0) delete updated[id];
+    onChange(updated);
+  }
+
+  return (
+    <div className="mt-2 border rounded-2xl overflow-hidden">
+      {/* Header bar */}
+      <div className={`px-4 py-2.5 flex items-center justify-between ${remaining === 0 ? 'bg-emerald-500' : 'bg-gray-100'}`}>
+        <span className={`text-sm font-bold ${remaining === 0 ? 'text-white' : 'text-gray-700'}`}>
+          {remaining === 0 ? '✅ All 12 flavors chosen!' : `Choose ${remaining} more flavor${remaining!==1?'s':''}`}
+        </span>
+        <span className={`text-sm font-black ${remaining === 0 ? 'text-white' : 'text-emerald-600'}`}>{total} / {packSize}</span>
+      </div>
+
+      {/* Progress bar */}
+      <div className="h-1.5 bg-gray-100">
+        <div className="h-full bg-emerald-400 transition-all duration-300" style={{width:`${(total/packSize)*100}%`}}/>
+      </div>
+
+      {/* Flavor list */}
+      <div className="max-h-56 overflow-y-auto divide-y bg-white">
+        {nonPack.map(p => {
+          const count = flavors[p.id] || 0;
+          return (
+            <div key={p.id} className={`flex items-center justify-between px-4 py-2.5 ${count > 0 ? 'bg-emerald-50' : ''}`}>
+              <span className="text-sm text-gray-700 flex items-center gap-1.5">
+                <span>{p.emoji}</span>
+                <span>{p.name}</span>
+              </span>
+              <div className="flex items-center gap-2">
+                {count > 0 && (
+                  <span className="text-xs bg-emerald-500 text-white rounded-full px-2 py-0.5 font-bold min-w-6 text-center">{count}</span>
+                )}
+                <button type="button" onClick={()=>adjust(p.id,-1)} disabled={count===0}
+                  className="w-7 h-7 rounded-full border font-bold text-gray-500 disabled:opacity-25 hover:bg-gray-100 flex items-center justify-center text-base leading-none">−</button>
+                <button type="button" onClick={()=>adjust(p.id,1)} disabled={remaining<=0}
+                  className="w-7 h-7 rounded-full border font-bold text-emerald-600 disabled:opacity-25 hover:bg-emerald-50 flex items-center justify-center text-base leading-none">+</button>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Compact summary of chosen flavors */}
+      {total > 0 && (
+        <div className="bg-gray-50 px-4 py-2 border-t">
+          <p className="text-xs text-gray-500 leading-relaxed">
+            {Object.entries(flavors)
+              .filter(([,n])=>n>0)
+              .map(([id,n])=>{ const p=products.find(p=>p.id===+id); return p?`${n}× ${p.emoji}${p.name}`:''; })
+              .join(' · ')}
+          </p>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ══════════════════════════════════════════════════════
+//  ADD ORDER MODAL
+// ══════════════════════════════════════════════════════
+
+function AddOrderModal({ products, onAdd, onClose }) {
+  const [customer,    setCustomer]    = useState('');
+  const [date,        setDate]        = useState(today());
+  const [shipping,    setShipping]    = useState('Venmo Pickup');
+  const [tracking,    setTracking]    = useState('');
+  const [note,        setNote]        = useState('');
+  const [items,       setItems]       = useState([{pid:'',qty:1,type:'kit',packFlavors:{}}]);
+  const [isBackorder, setIsBackorder] = useState(false);
+  const [status,      setStatus]      = useState('Received');
+
+  const addRow = () => setItems(p => [...p, {pid:'',qty:1,type:'kit',packFlavors:{}}]);
+  const delRow = i => setItems(p => p.filter((_,j) => j!==i));
+  const setRow = (i,f,v) => setItems(p => p.map((r,j) => j===i ? {...r,[f]:v} : r));
+
+  function itemPrice(row) {
+    const p = products.find(p => p.id === +row.pid);
+    if (!p) return 0;
+    return row.type === 'togo' ? (p.togoPrice ?? p.price) : p.price;
+  }
+
+  const total = items.reduce((s,r) => s + itemPrice(r) * (+r.qty||0), 0);
+
+  const activeProducts = products.filter(p => p.active);
+
+  const handleSubmit = e => {
+    e.preventDefault();
+    const filled = items.filter(r => r.pid && +r.qty > 0);
+    if (!filled.length) { alert('Add at least one item'); return; }
+
+    // Validate packs have all flavors chosen
+    for (const r of filled) {
+      const p = products.find(p => p.id === +r.pid);
+      if (p?.isPack) {
+        const chosen = Object.values(r.packFlavors || {}).reduce((s,n)=>s+n, 0);
+        if (chosen !== p.packSize) {
+          alert(`Please choose all ${p.packSize} flavors for the ${p.name} before saving.`);
+          return;
+        }
+      }
+    }
+
+    const valid = filled.map(r => {
+      const p     = products.find(p => p.id === +r.pid);
+      const price = r.type === 'togo' ? (p.togoPrice ?? p.price) : p.price;
+      return {
+        id: p.id, name: p.name, qty: +r.qty, price, type: r.type || 'kit',
+        ...(p.isPack ? { isPack:true, packSize:p.packSize, packFlavors: r.packFlavors || {} } : {})
+      };
+    });
+
+    onAdd({ customer: customer||'Anonymous', date, items: valid, total, shipping, tracking, note, status: isBackorder ? 'Backordered' : status, isBackorder });
+    onClose();
+  };
+
+  return (
+    <Modal title={isBackorder ? '📋 Log Backorder' : '📦 New Order'} onClose={onClose} wide>
+      <form onSubmit={handleSubmit} className="space-y-4">
+
+        {/* Backorder toggle */}
+        <label className="flex items-center gap-3 p-3 bg-orange-50 border border-orange-200 rounded-xl cursor-pointer">
+          <input type="checkbox" checked={isBackorder} onChange={e => { setIsBackorder(e.target.checked); setStatus(e.target.checked ? 'Backordered' : 'Received'); }} className="w-4 h-4 accent-orange-500"/>
+          <div>
+            <p className="text-sm font-semibold text-orange-800">Mark as Backorder</p>
+            <p className="text-xs text-orange-500">Use for historical orders or orders awaiting stock</p>
+          </div>
+        </label>
+
+        <div className="grid grid-cols-2 gap-3">
+          <div><Lbl>Customer Name</Lbl><Input value={customer} onChange={e=>setCustomer(e.target.value)} placeholder="Name or Anonymous"/></div>
+          <div><Lbl>Date</Lbl><Input type="date" value={date} onChange={e=>setDate(e.target.value)}/></div>
+        </div>
+
+        {/* Line items */}
+        <div>
+          <div className="flex items-center justify-between mb-2">
+            <Lbl>Teas Ordered</Lbl>
+            <button type="button" onClick={addRow} className="text-xs text-emerald-600 font-semibold hover:underline">+ Add row</button>
+          </div>
+          <div className="space-y-3">
+            {items.map((row, i) => {
+              const prod = activeProducts.find(p => p.id === +row.pid);
+              const isPack = prod?.isPack ?? false;
+              return (
+                <div key={i} className={`border rounded-2xl p-3 space-y-2 ${isPack ? 'bg-purple-50 border-purple-200' : 'bg-gray-50'}`}>
+                  {/* Product picker + qty */}
+                  <div className="flex gap-2 items-center">
+                    <select value={row.pid} onChange={e=>{ setRow(i,'pid',e.target.value); setRow(i,'packFlavors',{}); }} className="flex-1 border rounded-xl px-2 py-2 text-sm outline-none focus:ring-2 focus:ring-emerald-400 bg-white">
+                      <option value="">Select product…</option>
+                      <optgroup label="── Individual Teas ──">
+                        {activeProducts.filter(p=>!p.isPack).map(p => <option key={p.id} value={p.id}>{p.emoji} {p.name}</option>)}
+                      </optgroup>
+                      <optgroup label="── Packs ──">
+                        {activeProducts.filter(p=>p.isPack).map(p => <option key={p.id} value={p.id}>{p.emoji} {p.name} — {fmt(p.price)}</option>)}
+                      </optgroup>
+                    </select>
+                    <Input type="number" min="1" value={row.qty} onChange={e=>setRow(i,'qty',e.target.value)} className="w-16 text-center bg-white"/>
+                    {items.length > 1 && <button type="button" onClick={()=>delRow(i)} className="text-red-400 hover:text-red-600 text-xl px-1 leading-none flex-shrink-0">×</button>}
+                  </div>
+
+                  {/* Kit / To-Go toggle — only for individual teas */}
+                  {!isPack && (
+                    <div className="flex items-center gap-2">
+                      <div className="flex rounded-xl overflow-hidden border bg-white flex-1">
+                        <button type="button" onClick={()=>setRow(i,'type','kit')}
+                          className={`flex-1 py-1.5 text-xs font-bold transition-colors ${row.type==='kit'?'bg-emerald-500 text-white':'text-gray-500 hover:bg-gray-50'}`}>
+                          📦 Kit — {prod ? fmt(prod.price) : '$8.00'}
+                        </button>
+                        <button type="button" onClick={()=>setRow(i,'type','togo')}
+                          className={`flex-1 py-1.5 text-xs font-bold transition-colors ${row.type==='togo'?'bg-teal-500 text-white':'text-gray-500 hover:bg-gray-50'}`}>
+                          🥤 To-Go — {prod ? fmt(prod.togoPrice ?? 10) : '$10.00'}
+                        </button>
+                      </div>
+                      {prod && <span className="text-xs font-bold text-emerald-600 whitespace-nowrap">{fmt(itemPrice(row) * (+row.qty||0))}</span>}
+                    </div>
+                  )}
+
+                  {/* 12-Pack label + price */}
+                  {isPack && (
+                    <div className="flex items-center justify-between px-1">
+                      <span className="text-xs font-semibold text-purple-700">🎁 Mix & Match Pack · {prod.packSize} flavors · {fmt(prod.price)} each</span>
+                      <span className="text-xs font-bold text-emerald-600">{fmt(prod.price * (+row.qty||1))}</span>
+                    </div>
+                  )}
+
+                  {/* Flavor picker — appears when a pack product is selected */}
+                  {isPack && prod && (
+                    <PackFlavorPicker
+                      products={activeProducts}
+                      packSize={prod.packSize}
+                      flavors={row.packFlavors || {}}
+                      onChange={pf => setRow(i,'packFlavors',pf)}
+                    />
+                  )}
+                </div>
+              );
+            })}
+          </div>
+          <p className="text-right text-sm font-bold text-emerald-600 mt-2">Order Total: {fmt(total)}</p>
+        </div>
+
+        <div className="grid grid-cols-2 gap-3">
+          <div><Lbl>Shipping / Pickup</Lbl>
+            <Sel value={shipping} onChange={e=>setShipping(e.target.value)}>
+              {["Venmo Pickup","Local Delivery","USPS First Class","USPS Priority","UPS Ground","FedEx"].map(s=><option key={s}>{s}</option>)}
+            </Sel>
+          </div>
+          <div><Lbl>Tracking # (optional)</Lbl><Input value={tracking} onChange={e=>setTracking(e.target.value)} placeholder="Optional"/></div>
+        </div>
+
+        {/* Status picker (only for non-backorders) */}
+        {!isBackorder && (
+          <div>
+            <Lbl>Initial Status</Lbl>
+            <div className="flex gap-2 flex-wrap mt-1">
+              {['Received','Packed','Shipped','Delivered'].map(s => (
+                <button type="button" key={s} onClick={()=>setStatus(s)}
+                  className={`px-3 py-1.5 rounded-full text-xs font-semibold border transition-colors ${status===s?'bg-emerald-500 text-white border-emerald-500':'border-gray-200 text-gray-600 hover:border-emerald-300'}`}>{s}</button>
+              ))}
+            </div>
+          </div>
+        )}
+
+        <div><Lbl>Note</Lbl><Input value={note} onChange={e=>setNote(e.target.value)} placeholder="Optional…"/></div>
+
+        <button type="submit" className="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-3 rounded-2xl transition-colors text-base">
+          {isBackorder ? 'Log Backorder' : 'Create Order'}
+        </button>
+      </form>
+    </Modal>
+  );
+}
+
+// ══════════════════════════════════════════════════════
+//  EDIT INGREDIENT MODAL
+// ══════════════════════════════════════════════════════
+
+function EditIngredientModal({ ing, onSave, onClose }) {
+  const [retail,    setRetail]    = useState(ing.retail);
+  const [stock,     setStock]     = useState(ing.stock);
+  const [threshold, setThreshold] = useState(ing.threshold);
+  const wholesale    = retail * DISC;
+  const costPerServ  = wholesale / ing.servings;
+
+  return (
+    <Modal title={`Edit — ${ing.name}`} onClose={onClose}>
+      <div className="space-y-4">
+        <div className="bg-teal-50 border border-teal-100 rounded-xl p-3 text-xs text-teal-700 space-y-0.5">
+          <p><strong>SKU:</strong> {ing.sku} &nbsp;·&nbsp; {ing.size}</p>
+          <p><strong>Servings per container:</strong> {ing.servings} &nbsp;·&nbsp; <strong>Per kit:</strong> {ing.servingLabel}</p>
+          {ing.optional && <p className="text-orange-600 font-semibold">★ Optional add-in</p>}
+        </div>
+
+        <div>
+          <Lbl>Herbalife Retail Price ($)</Lbl>
+          <Input type="number" step="0.01" min="0" value={retail} onChange={e=>setRetail(parseFloat(e.target.value)||0)}/>
+          <div className="mt-2 grid grid-cols-2 gap-2 text-center">
+            <div className="bg-emerald-50 rounded-xl p-2">
+              <p className="text-base font-bold text-emerald-600">{fmt(wholesale)}</p>
+              <p className="text-xs text-gray-400">Your cost (50% off)</p>
+            </div>
+            <div className="bg-purple-50 rounded-xl p-2">
+              <p className="text-base font-bold text-purple-600">{fmt(costPerServ)}</p>
+              <p className="text-xs text-gray-400">Cost per kit</p>
+            </div>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-2 gap-3">
+          <div><Lbl>Containers on hand</Lbl><Input type="number" min="0" value={stock} onChange={e=>setStock(parseInt(e.target.value)||0)}/></div>
+          <div><Lbl>Reorder at (containers)</Lbl><Input type="number" min="0" value={threshold} onChange={e=>setThreshold(parseInt(e.target.value)||0)}/></div>
+        </div>
+
+        <button onClick={()=>{ onSave(ing.id, {retail, stock, threshold}); onClose(); }} className="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-3 rounded-2xl transition-colors">Save Changes</button>
+      </div>
+    </Modal>
+  );
+}
+
+// ══════════════════════════════════════════════════════
+//  EDIT PRODUCT MODAL
+// ══════════════════════════════════════════════════════
+
+function EditProductModal({ product, onSave, onClose }) {
+  const [name,      setName]      = useState(product.name);
+  const [price,     setPrice]     = useState(product.price);
+  const [togoPrice, setTogoPrice] = useState(product.togoPrice ?? 10.00);
+  const [active,    setActive]    = useState(product.active);
+  return (
+    <Modal title={`${product.emoji} Edit Product`} onClose={onClose}>
+      <div className="space-y-4">
+        <div>
+          <Lbl>Name</Lbl>
+          <Input value={name} onChange={e=>setName(e.target.value)} className="font-semibold"/>
+        </div>
+        {!product.isPack && (
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <Lbl>📦 Kit Price ($)</Lbl>
+              <Input type="number" step="0.50" min="0" value={price} onChange={e=>setPrice(parseFloat(e.target.value)||0)} className="text-xl text-center font-bold py-3"/>
+              <p className="text-xs text-gray-400 text-center mt-1">Pre-packaged</p>
+            </div>
+            <div>
+              <Lbl>🥤 To-Go Price ($)</Lbl>
+              <Input type="number" step="0.50" min="0" value={togoPrice} onChange={e=>setTogoPrice(parseFloat(e.target.value)||0)} className="text-xl text-center font-bold py-3"/>
+              <p className="text-xs text-gray-400 text-center mt-1">Cup, lid & straw</p>
+            </div>
+          </div>
+        )}
+        {product.isPack && (
+          <div>
+            <Lbl>Pack Price ($)</Lbl>
+            <Input type="number" step="1" min="0" value={price} onChange={e=>setPrice(parseFloat(e.target.value)||0)} className="text-xl text-center font-bold py-3"/>
+          </div>
+        )}
+        <label className="flex items-center gap-3 cursor-pointer">
+          <input type="checkbox" checked={active} onChange={e=>setActive(e.target.checked)} className="w-4 h-4 accent-emerald-500"/>
+          <span className="text-sm text-gray-700 font-medium">Available on menu</span>
+        </label>
+        <button onClick={()=>{ onSave(product.id, {name, price, togoPrice, active}); onClose(); }} className="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-3 rounded-2xl transition-colors">Save</button>
+      </div>
+    </Modal>
+  );
+}
+
+// ══════════════════════════════════════════════════════
+//  ADD TRANSACTION MODAL
+// ══════════════════════════════════════════════════════
+
+function AddTxnModal({ onAdd, onClose }) {
+  const [type, setType] = useState('income');
+  const [cat,  setCat]  = useState('Sales');
+  const [amt,  setAmt]  = useState('');
+  const [desc, setDesc] = useState('');
+  const [date, setDate] = useState(today());
+
+  const handleSubmit = e => {
+    e.preventDefault();
+    if (!amt || !desc) return;
+    onAdd({ type, category: cat, amount: parseFloat(amt), description: desc, date });
+    onClose();
+  };
+
+  return (
+    <Modal title="Add Transaction" onClose={onClose}>
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <div className="flex rounded-xl overflow-hidden border">
+          <button type="button" onClick={()=>setType('income')}  className={`flex-1 py-2.5 text-sm font-bold transition-colors ${type==='income'  ?'bg-emerald-500 text-white':'bg-white text-gray-500 hover:bg-gray-50'}`}>+ Income</button>
+          <button type="button" onClick={()=>setType('expense')} className={`flex-1 py-2.5 text-sm font-bold transition-colors ${type==='expense' ?'bg-red-500 text-white':   'bg-white text-gray-500 hover:bg-gray-50'}`}>− Expense</button>
+        </div>
+        <div><Lbl>Date</Lbl><Input type="date" value={date} onChange={e=>setDate(e.target.value)}/></div>
+        <div><Lbl>Category</Lbl><Sel value={cat} onChange={e=>setCat(e.target.value)}>{CATS.map(c=><option key={c}>{c}</option>)}</Sel></div>
+        <div><Lbl>Amount ($)</Lbl><Input type="number" step="0.01" min="0" value={amt} onChange={e=>setAmt(e.target.value)} placeholder="0.00"/></div>
+        <div><Lbl>Description</Lbl><Input value={desc} onChange={e=>setDesc(e.target.value)} placeholder="What was this for?"/></div>
+        <button type="submit" className="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-3 rounded-2xl transition-colors">Save</button>
+      </form>
+    </Modal>
+  );
+}
+
+// ══════════════════════════════════════════════════════
+//  EXPORT MODAL
+// ══════════════════════════════════════════════════════
+
+function ExportModal({ orders, transactions, onClose }) {
+  const [exportType, setExportType] = useState('orders');
+  const [range,      setRange]      = useState('month');
+  const [custStart,  setCustStart]  = useState(() => { const d=new Date(); d.setDate(1); return d.toISOString().split('T')[0]; });
+  const [custEnd,    setCustEnd]    = useState(today());
+
+  const RANGE_LABELS = { today:'Today', week:'This Week', month:'This Month', lastmonth:'Last Month', all:'All Time', custom:'Custom Range' };
+
+  function inRange(item) {
+    if (range === 'all') return true;
+    const start = range === 'custom' ? custStart : dateRangeStart(range);
+    const end   = range === 'custom' ? custEnd   : dateRangeEnd(range);
+    return item.date >= start && item.date <= end;
+  }
+
+  const filteredOrders = orders.filter(inRange);
+  const filteredTxns   = transactions.filter(inRange);
+  const previewCount   = exportType === 'orders' ? filteredOrders.length : exportType === 'transactions' ? filteredTxns.length : filteredOrders.length + filteredTxns.length;
+
+  const rangeLabel = range === 'custom' ? `${custStart} to ${custEnd}` : RANGE_LABELS[range];
+
+  function download(filename, rows) {
+    const blob = new Blob([rows.join('\n')], { type: 'text/csv' });
+    const a = Object.assign(document.createElement('a'), { href: URL.createObjectURL(blob), download: filename });
+    a.click(); URL.revokeObjectURL(a.href);
+  }
+
+  function doExport() {
+    const stamp = `${range}-${today()}`;
+    if (exportType === 'orders' || exportType === 'both') {
+      download(`glowdaily-orders-${stamp}.csv`, [
+        'Order ID,Date,Customer,Tea / Items,Qty,Unit Price,Line Total,Order Total,Status,Backorder,Shipping,Tracking,Note',
+        ...filteredOrders.flatMap(o =>
+          o.items.map((item, idx) => `${idx===0?o.id:''},${idx===0?o.date:''},"${idx===0?o.customer:''}","${item.name}",${item.qty},${item.price.toFixed(2)},${(item.price*item.qty).toFixed(2)},${idx===0?o.total.toFixed(2):''},${idx===0?o.status:''},${idx===0?(o.isBackorder?'Yes':'No'):''},${idx===0?o.shipping:''},${idx===0?(o.tracking||''):''},"${idx===0?(o.note||''):''}"`)
+        )
+      ]);
+    }
+    if (exportType === 'transactions' || exportType === 'both') {
+      download(`glowdaily-transactions-${stamp}.csv`, [
+        'Date,Type,Category,Amount,Description',
+        ...filteredTxns.map(t => `${t.date},${t.type},${t.category},${t.amount.toFixed(2)},"${t.description}"`)
+      ]);
+    }
+  }
+
+  return (
+    <Modal title="📥 Export CSV" onClose={onClose}>
+      <div className="space-y-5">
+        {/* What */}
+        <div>
+          <Lbl>Export what?</Lbl>
+          <div className="grid grid-cols-3 gap-2 mt-1">
+            {[['orders','Orders'],['transactions','Ledger'],['both','Both']].map(([v,l])=>(
+              <button key={v} type="button" onClick={()=>setExportType(v)}
+                className={`py-2 text-sm font-semibold rounded-xl border transition-colors ${exportType===v?'bg-emerald-500 text-white border-emerald-500':'bg-white text-gray-600 border-gray-200 hover:border-emerald-300'}`}>{l}</button>
+            ))}
+          </div>
+        </div>
+
+        {/* Date range */}
+        <div>
+          <Lbl>Date range</Lbl>
+          <div className="grid grid-cols-3 gap-2 mt-1">
+            {Object.entries(RANGE_LABELS).map(([v,l])=>(
+              <button key={v} type="button" onClick={()=>setRange(v)}
+                className={`py-2 text-xs font-semibold rounded-xl border transition-colors ${range===v?'bg-emerald-500 text-white border-emerald-500':'bg-white text-gray-600 border-gray-200 hover:border-emerald-300'}`}>{l}</button>
+            ))}
+          </div>
+        </div>
+
+        {range === 'custom' && (
+          <div className="grid grid-cols-2 gap-3">
+            <div><Lbl>From</Lbl><Input type="date" value={custStart} onChange={e=>setCustStart(e.target.value)}/></div>
+            <div><Lbl>To</Lbl><Input type="date" value={custEnd} onChange={e=>setCustEnd(e.target.value)}/></div>
+          </div>
+        )}
+
+        {/* Preview */}
+        <div className="bg-gray-50 rounded-2xl p-4 text-center">
+          <p className="text-3xl font-bold text-gray-800">{previewCount}</p>
+          <p className="text-xs text-gray-400 mt-1">record{previewCount!==1?'s':''} · {rangeLabel}</p>
+          {exportType === 'both' && <p className="text-xs text-gray-400">{filteredOrders.length} orders + {filteredTxns.length} ledger entries</p>}
+        </div>
+
+        <button onClick={doExport} disabled={previewCount===0}
+          className="w-full bg-emerald-500 hover:bg-emerald-600 disabled:opacity-40 text-white font-bold py-3 rounded-2xl transition-colors">
+          ↓ Download CSV {previewCount===0?'(no records)':''}
+        </button>
+      </div>
+    </Modal>
+  );
+}
+
+// ══════════════════════════════════════════════════════
+//  DASHBOARD PAGE
+// ══════════════════════════════════════════════════════
+
+function StatCard({ label, value, icon, bg }) {
+  return (
+    <div className={`rounded-2xl p-4 ${bg}`}>
+      <div className="text-2xl mb-1">{icon}</div>
+      <div className="text-xl font-bold text-gray-800 leading-tight">{value}</div>
+      <div className="text-xs text-gray-500 font-medium mt-0.5">{label}</div>
+    </div>
+  );
+}
+
+function Dashboard({ ingredients, products, orders, transactions, setPage }) {
+  const lowIng  = ingredients.filter(i => i.stock <= i.threshold);
+  const wkStart = dateRangeStart('week');
+  const weekOrders = orders.filter(o => o.date >= wkStart && !o.isBackorder);
+  const weekRev    = weekOrders.reduce((s,o) => s+o.total, 0);
+
+  const allRev  = transactions.filter(t=>t.type==='income').reduce((s,t)=>s+t.amount,0);
+  const allExp  = transactions.filter(t=>t.type==='expense').reduce((s,t)=>s+t.amount,0);
+  const netProfit = allRev - allExp;
+  const netMarg   = allRev > 0 ? (netProfit/allRev*100) : 0;
+
+  const pending  = orders.filter(o => ['Received','Packed','Backordered'].includes(o.status));
+  const backorders = orders.filter(o => o.isBackorder && o.status !== 'Delivered');
+
+  return (
+    <div className="space-y-5">
+      {/* Welcome banner when no orders yet */}
+      {orders.length === 0 && (
+        <div className="bg-gradient-to-r from-emerald-500 to-teal-500 rounded-2xl p-5 text-white">
+          <p className="font-bold text-lg">Welcome to GlowDaily! 🌟</p>
+          <p className="text-sm text-emerald-100 mt-1">Your dashboard is ready. Start by logging an order — or set up your ingredient costs in the Ingredients tab.</p>
+          <div className="flex gap-2 mt-3">
+            <button onClick={()=>setPage('orders')} className="bg-white/20 hover:bg-white/30 text-white text-xs font-semibold px-3 py-1.5 rounded-lg transition-colors">+ New Order</button>
+            <button onClick={()=>setPage('ingredients')} className="bg-white/20 hover:bg-white/30 text-white text-xs font-semibold px-3 py-1.5 rounded-lg transition-colors">Set Up Costs</button>
+          </div>
+        </div>
+      )}
+
+      {/* Low ingredient alert */}
+      {lowIng.length > 0 && (
+        <div className="bg-amber-50 border border-amber-200 rounded-2xl p-3 flex gap-3 items-start cursor-pointer" onClick={()=>setPage('ingredients')}>
+          <span className="text-xl">⚠️</span>
+          <div>
+            <p className="text-sm font-semibold text-amber-800">Low Ingredient Stock — tap to restock</p>
+            <p className="text-xs text-amber-600 mt-0.5">{lowIng.map(i=>`${i.name} (${i.stock} left)`).join(' · ')}</p>
+          </div>
+        </div>
+      )}
+
+      {/* Backorder alert */}
+      {backorders.length > 0 && (
+        <div className="bg-red-50 border border-red-200 rounded-2xl p-3 flex gap-3 items-start cursor-pointer" onClick={()=>setPage('orders')}>
+          <span className="text-xl">📋</span>
+          <div>
+            <p className="text-sm font-semibold text-red-700">{backorders.length} backorder{backorders.length>1?'s':''} need attention</p>
+            <p className="text-xs text-red-500 mt-0.5">Tap to view orders</p>
+          </div>
+        </div>
+      )}
+
+      {/* Stat cards */}
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+        <StatCard label="Total Revenue"  value={fmt(allRev)}     icon="💰" bg="bg-emerald-50 border border-emerald-100"/>
+        <StatCard label="Net Profit"     value={fmt(netProfit)}  icon="📈" bg="bg-purple-50 border border-purple-100"/>
+        <StatCard label="Net Margin"     value={pct(netMarg)}    icon="✨" bg="bg-blue-50 border border-blue-100"/>
+        <StatCard label="Orders (week)"  value={weekOrders.length} icon="📦" bg="bg-pink-50 border border-pink-100"/>
+      </div>
+
+      {/* Charts */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div className="bg-white rounded-2xl border shadow-sm p-4">
+          <p className="text-sm font-semibold text-gray-700 mb-3">📊 Revenue — Last 7 Days</p>
+          <WeekBarChart orders={orders}/>
+        </div>
+        <div className="bg-white rounded-2xl border shadow-sm p-4">
+          <p className="text-sm font-semibold text-gray-700 mb-3">🏆 Top Teas (units sold)</p>
+          <FlavorChart orders={orders}/>
+        </div>
+      </div>
+
+      {/* Recent orders */}
+      <div className="bg-white rounded-2xl border shadow-sm p-4">
+        <div className="flex items-center justify-between mb-3">
+          <p className="text-sm font-semibold text-gray-700">🕐 Recent Orders</p>
+          {pending.length > 0 && <span className="text-xs bg-amber-100 text-amber-700 px-2 py-1 rounded-full font-semibold">{pending.length} pending</span>}
+        </div>
+        {orders.length === 0
+          ? <Empty icon="📭" text="No orders yet — log your first one in the Orders tab"/>
+          : <div className="divide-y">
+              {orders.slice(0,6).map(o => (
+                <div key={o.id} className="flex items-center justify-between py-3">
+                  <div>
+                    <p className="text-sm font-medium text-gray-800">{o.customer} {o.isBackorder && <span className="text-xs text-orange-500 font-medium ml-1">backorder</span>}</p>
+                    <p className="text-xs text-gray-400">{o.id} · {o.date}</p>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <span className="text-sm font-bold text-emerald-600">{fmt(o.total)}</span>
+                    <span className={`text-xs px-2 py-1 rounded-full font-medium ${STATUS_STYLE[o.status]}`}>{o.status}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+        }
+      </div>
+    </div>
+  );
+}
+
+// ══════════════════════════════════════════════════════
+//  ORDERS PAGE
+// ══════════════════════════════════════════════════════
+
+function Orders({ products, orders, setOrders, setTransactions }) {
+  const [filter,   setFilter]   = useState('All');
+  const [search,   setSearch]   = useState('');
+  const [showAdd,  setShowAdd]  = useState(false);
+  const [expanded, setExpanded] = useState(null);
+
+  const FILTERS = ['All','Backordered','Received','Packed','Shipped','Delivered'];
+
+  const visible = orders.filter(o => {
+    const ms = filter==='All' || o.status===filter;
+    const mq = !search || o.customer.toLowerCase().includes(search.toLowerCase()) || o.id.toLowerCase().includes(search.toLowerCase());
+    return ms && mq;
+  });
+
+  const counts = {};
+  FILTERS.forEach(f => { counts[f] = f==='All' ? orders.length : orders.filter(o=>o.status===f).length; });
+
+  function addOrder(ord) {
+    const id = `ORD-${String(orders.length+1).padStart(3,'0')}`;
+    const newOrder = { ...ord, id };
+    setOrders(p => [newOrder, ...p]);
+    // Auto-log income transaction when order is created (unless backordered)
+    if (!ord.isBackorder && ord.status !== 'Backordered') {
+      setTransactions(p => [{
+        id: `TXN-${Date.now()}`,
+        date: ord.date, type: 'income', category: 'Sales',
+        amount: ord.total,
+        description: `${id} — ${ord.customer} (${ord.items.map(i=>`${i.qty}× ${i.name}`).join(', ')})`
+      }, ...p]);
+    }
+  }
+
+  function advanceStatus(ordId) {
+    setOrders(p => p.map(o => {
+      if (o.id !== ordId) return o;
+      const next = NEXT_STATUS[o.status] || o.status;
+      // Log income when delivered (if not already logged at order creation)
+      if (next === 'Delivered' && o.isBackorder) {
+        setTransactions(prev => [{
+          id: `TXN-${Date.now()}`,
+          date: today(), type: 'income', category: 'Sales',
+          amount: o.total,
+          description: `${ordId} DELIVERED — ${o.customer}`
+        }, ...prev]);
+      }
+      return { ...o, status: next };
+    }));
+  }
+
+  function updateTracking(ordId, tracking) {
+    setOrders(p => p.map(o => o.id === ordId ? { ...o, tracking } : o));
+  }
+
+  return (
+    <div className="space-y-4">
+      <div className="flex gap-2">
+        <input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Search customer or order ID…" className="flex-1 border rounded-xl px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-emerald-400"/>
+        <button onClick={()=>setShowAdd(true)} className="bg-emerald-500 hover:bg-emerald-600 text-white px-4 py-2 rounded-xl text-sm font-bold transition-colors whitespace-nowrap">+ New</button>
+      </div>
+
+      {/* Status filter tabs */}
+      <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
+        {FILTERS.map(f => (
+          <button key={f} onClick={()=>setFilter(f)}
+            className={`px-3 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap border transition-colors ${filter===f?'bg-emerald-500 text-white border-emerald-500':'bg-white text-gray-600 border-gray-200 hover:border-emerald-300'}`}>
+            {f} ({counts[f]})
+          </button>
+        ))}
+      </div>
+
+      {visible.length === 0
+        ? <Empty icon={orders.length===0?'📭':'🔍'} text={orders.length===0?'No orders yet. Tap + New to log your first order.':'No orders match your filter.'}/>
+        : <div className="space-y-3">
+            {visible.map(o => {
+              const isExpanded = expanded === o.id;
+              return (
+                <div key={o.id} className={`bg-white rounded-2xl border shadow-sm overflow-hidden ${o.isBackorder?'border-orange-200':''}`}>
+                  {/* Order header */}
+                  <div className="p-4 cursor-pointer select-none" onClick={()=>setExpanded(isExpanded ? null : o.id)}>
+                    <div className="flex items-start justify-between">
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <p className="font-semibold text-gray-800">{o.customer}</p>
+                          {o.isBackorder && <span className="text-xs bg-orange-100 text-orange-600 px-2 py-0.5 rounded-full font-semibold">backorder</span>}
+                        </div>
+                        <p className="text-xs text-gray-400 mt-0.5">{o.id} · {o.date} · {o.shipping}</p>
+                      </div>
+                      <div className="text-right ml-3 flex-shrink-0">
+                        <p className="font-bold text-emerald-600">{fmt(o.total)}</p>
+                        <span className={`text-xs px-2 py-0.5 rounded-full font-semibold ${STATUS_STYLE[o.status]}`}>{o.status}</span>
+                      </div>
+                    </div>
+                    <p className="text-xs text-gray-500 mt-2">{o.items.map(i=>`${i.qty}× ${i.name} ${i.type==='togo'?'🥤':'📦'}`).join(' · ')}</p>
+                  </div>
+
+                  {/* Expanded details */}
+                  {isExpanded && (
+                    <div className="border-t bg-gray-50 px-4 pb-4 pt-3 space-y-3">
+                      <div className="space-y-1">
+                        {o.items.map((item, i) => (
+                          <div key={i} className="text-sm space-y-1">
+                            <div className="flex justify-between items-center">
+                              <span className="text-gray-600">
+                                {item.qty}× {item.name}
+                                {item.isPack ? (
+                                  <span className="ml-2 text-xs px-1.5 py-0.5 rounded-full font-semibold bg-purple-100 text-purple-700">🎁 Pack</span>
+                                ) : (
+                                  <span className={`ml-2 text-xs px-1.5 py-0.5 rounded-full font-semibold ${item.type==='togo'?'bg-teal-100 text-teal-700':'bg-emerald-100 text-emerald-700'}`}>
+                                    {item.type==='togo'?'🥤 To-Go':'📦 Kit'}
+                                  </span>
+                                )}
+                              </span>
+                              <span className="font-medium">{fmt(item.price * item.qty)}</span>
+                            </div>
+                            {item.isPack && item.packFlavors && Object.keys(item.packFlavors).length > 0 && (
+                              <div className="ml-4 pl-2 border-l-2 border-purple-200 flex flex-wrap gap-1">
+                                {Object.entries(item.packFlavors).map(([pid, count]) => {
+                                  const fp = products.find(p => p.id === +pid);
+                                  return fp ? (
+                                    <span key={pid} className="text-xs bg-purple-50 text-purple-700 px-1.5 py-0.5 rounded-full">
+                                      {count}× {fp.emoji} {fp.name}
+                                    </span>
+                                  ) : null;
+                                })}
+                              </div>
+                            )}
+                          </div>
+                        ))}
+                        <div className="flex justify-between text-sm font-bold pt-1 border-t">
+                          <span>Total</span>
+                          <span className="text-emerald-600">{fmt(o.total)}</span>
+                        </div>
+                      </div>
+
+                      {/* Tracking input */}
+                      <div>
+                        <Lbl>Tracking #</Lbl>
+                        <input
+                          defaultValue={o.tracking||''}
+                          onBlur={e=>updateTracking(o.id,e.target.value)}
+                          placeholder="Enter tracking number…"
+                          className="w-full border rounded-xl px-3 py-2 text-xs font-mono outline-none focus:ring-2 focus:ring-emerald-400 mt-1"
+                        />
+                      </div>
+
+                      {o.note && <p className="text-xs text-gray-500 italic">"{o.note}"</p>}
+
+                      {/* Status advance button */}
+                      {NEXT_STATUS[o.status] && (
+                        <button onClick={()=>advanceStatus(o.id)} className="w-full bg-emerald-500 hover:bg-emerald-600 text-white text-sm font-bold py-2.5 rounded-xl transition-colors">
+                          Mark as {NEXT_STATUS[o.status]} →
+                        </button>
+                      )}
+                      {o.status === 'Delivered' && <div className="text-center text-sm text-emerald-600 font-semibold">✅ Fulfilled & Delivered</div>}
+                      {o.status === 'Backordered' && (
+                        <button onClick={()=>setOrders(p=>p.map(ord=>ord.id===o.id?{...ord,status:'Received'}:ord))} className="w-full bg-blue-500 hover:bg-blue-600 text-white text-sm font-bold py-2.5 rounded-xl transition-colors">
+                          Stock received — move to Received →
+                        </button>
+                      )}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+      }
+
+      {showAdd && <AddOrderModal products={products} onAdd={addOrder} onClose={()=>setShowAdd(false)}/>}
+    </div>
+  );
+}
+
+// ══════════════════════════════════════════════════════
+//  INGREDIENTS PAGE
+// ══════════════════════════════════════════════════════
+
+function Ingredients({ ingredients, setIngredients }) {
+  const [editing, setEditing] = useState(null);
+
+  const saveIngredient = (id, updates) => {
+    setIngredients(p => p.map(i => i.id === id ? {...i, ...updates} : i));
+  };
+
+  const totalCostNoOpt  = kitCost(ingredients, false);
+  const totalCostWithOpt = kitCost(ingredients, true);
+  const lowIng = ingredients.filter(i => i.stock <= i.threshold);
+
+  return (
+    <div className="space-y-4">
+      {/* Info banner */}
+      <div className="bg-teal-50 border border-teal-100 rounded-2xl p-4">
+        <p className="text-sm font-semibold text-teal-800 mb-1">🧪 Herbalife Ingredient Costs</p>
+        <p className="text-xs text-teal-600">Tap any ingredient to update its retail price and stock. Your wholesale cost = retail × 50% (Supervisor discount). Prices below are estimates — update with your actual Herbalife prices.</p>
+        <div className="grid grid-cols-2 gap-3 mt-3">
+          <div className="bg-white rounded-xl p-3 text-center border border-teal-100">
+            <p className="text-lg font-bold text-emerald-600">{fmt(totalCostNoOpt)}</p>
+            <p className="text-xs text-gray-400">Base cost / kit</p>
+          </div>
+          <div className="bg-white rounded-xl p-3 text-center border border-teal-100">
+            <p className="text-lg font-bold text-purple-600">{fmt(totalCostWithOpt)}</p>
+            <p className="text-xs text-gray-400">With Collagen add-in</p>
+          </div>
+        </div>
+      </div>
+
+      {lowIng.length > 0 && (
+        <div className="bg-red-50 border border-red-200 rounded-xl p-3">
+          <p className="text-sm font-semibold text-red-700">🚨 Restock needed</p>
+          <p className="text-xs text-red-500 mt-0.5">{lowIng.map(i=>i.name).join(', ')}</p>
+        </div>
+      )}
+
+      <div className="space-y-3">
+        {ingredients.map(ing => {
+          const wholesale   = ing.retail * DISC;
+          const costPerServ = wholesale / ing.servings;
+          const isLow       = ing.stock <= ing.threshold;
+          return (
+            <div key={ing.id} className={`bg-white rounded-2xl border shadow-sm p-4 ${isLow?'border-red-200':''}`}>
+              <div className="flex items-start justify-between">
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <p className="font-semibold text-gray-800 text-sm">{ing.name}</p>
+                    {ing.optional && <span className="text-xs bg-purple-100 text-purple-600 px-2 py-0.5 rounded-full font-medium">optional add-in</span>}
+                    {isLow && <span className="text-xs bg-red-100 text-red-600 px-2 py-0.5 rounded-full font-medium">⚠ low stock</span>}
+                  </div>
+                  <p className="text-xs text-gray-400 mt-0.5">{ing.flavor} · SKU {ing.sku} · {ing.size}</p>
+                  <p className="text-xs text-gray-400">{ing.servingLabel}</p>
+                </div>
+                <button onClick={()=>setEditing(ing)} className="ml-3 flex-shrink-0 text-xs border border-emerald-200 text-emerald-600 px-3 py-1.5 rounded-xl hover:bg-emerald-50 transition-colors font-medium">Edit</button>
+              </div>
+
+              <div className="grid grid-cols-3 gap-2 mt-3">
+                <div className="bg-gray-50 rounded-xl p-2 text-center">
+                  <p className="text-sm font-bold text-gray-700">{fmt(ing.retail)}</p>
+                  <p className="text-xs text-gray-400">Retail</p>
+                </div>
+                <div className="bg-emerald-50 rounded-xl p-2 text-center">
+                  <p className="text-sm font-bold text-emerald-600">{fmt(wholesale)}</p>
+                  <p className="text-xs text-gray-400">Your cost</p>
+                </div>
+                <div className="bg-purple-50 rounded-xl p-2 text-center">
+                  <p className="text-sm font-bold text-purple-600">{fmt(costPerServ)}</p>
+                  <p className="text-xs text-gray-400">/ kit</p>
+                </div>
+              </div>
+
+              <div className="flex items-center justify-between mt-3 text-xs text-gray-400">
+                <span>Stock: <strong className={isLow?'text-red-500':'text-gray-700'}>{ing.stock} container{ing.stock!==1?'s':''}</strong></span>
+                <span>~{Math.floor(ing.stock * ing.servings)} kits available</span>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      {editing && <EditIngredientModal ing={editing} onSave={saveIngredient} onClose={()=>setEditing(null)}/>}
+    </div>
+  );
+}
+
+// ══════════════════════════════════════════════════════
+//  MARGINS PAGE
+// ══════════════════════════════════════════════════════
+
+function Margins({ ingredients, products, orders, transactions, setProducts }) {
+  const [editingProduct, setEditingProduct] = useState(null);
+  const [extraCost,      setExtraCost]      = useState(1.00); // packaging/labor per kit
+  const [withCollagen,   setWithCollagen]   = useState(false);
+  const [whatifProduct,  setWhatifProduct]  = useState(products[0]);
+  const [whatifPrice,    setWhatifPrice]    = useState(products[0]?.price || 8);
+  const [whatifQty,      setWhatifQty]      = useState(10);
+
+  const baseCost   = kitCost(ingredients, withCollagen) + extraCost;
+
+  // Sales map
+  const salesMap = useMemo(() => {
+    const m = {};
+    orders.forEach(o => o.items.forEach(i => { m[i.id] = (m[i.id]||0) + i.qty; }));
+    return m;
+  }, [orders]);
+
+  const allRev = transactions.filter(t=>t.type==='income').reduce((s,t)=>s+t.amount,0);
+  const allExp = transactions.filter(t=>t.type==='expense').reduce((s,t)=>s+t.amount,0);
+
+  const saveProduct = (id, updates) => setProducts(p => p.map(prod => prod.id===id ? {...prod,...updates} : prod));
+
+  const wipSingleCost = whatifProduct?.isPack ? baseCost * (whatifProduct.packSize ?? 1) : baseCost;
+  const wipRev  = whatifPrice * whatifQty;
+  const wipCost = wipSingleCost * whatifQty;
+  const wipProf = wipRev - wipCost;
+  const wipMarg = wipRev > 0 ? (wipProf/wipRev*100) : 0;
+
+  return (
+    <div className="space-y-4">
+      {/* Cost settings */}
+      <div className="bg-white rounded-2xl border shadow-sm p-4">
+        <p className="text-sm font-semibold text-gray-700 mb-3">⚙️ Cost Settings</p>
+        <div className="space-y-3">
+          <label className="flex items-center gap-3 cursor-pointer">
+            <input type="checkbox" checked={withCollagen} onChange={e=>setWithCollagen(e.target.checked)} className="w-4 h-4 accent-emerald-500"/>
+            <span className="text-sm text-gray-700">Include Collagen Beauty Booster in cost</span>
+          </label>
+          <div>
+            <Lbl>Extra cost per kit (packaging, cups, straws, flavor syrups) ($)</Lbl>
+            <input type="number" step="0.25" min="0" value={extraCost} onChange={e=>setExtraCost(parseFloat(e.target.value)||0)} className="mt-1 w-full border rounded-xl px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-emerald-400"/>
+          </div>
+          <div className="grid grid-cols-3 gap-2 text-center pt-1">
+            <div className="bg-red-50 rounded-xl p-2"><p className="text-sm font-bold text-red-500">{fmt(kitCost(ingredients,withCollagen))}</p><p className="text-xs text-gray-400">Herbalife</p></div>
+            <div className="bg-amber-50 rounded-xl p-2"><p className="text-sm font-bold text-amber-600">{fmt(extraCost)}</p><p className="text-xs text-gray-400">Packaging</p></div>
+            <div className="bg-emerald-50 rounded-xl p-2"><p className="text-sm font-bold text-emerald-600">{fmt(baseCost)}</p><p className="text-xs text-gray-400">Total / kit</p></div>
+          </div>
+        </div>
+      </div>
+
+      {/* P&L */}
+      <div className="bg-white rounded-2xl border shadow-sm p-4">
+        <p className="text-sm font-semibold text-gray-700 mb-3">💵 P&L Summary</p>
+        <div className="divide-y">
+          {[
+            {label:'Revenue (logged)',   val:fmt(allRev),           cls:'text-emerald-600 font-semibold'},
+            {label:'Expenses (logged)',  val:`−${fmt(allExp)}`,     cls:'text-red-500 font-semibold'},
+            {label:'Net Profit',         val:fmt(allRev-allExp),    cls:'text-emerald-600 font-bold text-lg'},
+            {label:'Net Margin',         val:pct(allRev>0?((allRev-allExp)/allRev*100):0), cls:'text-purple-600 font-semibold'},
+          ].map(row => (
+            <div key={row.label} className="flex justify-between items-center py-2.5">
+              <span className="text-sm text-gray-600">{row.label}</span>
+              <span className={row.cls}>{row.val}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Per-product table */}
+      <div className="bg-white rounded-2xl border shadow-sm p-4">
+        <p className="text-sm font-semibold text-gray-700 mb-3">📋 Menu Prices & Margins — tap to edit</p>
+        <div className="overflow-x-auto -mx-1">
+          <table className="w-full text-sm min-w-[440px]">
+            <thead>
+              <tr className="border-b">
+                {['Tea','📦 Kit','🥤 To-Go','Cost','Kit Margin','Sold'].map(h=>(
+                  <th key={h} className={`pb-2 text-xs text-gray-400 font-medium ${h==='Tea'?'text-left':'text-right'}`}>{h}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody className="divide-y">
+              {products.map(p => {
+                const togo      = p.togoPrice ?? 10;
+                const itemCost  = p.isPack ? baseCost * (p.packSize ?? 1) : baseCost;
+                const mKit      = p.price > 0 ? ((p.price - itemCost) / p.price * 100) : 0;
+                const mTogo     = togo   > 0 ? ((togo   - itemCost) / togo   * 100) : 0;
+                const sold      = salesMap[p.id] || 0;
+                return (
+                  <tr key={p.id} onClick={()=>setEditingProduct(p)} className={`hover:bg-gray-50 cursor-pointer ${!p.active?'opacity-40':''}`}>
+                    <td className="py-2 font-medium text-gray-800 text-xs max-w-[110px]">
+                      {p.emoji} {p.name}
+                      {p.isPack && <span className="ml-1 text-purple-400 text-xs">×{p.packSize}</span>}
+                      {!p.active && <span className="text-gray-300 ml-1">(off)</span>}
+                    </td>
+                    <td className="py-2 text-right font-semibold text-emerald-600">{fmt(p.price)}</td>
+                    <td className="py-2 text-right font-semibold text-teal-600">{p.isPack ? '—' : fmt(togo)}</td>
+                    <td className="py-2 text-right text-gray-400">{fmt(itemCost)}{p.isPack && <span className="text-xs text-purple-400"> (×{p.packSize})</span>}</td>
+                    <td className="py-2 text-right">
+                      <div className="flex flex-col items-end gap-0.5">
+                        <span className={`text-xs px-1.5 py-0.5 rounded-full font-bold ${mKit>=65?'bg-emerald-100 text-emerald-700':mKit>=50?'bg-amber-100 text-amber-700':'bg-red-100 text-red-700'}`}>{pct(mKit)}</span>
+                        {!p.isPack && <span className={`text-xs px-1.5 py-0.5 rounded-full font-bold ${mTogo>=65?'bg-teal-100 text-teal-700':mTogo>=50?'bg-amber-100 text-amber-700':'bg-red-100 text-red-700'}`}>{pct(mTogo)} 🥤</span>}
+                      </div>
+                    </td>
+                    <td className="py-2 text-right text-gray-400">{sold}</td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+        <p className="text-xs text-gray-300 mt-2 text-center">Tap any row to edit price or toggle availability</p>
+      </div>
+
+      {/* What-If Calculator */}
+      <div className="bg-white rounded-2xl border shadow-sm p-4">
+        <p className="text-sm font-semibold text-gray-700 mb-3">🔮 What-If Calculator</p>
+        <div className="space-y-3">
+          <div>
+            <Lbl>Product</Lbl>
+            <Sel value={whatifProduct?.id} onChange={e=>{ const p=products.find(p=>p.id===+e.target.value); setWhatifProduct(p); setWhatifPrice(p.price); }}>
+              <optgroup label="── Individual Teas ──">
+                {products.filter(p=>!p.isPack).map(p=><option key={p.id} value={p.id}>{p.emoji} {p.name}</option>)}
+              </optgroup>
+              <optgroup label="── Packs ──">
+                {products.filter(p=>p.isPack).map(p=><option key={p.id} value={p.id}>{p.emoji} {p.name}</option>)}
+              </optgroup>
+            </Sel>
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div><Lbl>Sell Price ($)</Lbl><input type="number" step="0.50" value={whatifPrice} onChange={e=>setWhatifPrice(parseFloat(e.target.value)||0)} className="w-full border rounded-xl px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-emerald-400"/></div>
+            <div><Lbl>Units</Lbl><input type="number" value={whatifQty} onChange={e=>setWhatifQty(parseInt(e.target.value)||0)} className="w-full border rounded-xl px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-emerald-400"/></div>
+          </div>
+          <div className="grid grid-cols-3 gap-3 pt-1">
+            {[{l:'Revenue',val:wipRev,bg:'bg-emerald-50 text-emerald-700'},{l:'Cost',val:wipCost,bg:'bg-red-50 text-red-600'},{l:`Profit (${pct(wipMarg)})`,val:wipProf,bg:'bg-purple-50 text-purple-700'}].map(c=>(
+              <div key={c.l} className={`rounded-2xl p-3 text-center ${c.bg}`}>
+                <p className="text-lg font-bold">{fmt(c.val)}</p>
+                <p className="text-xs mt-0.5 opacity-70">{c.l}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {editingProduct && <EditProductModal product={editingProduct} onSave={saveProduct} onClose={()=>setEditingProduct(null)}/>}
+    </div>
+  );
+}
+
+// ══════════════════════════════════════════════════════
+//  BOOKKEEPING PAGE
+// ══════════════════════════════════════════════════════
+
+function Bookkeeping({ transactions, setTransactions }) {
+  const [showAdd,    setShowAdd]    = useState(false);
+  const [showExport, setShowExport] = useState(false);
+  const [typeF,      setTypeF]      = useState('all');
+  const [catF,       setCatF]       = useState('All');
+
+  const visible = transactions.filter(t => {
+    const mt = typeF==='all'||t.type===typeF;
+    const mc = catF==='All'||t.category===catF;
+    return mt&&mc;
+  });
+
+  const income  = transactions.filter(t=>t.type==='income').reduce((s,t)=>s+t.amount,0);
+  const expense = transactions.filter(t=>t.type==='expense').reduce((s,t)=>s+t.amount,0);
+
+  const addTxn = txn => setTransactions(p => [{ id:`TXN-${Date.now()}`, ...txn }, ...p]);
+
+  return (
+    <div className="space-y-4">
+      {/* Summary */}
+      <div className="grid grid-cols-3 gap-3">
+        <div className="bg-emerald-50 border border-emerald-100 rounded-2xl p-3 text-center">
+          <p className="text-lg font-bold text-emerald-600">{fmt(income)}</p>
+          <p className="text-xs text-gray-400">Income</p>
+        </div>
+        <div className="bg-red-50 border border-red-100 rounded-2xl p-3 text-center">
+          <p className="text-lg font-bold text-red-500">{fmt(expense)}</p>
+          <p className="text-xs text-gray-400">Expenses</p>
+        </div>
+        <div className="bg-purple-50 border border-purple-100 rounded-2xl p-3 text-center">
+          <p className="text-lg font-bold text-purple-600">{fmt(income-expense)}</p>
+          <p className="text-xs text-gray-400">Net</p>
+        </div>
+      </div>
+
+      {/* Filters + actions */}
+      <div className="flex gap-2 flex-wrap items-center">
+        <div className="flex rounded-xl overflow-hidden border bg-white text-sm">
+          {['all','income','expense'].map(t=>(
+            <button key={t} onClick={()=>setTypeF(t)} className={`px-3 py-2 capitalize font-semibold transition-colors ${typeF===t?'bg-emerald-500 text-white':'text-gray-600 hover:bg-gray-50'}`}>{t}</button>
+          ))}
+        </div>
+        <Sel value={catF} onChange={e=>setCatF(e.target.value)} className="w-auto">
+          <option value="All">All categories</option>
+          {CATS.map(c=><option key={c}>{c}</option>)}
+        </Sel>
+        <div className="ml-auto flex gap-2">
+          <Btn onClick={()=>setShowAdd(true)}>+ Add</Btn>
+          <Btn variant="outline" onClick={()=>setShowExport(true)}>↓ Export CSV</Btn>
+        </div>
+      </div>
+
+      {/* Transaction list */}
+      <div className="bg-white rounded-2xl border shadow-sm divide-y">
+        {visible.length === 0
+          ? <Empty icon={transactions.length===0?'📒':'🔍'} text={transactions.length===0?'No transactions yet. Income is auto-logged when orders are created.':'No transactions match your filter.'}/>
+          : visible.map(t => (
+              <div key={t.id} className="flex items-center gap-3 px-4 py-3">
+                <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0 ${t.type==='income'?'bg-emerald-100 text-emerald-600':'bg-red-100 text-red-500'}`}>
+                  {t.type==='income'?'↑':'↓'}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-gray-800 truncate">{t.description}</p>
+                  <p className="text-xs text-gray-400">{t.date} · {t.category}</p>
+                </div>
+                <span className={`text-sm font-bold flex-shrink-0 ${t.type==='income'?'text-emerald-600':'text-red-500'}`}>
+                  {t.type==='income'?'+':'−'}{fmt(t.amount)}
+                </span>
+              </div>
+            ))
+        }
+      </div>
+
+      {showAdd    && <AddTxnModal    onAdd={addTxn} onClose={()=>setShowAdd(false)}/>}
+      {showExport && <ExportModal    orders={[]} transactions={transactions} onClose={()=>setShowExport(false)}/>}
+    </div>
+  );
+}
+
+// ══════════════════════════════════════════════════════
+//  BACKUP / RESTORE MODAL
+// ══════════════════════════════════════════════════════
+
+function BackupModal({ ingredients, products, orders, transactions, onRestore, onClear, onClose }) {
+  const [confirmClear, setConfirmClear] = useState(false);
+  const [importStatus, setImportStatus] = useState(null); // null | 'ok' | 'err'
+  const fileRef = useRef(null);
+
+  function doExport() {
+    const payload = {
+      _meta: { version: STORAGE_VERSION, exportedAt: new Date().toISOString(), business: 'GlowDaily Nutrition' },
+      ingredients, products, orders, transactions
+    };
+    const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+    const a = Object.assign(document.createElement('a'), {
+      href: URL.createObjectURL(blob),
+      download: `glowdaily-backup-${today()}.json`
+    });
+    a.click(); URL.revokeObjectURL(a.href);
+  }
+
+  function doImport(e) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = ev => {
+      try {
+        const data = JSON.parse(ev.target.result);
+        if (!data.orders && !data.products) throw new Error('Not a GlowDaily backup');
+        onRestore(data);
+        setImportStatus('ok');
+      } catch {
+        setImportStatus('err');
+      }
+    };
+    reader.readAsText(file);
+  }
+
+  const totalRecords = orders.length + transactions.length;
+
+  return (
+    <Modal title="💾 Backup & Restore" onClose={onClose}>
+      <div className="space-y-5">
+
+        {/* Status summary */}
+        <div className="bg-gray-50 rounded-2xl p-4 grid grid-cols-2 gap-3 text-center">
+          <div><p className="text-xl font-bold text-gray-800">{orders.length}</p><p className="text-xs text-gray-400">Orders saved</p></div>
+          <div><p className="text-xl font-bold text-gray-800">{transactions.length}</p><p className="text-xs text-gray-400">Transactions saved</p></div>
+          <div className="col-span-2 bg-emerald-50 rounded-xl py-2">
+            <p className="text-xs text-emerald-700 font-semibold">✅ Auto-saving to this browser</p>
+            <p className="text-xs text-emerald-500 mt-0.5">Data survives closing & reopening on the same PC</p>
+          </div>
+        </div>
+
+        {/* Export */}
+        <div>
+          <Lbl>Save a backup file (for different PC or safekeeping)</Lbl>
+          <button onClick={doExport} className="mt-2 w-full bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-3 rounded-2xl transition-colors">
+            ↓ Download Backup File (.json)
+          </button>
+          <p className="text-xs text-gray-400 mt-1 text-center">Saves all orders, transactions, products & ingredient prices</p>
+        </div>
+
+        <hr/>
+
+        {/* Import */}
+        <div>
+          <Lbl>Restore from backup (load a .json file)</Lbl>
+          <button onClick={()=>fileRef.current?.click()} className="mt-2 w-full border-2 border-dashed border-gray-300 hover:border-emerald-400 text-gray-600 hover:text-emerald-600 font-semibold py-4 rounded-2xl transition-colors text-sm">
+            ↑ Choose .json backup file
+          </button>
+          <input ref={fileRef} type="file" accept=".json" onChange={doImport} className="hidden"/>
+          {importStatus === 'ok'  && <p className="text-xs text-emerald-600 font-semibold mt-2 text-center">✅ Data restored successfully!</p>}
+          {importStatus === 'err' && <p className="text-xs text-red-500 font-semibold mt-2 text-center">❌ Invalid file — please use a GlowDaily backup (.json)</p>}
+          <p className="text-xs text-gray-400 mt-1 text-center">⚠️ This will replace your current data with the backup</p>
+        </div>
+
+        <hr/>
+
+        {/* Clear */}
+        {!confirmClear
+          ? <button onClick={()=>setConfirmClear(true)} className="w-full border border-red-200 text-red-500 hover:bg-red-50 font-semibold py-2.5 rounded-2xl transition-colors text-sm">🗑 Clear all data…</button>
+          : <div className="space-y-2">
+              <p className="text-sm text-red-600 font-semibold text-center">Delete ALL {totalRecords} records?<br/><span className="font-normal text-red-400 text-xs">This cannot be undone. Export a backup first.</span></p>
+              <div className="grid grid-cols-2 gap-2">
+                <button onClick={()=>setConfirmClear(false)} className="border text-gray-600 font-semibold py-2 rounded-xl text-sm hover:bg-gray-50">Cancel</button>
+                <button onClick={()=>{ onClear(); setConfirmClear(false); onClose(); }} className="bg-red-500 hover:bg-red-600 text-white font-bold py-2 rounded-xl text-sm transition-colors">Yes, Delete All</button>
+              </div>
+            </div>
+        }
+      </div>
+    </Modal>
+  );
+}
+
+// ══════════════════════════════════════════════════════
+//  APP SHELL
+// ══════════════════════════════════════════════════════
+
+const NAV = [
+  { id:'dashboard',   label:'Home',        icon:'🏠' },
+  { id:'orders',      label:'Orders',      icon:'📦' },
+  { id:'ingredients', label:'Ingredients', icon:'🧪' },
+  { id:'margins',     label:'Margins',     icon:'📊' },
+  { id:'books',       label:'Books',       icon:'💳' },
+];
+
+const TITLES = {
+  dashboard:   'Dashboard',
+  orders:      'Orders',
+  ingredients: 'Ingredients',
+  margins:     'Profit & Margins',
+  books:       'Bookkeeping',
+};
+
+function App() {
+  const [page,         setPage]         = useState('dashboard');
+  const [ready,        setReady]        = useState(false);
+  const [cloudStatus,  setCloudStatus]  = useState('loading'); // 'loading' | 'ok' | 'error'
+  const [ingredients,  setIngredients]  = useState(INIT_INGREDIENTS);
+  const [products,     setProducts]     = useState(INIT_PRODUCTS);
+  const [orders,       setOrders]       = useState(INIT_ORDERS);
+  const [transactions, setTransactions] = useState(INIT_TRANSACTIONS);
+  const [showExport,   setShowExport]   = useState(false);
+  const [showBackup,   setShowBackup]   = useState(false);
+  const [saveFlash,    setSaveFlash]    = useState(false);
+
+  // Load from Supabase cloud on mount, fallback to localStorage
+  useEffect(() => {
+    Promise.all([
+      loadFromCloud('ingredients', loadState('ingredients', INIT_INGREDIENTS)),
+      loadFromCloud('products',    loadState('products',    INIT_PRODUCTS)),
+      loadFromCloud('orders',      loadState('orders',      INIT_ORDERS)),
+      loadFromCloud('transactions',loadState('transactions',INIT_TRANSACTIONS)),
+    ]).then(([ing, prod, ord, txn]) => {
+      // Merge: add any new products from INIT_PRODUCTS not in cloud
+      const storedIds = new Set(prod.map(p => p.id));
+      const merged = [...prod];
+      INIT_PRODUCTS.forEach(p => { if (!storedIds.has(p.id)) merged.push(p); });
+
+      setIngredients(ing);
+      setProducts(merged);
+      setOrders(ord);
+      setTransactions(txn);
+      setCloudStatus('ok');
+      setReady(true);
+    }).catch(() => {
+      // Fallback to localStorage if cloud unreachable
+      const stored = loadState('products', INIT_PRODUCTS);
+      const storedIds = new Set(stored.map(p => p.id));
+      const merged = [...stored];
+      INIT_PRODUCTS.forEach(p => { if (!storedIds.has(p.id)) merged.push(p); });
+      setIngredients(loadState('ingredients', INIT_INGREDIENTS));
+      setProducts(merged);
+      setOrders(loadState('orders', INIT_ORDERS));
+      setTransactions(loadState('transactions', INIT_TRANSACTIONS));
+      setCloudStatus('error');
+      setReady(true);
+    });
+  }, []);
+
+  // Sync to Supabase + localStorage on every state change (after ready)
+  useEffect(() => { if (!ready) return; saveState('ingredients',  ingredients);  saveToCloud('ingredients',  ingredients);  flashSave(); }, [ingredients, ready]);
+  useEffect(() => { if (!ready) return; saveState('products',     products);     saveToCloud('products',     products);     flashSave(); }, [products, ready]);
+  useEffect(() => { if (!ready) return; saveState('orders',       orders);       saveToCloud('orders',       orders);       flashSave(); }, [orders, ready]);
+  useEffect(() => { if (!ready) return; saveState('transactions', transactions); saveToCloud('transactions', transactions); flashSave(); }, [transactions, ready]);
+
+  function flashSave() {
+    setSaveFlash(true);
+    setTimeout(() => setSaveFlash(false), 1200);
+  }
+
+  // Loading screen while fetching from cloud
+  if (!ready) return (
+    <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-b from-emerald-50 to-white gap-4">
+      <div className="text-4xl animate-bounce">🌿</div>
+      <p className="text-emerald-600 font-semibold text-lg">Loading GlowDaily…</p>
+      <p className="text-gray-400 text-sm">Connecting to cloud ☁️</p>
+    </div>
+  );
+
+  const lowIngCount   = ingredients.filter(i=>i.stock<=i.threshold).length;
+  const pendingOrders = orders.filter(o=>['Received','Packed','Backordered'].includes(o.status)).length;
+  const backorderCount = orders.filter(o=>o.isBackorder && o.status!=='Delivered').length;
+
+  function handleRestore(data) {
+    if (data.ingredients)  setIngredients(data.ingredients);
+    if (data.products)     setProducts(data.products);
+    if (data.orders)       setOrders(data.orders);
+    if (data.transactions) setTransactions(data.transactions);
+  }
+
+  function handleClearAll() {
+    setOrders([]); setTransactions([]);
+    setIngredients(INIT_INGREDIENTS); setProducts(INIT_PRODUCTS);
+    ['orders','transactions','ingredients','products'].forEach(k => localStorage.removeItem(`gd_${k}`));
+  }
+
+  const PAGE = {
+    dashboard:   <Dashboard   ingredients={ingredients} products={products} orders={orders} transactions={transactions} setPage={setPage}/>,
+    orders:      <Orders      products={products} orders={orders} setOrders={setOrders} setTransactions={setTransactions}/>,
+    ingredients: <Ingredients ingredients={ingredients} setIngredients={setIngredients}/>,
+    margins:     <Margins     ingredients={ingredients} products={products} orders={orders} transactions={transactions} setProducts={setProducts}/>,
+    books:       <Bookkeeping transactions={transactions} setTransactions={setTransactions}/>,
+  };
+
+  return (
+    <div className="min-h-screen bg-gray-50 pb-20 lg:pb-0 lg:pl-64">
+
+      {/* ── Desktop Sidebar ── */}
+      <aside className="hidden lg:flex fixed left-0 top-0 h-full w-64 bg-white border-r flex-col z-20">
+        <div className="p-5 border-b">
+          <div className="flex items-center gap-3">
+            <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-emerald-400 to-teal-500 flex items-center justify-center text-white font-black text-lg shadow-sm flex-shrink-0">G</div>
+            <div>
+              <p className="font-black text-gray-900 leading-tight">GlowDaily</p>
+              <p className="text-xs text-gray-400 font-medium">Nutrition Dashboard</p>
+            </div>
+          </div>
+        </div>
+        <nav className="flex-1 p-3 space-y-0.5 overflow-y-auto">
+          {NAV.map(n => (
+            <button key={n.id} onClick={()=>setPage(n.id)}
+              className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-colors ${page===n.id?'bg-emerald-50 text-emerald-700':'text-gray-600 hover:bg-gray-50'}`}>
+              <span className="text-base">{n.icon}</span>
+              <span>{n.label}</span>
+              {n.id==='ingredients' && lowIngCount>0 && <span className="ml-auto bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold">{lowIngCount}</span>}
+              {n.id==='orders' && pendingOrders>0 && <span className="ml-auto bg-amber-500 text-white text-xs rounded-full min-w-5 h-5 px-1 flex items-center justify-center font-bold">{pendingOrders}</span>}
+            </button>
+          ))}
+        </nav>
+        <div className="p-4 border-t space-y-2">
+          <button onClick={()=>setShowBackup(true)} className="w-full text-xs text-emerald-600 hover:text-emerald-700 border border-emerald-200 hover:border-emerald-400 bg-emerald-50 hover:bg-emerald-100 rounded-xl py-2 font-bold transition-colors">💾 Backup & Restore</button>
+          <button onClick={()=>setShowExport(true)} className="w-full text-xs text-gray-500 hover:text-emerald-600 border border-gray-200 hover:border-emerald-300 rounded-xl py-2 font-semibold transition-colors">↓ Export CSV</button>
+          <p className={`text-xs text-center transition-all duration-300 ${saveFlash?'text-emerald-500 font-semibold':'text-gray-300'}`}>
+            {saveFlash ? '☁️ Saved to cloud' : cloudStatus==='ok' ? '☁️ Cloud connected' : cloudStatus==='error' ? '⚠️ Offline — local only' : 'GlowDaily v2.0'}
+          </p>
+        </div>
+      </aside>
+
+      {/* ── Mobile Header ── */}
+      <header className="lg:hidden sticky top-0 z-10 bg-white border-b px-4 py-3 flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-emerald-400 to-teal-500 flex items-center justify-center text-white font-black text-sm">G</div>
+          <span className="font-bold text-gray-800">{TITLES[page]}</span>
+        </div>
+        <div className="flex items-center gap-2">
+          {saveFlash && <span className="text-xs text-emerald-500 font-semibold">💾</span>}
+          {backorderCount>0 && <span className="bg-orange-500 text-white text-xs rounded-full px-2 py-0.5 font-bold">{backorderCount} BO</span>}
+          <button onClick={()=>setShowBackup(true)} className="text-xs text-emerald-600 border border-emerald-200 bg-emerald-50 rounded-lg px-2 py-1 font-bold">💾</button>
+          <button onClick={()=>setShowExport(true)} className="text-xs text-gray-500 border rounded-lg px-2 py-1 font-semibold">↓ CSV</button>
+        </div>
+      </header>
+
+      {/* ── Desktop page title ── */}
+      <div className="hidden lg:block bg-white border-b px-8 py-4">
+        <h1 className="text-xl font-bold text-gray-900">{TITLES[page]}</h1>
+      </div>
+
+      {/* ── Main content ── */}
+      <main className="p-4 lg:p-8 max-w-4xl mx-auto">
+        {PAGE[page]}
+      </main>
+
+      {/* ── Mobile Bottom Nav ── */}
+      <nav className="lg:hidden fixed bottom-0 inset-x-0 bg-white border-t flex z-10 safe-area-inset-bottom">
+        {NAV.map(n => (
+          <button key={n.id} onClick={()=>setPage(n.id)}
+            className={`relative flex-1 flex flex-col items-center py-2 transition-colors ${page===n.id?'text-emerald-600':'text-gray-400'}`}>
+            <span className="text-xl leading-none">{n.icon}</span>
+            <span className="text-xs mt-0.5 font-semibold">{n.label}</span>
+            {n.id==='ingredients' && lowIngCount>0 && <span className="absolute top-1 right-1/4 translate-x-1/2 bg-red-500 text-white text-xs rounded-full w-4 h-4 flex items-center justify-center font-bold">{lowIngCount}</span>}
+            {n.id==='orders' && pendingOrders>0 && <span className="absolute top-1 right-1/4 translate-x-1/2 bg-amber-500 text-white text-xs rounded-full w-4 h-4 flex items-center justify-center font-bold">{pendingOrders}</span>}
+          </button>
+        ))}
+      </nav>
+
+      {/* ── Global Export Modal ── */}
+      {showExport && <ExportModal orders={orders} transactions={transactions} onClose={()=>setShowExport(false)}/>}
+
+      {/* ── Backup / Restore Modal ── */}
+      {showBackup && (
+        <BackupModal
+          ingredients={ingredients} products={products}
+          orders={orders} transactions={transactions}
+          onRestore={handleRestore}
+          onClear={handleClearAll}
+          onClose={()=>setShowBackup(false)}
+        />
+      )}
+    </div>
+  );
+}
+
+// ── Password gate ────────────────────────────────────────
+const APP_PASSWORD = 'GlowDaily2026'; // Change this to whatever you want
+
+function Login({ onUnlock }) {
+  const [pw, setPw]       = useState('');
+  const [err, setErr]     = useState(false);
+  const [show, setShow]   = useState(false);
+
+  function attempt() {
+    if (pw === APP_PASSWORD) {
+      sessionStorage.setItem('gd_auth', '1');
+      onUnlock();
+    } else {
+      setErr(true);
+      setPw('');
+      setTimeout(() => setErr(false), 1800);
+    }
+  }
+
+  return (
+    <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-b from-emerald-50 to-white px-6">
+      <div className="w-full max-w-sm bg-white rounded-3xl shadow-xl border p-8 space-y-6">
+        <div className="text-center space-y-2">
+          <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-emerald-400 to-teal-500 flex items-center justify-center text-white text-3xl font-black mx-auto shadow-lg">G</div>
+          <h1 className="text-2xl font-black text-gray-800">GlowDaily</h1>
+          <p className="text-sm text-gray-400">Business Dashboard · Private</p>
+        </div>
+        <div className="space-y-3">
+          <div className="relative">
+            <input
+              type={show ? 'text' : 'password'}
+              value={pw}
+              onChange={e => setPw(e.target.value)}
+              onKeyDown={e => e.key === 'Enter' && attempt()}
+              placeholder="Enter password"
+              autoFocus
+              className={`w-full border-2 rounded-2xl px-4 py-3 text-sm outline-none transition-colors pr-12
+                ${err ? 'border-red-400 bg-red-50' : 'border-gray-200 focus:border-emerald-400'}`}
+            />
+            <button type="button" onClick={() => setShow(s => !s)}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 text-lg">
+              {show ? '🙈' : '👁️'}
+            </button>
+          </div>
+          {err && <p className="text-xs text-red-500 text-center font-semibold">Incorrect password — try again</p>}
+          <button onClick={attempt}
+            className="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-3 rounded-2xl transition-colors shadow-sm">
+            Unlock →
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function Root() {
+  const [authed, setAuthed] = useState(() => sessionStorage.getItem('gd_auth') === '1');
+  if (!authed) return <Login onUnlock={() => setAuthed(true)} />;
+  return <App />;
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<Root/>);
+</script>
+</body>
+</html>
