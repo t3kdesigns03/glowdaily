@@ -470,7 +470,9 @@ section { padding: 5rem 2rem; }
   border-radius: 20px; padding: 2.5rem; margin-top: 2rem;
 }
 .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; }
-@media(max-width:600px) { .form-row { grid-template-columns: 1fr; } }
+.form-row.form-row-3 { grid-template-columns: 1fr 1fr 1fr; }
+@media(max-width:800px) { .form-row.form-row-3 { grid-template-columns: 1fr 1fr; } }
+@media(max-width:600px) { .form-row, .form-row.form-row-3 { grid-template-columns: 1fr; } }
 .form-group { display: flex; flex-direction: column; gap: 0.4rem; }
 .form-group label { font-weight: 700; font-size: 0.88rem; color: var(--teal2); }
 .form-group input, .form-group select, .form-group textarea {
@@ -871,15 +873,25 @@ footer a { color: var(--teal); text-decoration: none; }
     <div class="order-form" id="orderFormWrap">
       <!-- CONTACT -->
       <div class="form-section-title">👤 Contact Info</div>
-      <div class="form-row">
+      <div class="form-row form-row-3">
         <div class="form-group">
           <label for="custName">Name *</label>
-          <input type="text" id="custName" placeholder="Your name"/>
+          <input type="text" id="custName" placeholder="Your name" autocomplete="name" required/>
         </div>
         <div class="form-group">
-          <label for="custContact">Phone or Email *</label>
-          <input type="text" id="custContact" placeholder="Best way to reach you"/>
+          <label for="custPhone">Phone *</label>
+          <input type="tel" id="custPhone" placeholder="(555) 555-5555" autocomplete="tel" required/>
         </div>
+        <div class="form-group">
+          <label for="custEmail">Email *</label>
+          <input type="email" id="custEmail" placeholder="you@email.com" autocomplete="email" required/>
+        </div>
+      </div>
+
+      <!-- Only shown when Flavor Friday is in the cart -->
+      <div class="form-group" id="flavorFridayBlock" style="display:none;margin-top:0.75rem">
+        <label for="custFlavorFriday">Custom Flavor for Flavor Friday *</label>
+        <textarea id="custFlavorFriday" rows="2" placeholder="Strawberry Starburst, Cotton Candy, Wild Berry, etc."></textarea>
       </div>
 
       <!-- FULFILLMENT -->
@@ -1119,6 +1131,7 @@ const DRINK_COLORS = {
   16: { stops:['#880099','#0011CC','#CC1133'], glow:'#880099' },              // MadDogg
   17: { stops:['#FF8800','#FFD700','#AAEE55'], glow:'#FF8800' },              // Robert Marlicious
   18: { stops:['#FFD700','#FF8C00','#FF44BB','#8800FF','#00BBFF'], glow:'#FFD700' }, // 12-Pack
+  19: { stops:['#FF44BB','#FFD700','#00E8D4'], glow:'#FFD700' },              // Flavor Friday
 };
 
 function drinkSVG(id) {
@@ -1213,7 +1226,11 @@ const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 // Fallback menu (matches dashboard INIT_PRODUCTS)
+const TAX_RATE = 0.08;              // 8% sales tax
+const FLAVOR_FRIDAY_ID = 19;        // Weekly special: customer names their own mix
+
 const FALLBACK_PRODUCTS = [
+  { id:19, name:"Flavor Friday", emoji:"🌟", price:10.00, togoPrice:9.00, active:true, isCustomFlavor:true, badge:"Weekly Special", flavors:"Build your own custom flavor — tell us your dream mix at checkout" },
   { id:1,  name:"American Bomb Pop", emoji:"🎆", price:10.00, togoPrice:9.00, active:true, flavors:"Blue Blast · Cherry" },
   { id:2,  name:"Galaxy Blast",      emoji:"🌌", price:10.00, togoPrice:9.00, active:true, flavors:"Blackberry · Blue Blast · Lemonade · Wild Berry" },
   { id:3,  name:"County Fair",       emoji:"🎡", price:10.00, togoPrice:9.00, active:true, flavors:"Lemonade · Wild Berry · Strawberry · Cotton Candy" },
@@ -1290,7 +1307,33 @@ async function loadProducts() {
   // Fallback
   if (!loaded) products = FALLBACK_PRODUCTS.filter(p => p.active);
 
+  // Always ensure Flavor Friday exists at the top of the menu (weekly special).
+  // Covers cloud/DB menus that were saved before this item existed.
+  ensureFlavorFriday();
+
   renderMenu();
+}
+
+function ensureFlavorFriday() {
+  const ff = FALLBACK_PRODUCTS.find(p => p.id === FLAVOR_FRIDAY_ID);
+  if (!ff) return;
+  const idx = products.findIndex(p => p.id == FLAVOR_FRIDAY_ID || p.name === 'Flavor Friday');
+  if (idx === -1) {
+    products = [{ ...ff }, ...products];
+  } else {
+    // Keep existing remote pricing if present, but ensure custom-flavor flag + badge.
+    products[idx] = {
+      ...ff,
+      ...products[idx],
+      isCustomFlavor: true,
+      badge: products[idx].badge || ff.badge,
+      flavors: products[idx].flavors || ff.flavors,
+      active: true
+    };
+    // Move to front so it stands out
+    const [item] = products.splice(idx, 1);
+    products.unshift(item);
+  }
 }
 
 // ── LOAD MONTHLY SPECIAL ──────────────────────────
@@ -1334,6 +1377,7 @@ function renderMenu() {
     <div class="menu-card ${selected} ${isPack}" id="card-${p.id}" onclick="toggleItem(${p.id})">
       <div class="card-drink-img">${drinkSVG(p.id)}</div>
       ${p.isPack ? `<div class="card-pack-label">📦 ${p.packSize || 12}-Pack Bundle</div>` : ''}
+      ${p.badge ? `<div class="card-pack-label" style="background:rgba(255,184,0,0.2);color:var(--gold)">${p.badge}</div>` : ''}
       <div class="card-name">${p.name}</div>
       <div class="card-price">$${Number(price).toFixed(2)}</div>
       ${p.flavors ? `<div class="card-flavors">${p.flavors}</div>` : ''}
@@ -1397,7 +1441,25 @@ function updateCart() {
   }).join('');
 
   document.getElementById('cartItems').innerHTML = rows || '<div class="empty-cart">No items yet</div>';
-  document.getElementById('cartTotal').textContent = `$${total.toFixed(2)}`;
+
+  // Cart pricing: subtotal + 8% tax
+  const tax   = total * TAX_RATE;
+  const grand = total + tax;
+  document.getElementById('cartTotal').innerHTML =
+    `<span style="display:block;font-size:0.85rem;font-weight:600;color:var(--muted)">Subtotal $${total.toFixed(2)} · Tax (8%) $${tax.toFixed(2)}</span>` +
+    `$${grand.toFixed(2)}`;
+
+  syncFlavorFridayField();
+}
+
+// Show / hide the Flavor Friday custom-flavor textarea based on cart contents.
+function syncFlavorFridayField() {
+  const block = document.getElementById('flavorFridayBlock');
+  const input = document.getElementById('custFlavorFriday');
+  if (!block || !input) return;
+  const inCart = (cart[FLAVOR_FRIDAY_ID] || 0) > 0;
+  block.style.display = inCart ? 'block' : 'none';
+  if (!inCart) input.value = '';
 }
 
 function setPriceMode(mode) {
@@ -1423,17 +1485,27 @@ function selectPay(el, val) {
 }
 
 async function submitOrder() {
-  const name    = document.getElementById('custName').value.trim();
-  const contact = document.getElementById('custContact').value.trim();
+  const name  = document.getElementById('custName').value.trim();
+  const phone = document.getElementById('custPhone').value.trim();
+  const email = document.getElementById('custEmail').value.trim();
   const fulfill = document.getElementById('fulfillment').value;
   const note    = document.getElementById('orderNote').value.trim();
+  const flavorFriday = (document.getElementById('custFlavorFriday')?.value || '').trim();
   const errEl   = document.getElementById('formError');
   errEl.style.display = 'none';
 
-  const cartEntries = Object.entries(cart);
-  if (!name)           { showErr('Please enter your name.'); return; }
-  if (!contact)        { showErr('Please enter a phone number or email.'); return; }
+  const cartEntries = Object.entries(cart).filter(([id]) => id !== '_packFlavors');
+  if (!name)  { showErr('Please enter your name.'); return; }
+  if (!phone) { showErr('Phone number is required.'); document.getElementById('custPhone')?.focus(); return; }
+  if (!email) { showErr('Email is required.'); document.getElementById('custEmail')?.focus(); return; }
   if (!cartEntries.length) { showErr('Please select at least one item from the menu above.'); return; }
+
+  // Flavor Friday requires a written custom flavor before checkout.
+  if ((cart[FLAVOR_FRIDAY_ID] || 0) > 0 && !flavorFriday) {
+    showErr('Please tell us your custom flavor for Flavor Friday.');
+    document.getElementById('custFlavorFriday')?.focus();
+    return;
+  }
 
   if (fulfill === 'ship') {
     const street = document.getElementById('addrStreet').value.trim();
@@ -1457,7 +1529,7 @@ async function submitOrder() {
     packFlavorNote = ' | 12-Pack flavors: ' + lines.join(', ');
   }
 
-  const items = cartEntries.filter(([id])=>id!=='_packFlavors').map(([id, qty]) => {
+  const items = cartEntries.map(([id, qty]) => {
     const p     = products.find(x => x.id == id);
     const price = priceMode === 'ship' ? (p.togoPrice ?? p.price) : p.price;
     const base  = { id: Number(id), name: p.name, emoji: p.emoji, qty, price, type: priceMode === 'ship' ? 'togo' : 'kit' };
@@ -1466,11 +1538,16 @@ async function submitOrder() {
       base.packSize    = p.packSize || 12;
       base.packFlavors = { ...cart._packFlavors };
     }
+    if (Number(id) === FLAVOR_FRIDAY_ID && flavorFriday) {
+      base.customFlavor = flavorFriday;
+    }
     return base;
   });
 
-  const total = items.reduce((s, i) => s + i.price * i.qty, 0);
-  const orderId = 'GD-' + Date.now().toString(36).toUpperCase();
+  const subtotal = items.reduce((s, i) => s + i.price * i.qty, 0);
+  const tax      = subtotal * TAX_RATE;
+  const total    = subtotal + tax;
+  const orderId  = 'GD-' + Date.now().toString(36).toUpperCase();
 
   let shipping = fulfill;
   if (fulfill === 'ship') {
@@ -1481,15 +1558,23 @@ async function submitOrder() {
     shipping = `${street}, ${city}, ${state} ${zip}`;
   }
 
+  const flavorFridayNote = flavorFriday ? ` | Flavor Friday custom: ${flavorFriday}` : '';
+  const pricingNote = ` | Subtotal: $${subtotal.toFixed(2)} | Tax (8%): $${tax.toFixed(2)} | Total: $${total.toFixed(2)}`;
+  const venmoNote = selectedPay === 'venmo' ? ' | Please send payment via Venmo to @GlowDaily' : '';
+
   const orderRow = {
     id:       orderId,
     date:     new Date().toISOString().split('T')[0],
     customer: name,
+    phone:    phone,
+    email:    email,
     items:    items,
+    subtotal: subtotal,
+    tax:      tax,
     total:    total,
     status:   'Received',
     shipping: shipping,
-    note:     `Contact: ${contact} | Pay: ${selectedPay}${packFlavorNote}${note ? ' | ' + note : ''}`,
+    note:     `Phone: ${phone} | Email: ${email} | Pay: ${selectedPay}${packFlavorNote}${flavorFridayNote}${pricingNote}${venmoNote}${note ? ' | ' + note : ''}`,
   };
 
   try {
@@ -1508,13 +1593,21 @@ async function submitOrder() {
 
     // Send email notification
     try {
-      const itemLines = orderRow.items.map(i => `${i.emoji || ''} ${i.name} x${i.qty} — $${(i.price * i.qty).toFixed(2)}`).join('\n');
+      const itemLines = orderRow.items.map(i => {
+        const custom = i.customFlavor ? ` (Custom: ${i.customFlavor})` : '';
+        return `${i.emoji || ''} ${i.name} x${i.qty}${custom} — $${(i.price * i.qty).toFixed(2)}`;
+      }).join('\n');
+      const breakdown =
+        `Subtotal: $${subtotal.toFixed(2)}\n` +
+        `Tax (8%): $${tax.toFixed(2)}\n` +
+        `Total: $${total.toFixed(2)}\n` +
+        (selectedPay === 'venmo' ? 'Please send payment via Venmo to @GlowDaily' : '');
       await emailjs.send('service_9umcv8b', 'template_g1rpfut', {
         order_id:    orderRow.id,
         date:        orderRow.date,
         customer:    orderRow.customer,
-        contact:     contact,
-        items:       itemLines,
+        contact:     `${phone} / ${email}`,
+        items:       itemLines + '\n\n' + breakdown,
         total:       `$${orderRow.total.toFixed(2)}`,
         payment:     selectedPay,
         fulfillment: orderRow.shipping,
@@ -1528,14 +1621,14 @@ async function submitOrder() {
       await sb.from('orders').insert([orderRow]);
     } catch(e2) {}
 
-    showConfirm(orderId, contact);
+    showConfirm(orderId, `${phone} / ${email}`);
   } catch(err) {
     // Save locally as fallback — user can restore via dashboard Backup/Restore
     try {
       const prev = JSON.parse(localStorage.getItem('gd_web_orders') || '[]');
       localStorage.setItem('gd_web_orders', JSON.stringify([orderRow, ...prev]));
     } catch(e) {}
-    showConfirm(orderId, contact);
+    showConfirm(orderId, `${phone} / ${email}`);
     showToast('Order saved locally. Check Supabase connection.');
   }
 
@@ -1563,9 +1656,13 @@ function showConfirm(id, contact) {
 function newOrder() {
   document.getElementById('orderFormWrap').style.display = 'block';
   document.getElementById('orderConfirm').classList.add('hidden');
-  document.getElementById('custName').value    = '';
-  document.getElementById('custContact').value = '';
-  document.getElementById('orderNote').value   = '';
+  document.getElementById('custName').value  = '';
+  document.getElementById('custPhone').value = '';
+  document.getElementById('custEmail').value = '';
+  const ff = document.getElementById('custFlavorFriday');
+  if (ff) ff.value = '';
+  syncFlavorFridayField();
+  document.getElementById('orderNote').value = '';
   document.getElementById('formError').style.display = 'none';
   window.scrollTo({ top: document.getElementById('menu').offsetTop - 80, behavior:'smooth' });
 }
@@ -1587,7 +1684,7 @@ const DRINK_DOT = {
   1:'#FF0A2E', 2:'#9933FF', 3:'#FFE033', 4:'#FF8000', 5:'#FF9900',
   6:'#CC0000', 7:'#FF0077', 8:'#8B0037', 9:'#00AAFF', 10:'#9900DD',
   11:'#CC0033', 12:'#FF6600', 13:'#CC0011', 14:'#00CCDD', 15:'#22CC22',
-  16:'#880099', 17:'#FF8800',
+  16:'#880099', 17:'#FF8800', 19:'#FFD700',
 };
 
 function packTotal() {
@@ -1608,7 +1705,7 @@ function closePackPicker(e) {
 }
 
 function renderPackPicker() {
-  const teas = products.filter(p => !p.isPack && p.active !== false);
+  const teas = products.filter(p => !p.isPack && !p.isCustomFlavor && p.active !== false);
   const total = packTotal();
   const pct   = Math.round(total / PACK_SIZE * 100);
 
