@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>GlowDaily – Fix Prices</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <style>
+    body { font-family: sans-serif; max-width: 500px; margin: 60px auto; text-align: center; }
+    button { padding: 16px 32px; font-size: 1.2rem; background: #10b981; color: white; border: none; border-radius: 12px; cursor: pointer; }
+    button:disabled { background: #6b7280; cursor: not-allowed; }
+    #status { margin-top: 24px; font-size: 1rem; color: #374151; white-space: pre-line; }
+  </style>
+</head>
+<body>
+  <h2>GlowDaily Price Fix</h2>
+  <p>Sets <strong>In-Person = $10</strong> and <strong>Shipped = $9</strong> for all teas in Supabase.</p>
+  <button id="btn" onclick="run()">Run Fix</button>
+  <div id="status"></div>
+
+  <script>
+    const SUPABASE_URL = 'https://irfwztshbtgpcwewztgc.supabase.co';
+    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlyZnd6dHNoYnRncGN3ZXd6dGdjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE0MjM1NjYsImV4cCI6MjA5Njk5OTU2Nn0.LSuqQiOgPrDR2ZjeCvXGwqcbEP-Dgjas2tC0qvNDuMo';
+    const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    async function run() {
+      const btn = document.getElementById('btn');
+      const status = document.getElementById('status');
+      btn.disabled = true;
+      status.textContent = 'Fetching current products from Supabase...';
+
+      // Fetch current products
+      const { data, error } = await sb.from('gd_store').select('value').eq('key', 'products').maybeSingle();
+      if (error || !data) {
+        status.textContent = '❌ Could not fetch products: ' + (error?.message || 'No data found');
+        btn.disabled = false;
+        return;
+      }
+
+      const products = data.value;
+      status.textContent = `Found ${products.length} products. Updating prices...`;
+
+      // Update prices: in-person (price) = $10, shipped (togoPrice) = $9
+      const updated = products.map(p => {
+        if (p.isPack) return p; // leave 12-pack alone
+        return { ...p, price: 10.00, togoPrice: 9.00 };
+      });
+
+      // Save back to Supabase
+      const { error: saveErr } = await sb.from('gd_store').upsert(
+        { key: 'products', value: updated, updated_at: new Date().toISOString() },
+        { onConflict: 'key' }
+      );
+
+      if (saveErr) {
+        status.textContent = '❌ Save failed: ' + saveErr.message;
+        btn.disabled = false;
+        return;
+      }
+
+      status.textContent = `✅ Done! All ${updated.filter(p=>!p.isPack).length} teas updated:\n• In-Person: $10.00\n• Shipped: $9.00\n\nRefresh your site to confirm.`;
+    }
+  </script>
+</body>
+</html>

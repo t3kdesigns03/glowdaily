@@ -97,23 +97,23 @@ const INIT_INGREDIENTS = [
 ];
 
 const INIT_PRODUCTS = [
-  { id:1,  name:"American Bomb Pop", emoji:"🎆", price:8.00, togoPrice:10.00, active:true },
-  { id:2,  name:"Galaxy Blast",      emoji:"🌌", price:8.00, togoPrice:10.00, active:true },
-  { id:3,  name:"County Fair",       emoji:"🎡", price:8.00, togoPrice:10.00, active:true },
-  { id:4,  name:"Orange Push Pop",   emoji:"🍊", price:8.00, togoPrice:10.00, active:true },
-  { id:5,  name:"Crazy Funhouse",    emoji:"🎪", price:8.00, togoPrice:10.00, active:true },
-  { id:6,  name:"Poison Apple",      emoji:"🍎", price:8.00, togoPrice:10.00, active:true },
-  { id:7,  name:"All the Pinks",     emoji:"🌸", price:8.00, togoPrice:10.00, active:true },
-  { id:8,  name:"Pom Berry",         emoji:"🍇", price:8.00, togoPrice:10.00, active:true },
-  { id:9,  name:"Chum Bucket",       emoji:"🫧", price:8.00, togoPrice:10.00, active:true },
-  { id:10, name:"Purple Passion",    emoji:"💜", price:8.00, togoPrice:10.00, active:true },
-  { id:11, name:"Cherri Sherri",     emoji:"🍒", price:8.00, togoPrice:10.00, active:true },
-  { id:12, name:"Tropical Sunrise",  emoji:"🌅", price:8.00, togoPrice:10.00, active:true },
-  { id:13, name:"Mario the Plumber", emoji:"🍄", price:8.00, togoPrice:10.00, active:true },
-  { id:14, name:"Mystery Machine",   emoji:"🔮", price:8.00, togoPrice:10.00, active:true },
-  { id:15, name:"Bella-Rita",        emoji:"🍹", price:8.00, togoPrice:10.00, active:true },
-  { id:16, name:"MadDogg",           emoji:"🐕", price:8.00, togoPrice:10.00, active:true },
-  { id:17, name:"Robert Marlicious",     emoji:"🧃", price:8.00,  togoPrice:10.00, active:true },
+  { id:1,  name:"American Bomb Pop", emoji:"🎆", price:10.00, togoPrice:9.00, active:true },
+  { id:2,  name:"Galaxy Blast",      emoji:"🌌", price:10.00, togoPrice:9.00, active:true },
+  { id:3,  name:"County Fair",       emoji:"🎡", price:10.00, togoPrice:9.00, active:true },
+  { id:4,  name:"Orange Push Pop",   emoji:"🍊", price:10.00, togoPrice:9.00, active:true },
+  { id:5,  name:"Crazy Funhouse",    emoji:"🎪", price:10.00, togoPrice:9.00, active:true },
+  { id:6,  name:"Poison Apple",      emoji:"🍎", price:10.00, togoPrice:9.00, active:true },
+  { id:7,  name:"Countryside Blush",     emoji:"🌸", price:10.00, togoPrice:9.00, active:true },
+  { id:8,  name:"Pom Berry",         emoji:"🍇", price:10.00, togoPrice:9.00, active:true },
+  { id:9,  name:"Chum Bucket",       emoji:"🫧", price:10.00, togoPrice:9.00, active:true },
+  { id:10, name:"Purple Passion",    emoji:"💜", price:10.00, togoPrice:9.00, active:true },
+  { id:11, name:"Cherri Sherri",     emoji:"🍒", price:10.00, togoPrice:9.00, active:true },
+  { id:12, name:"Tropical Sunrise",  emoji:"🌅", price:10.00, togoPrice:9.00, active:true },
+  { id:13, name:"Mario the Plumber", emoji:"🍄", price:10.00, togoPrice:9.00, active:true },
+  { id:14, name:"Mystery Machine",   emoji:"🔮", price:10.00, togoPrice:9.00, active:true },
+  { id:15, name:"Bella-Rita",        emoji:"🍹", price:10.00, togoPrice:9.00, active:true },
+  { id:16, name:"MadDogg",           emoji:"🐕", price:10.00, togoPrice:9.00, active:true },
+  { id:17, name:"Robert Marlicious",     emoji:"🧃", price:10.00, togoPrice:9.00, active:true },
   { id:18, name:"Monthly 12-Pack", emoji:"🎁", price:80.00, togoPrice:80.00, isPack:true, packSize:12, active:true },
 ];
 
@@ -1773,7 +1773,15 @@ function App() {
 }
 
 // ── Login gate ───────────────────────────────────────────
-const CREDENTIALS = { username: '6lowdaily', password: 'M@g3Pow3r420$%' };
+const CREDENTIALS = {
+  username: 'd0fe6434585e4fc3e6e2d9cc8bc8f6734a4fd2caa72138cca72b24496af82c84',
+  password: 'f0b1be208b220b0f4ed40c16811d294ce11fde43e613e715c2d636b59fc3bd9a',
+};
+
+async function sha256(str) {
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
+  return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,'0')).join('');
+}
 
 function Login({ onUnlock }) {
   const [user, setUser]   = useState('');
@@ -1781,8 +1789,9 @@ function Login({ onUnlock }) {
   const [err, setErr]     = useState(false);
   const [show, setShow]   = useState(false);
 
-  function attempt() {
-    if (user === CREDENTIALS.username && pw === CREDENTIALS.password) {
+  async function attempt() {
+    const [uh, ph] = await Promise.all([sha256(user), sha256(pw)]);
+    if (uh === CREDENTIALS.username && ph === CREDENTIALS.password) {
       sessionStorage.setItem('gd_auth', '1');
       onUnlock();
     } else {

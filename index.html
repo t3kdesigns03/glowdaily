@@ -1,0 +1,1677 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>GlowDaily Nutrition – Loaded Teas & Nutrition</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Space+Grotesk:wght@400;600;700&display=swap" rel="stylesheet"/>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+<script>emailjs.init('5vEW7OfRzLj8KG5lM');</script>
+<style>
+/* ── RESET & BASE ────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --space:    #040C18;
+  --navy:     #081628;
+  --navy2:    #0E1F36;
+  --teal:     #00E8D4;
+  --teal2:    #4FF5E2;
+  --teal3:    #A0FBF0;
+  --gold:     #FFB800;
+  --gold2:    #FFD966;
+  --orange:   #FF7A1A;
+  --orange2:  #FFAD5C;
+  --purple:   #9B3DFF;
+  --purple2:  #C47BFF;
+  --green:    #1FD98A;
+  --white:    #EDFFFE;
+  --muted:    #8AACB8;
+  --card-bg:  rgba(8,22,40,0.88);
+  --glow:        0 0 28px rgba(0,232,212,0.5);
+  --glow-gold:   0 0 28px rgba(255,184,0,0.5);
+  --glow-orange: 0 0 28px rgba(255,122,26,0.5);
+  --glow-purple: 0 0 28px rgba(155,61,255,0.45);
+  --neon-pink:   #FF2EDA;
+  --neon-cyan:   #00F5FF;
+  --neon-pink-shadow:
+    0 0 4px #fff, 0 0 11px #fff,
+    0 0 20px var(--neon-pink), 0 0 42px var(--neon-pink),
+    0 0 82px var(--neon-pink), 0 0 120px var(--neon-pink);
+  --neon-cyan-shadow:
+    0 0 4px #fff, 0 0 11px #fff,
+    0 0 20px var(--neon-cyan), 0 0 42px var(--neon-cyan),
+    0 0 82px var(--neon-cyan), 0 0 120px var(--neon-cyan);
+}
+html { scroll-behavior: smooth; }
+body {
+  font-family: 'Nunito', sans-serif;
+  background: var(--space);
+  color: var(--white);
+  overflow-x: hidden;
+}
+h1,h2,h3,h4 { font-family: 'Space Grotesk', sans-serif; }
+
+/* ── STARS BACKGROUND ───────────────────────────── */
+.stars-bg {
+  position: fixed; inset: 0; z-index: 0;
+  background:
+    radial-gradient(ellipse at 15% 40%, #0A1A35 0%, transparent 55%),
+    radial-gradient(ellipse at 85% 20%, #1A0830 0%, transparent 50%),
+    radial-gradient(ellipse at 60% 80%, #0A1E10 0%, transparent 45%),
+    #040C18;
+  overflow: hidden;
+  pointer-events: none;
+}
+.stars-bg::before, .stars-bg::after {
+  content: '';
+  position: absolute; inset: 0;
+  background-image:
+    radial-gradient(1px 1px at 10% 15%, rgba(255,255,255,0.9) 0%, transparent 100%),
+    radial-gradient(1px 1px at 25% 45%, rgba(255,255,255,0.7) 0%, transparent 100%),
+    radial-gradient(1.5px 1.5px at 40% 20%, rgba(255,255,255,0.8) 0%, transparent 100%),
+    radial-gradient(1px 1px at 55% 65%, rgba(255,255,255,0.6) 0%, transparent 100%),
+    radial-gradient(1px 1px at 70% 35%, rgba(255,255,255,0.9) 0%, transparent 100%),
+    radial-gradient(2px 2px at 80% 10%, rgba(255,255,255,0.7) 0%, transparent 100%),
+    radial-gradient(1px 1px at 90% 55%, rgba(255,255,255,0.8) 0%, transparent 100%),
+    radial-gradient(1px 1px at 5% 80%, rgba(255,255,255,0.6) 0%, transparent 100%),
+    radial-gradient(1.5px 1.5px at 15% 60%, rgba(255,255,255,0.9) 0%, transparent 100%),
+    radial-gradient(1px 1px at 35% 85%, rgba(255,255,255,0.7) 0%, transparent 100%),
+    radial-gradient(1px 1px at 60% 90%, rgba(255,255,255,0.8) 0%, transparent 100%),
+    radial-gradient(2px 2px at 75% 75%, rgba(255,255,255,0.5) 0%, transparent 100%),
+    radial-gradient(1px 1px at 85% 85%, rgba(255,255,255,0.7) 0%, transparent 100%),
+    radial-gradient(1.5px 1.5px at 45% 5%, rgba(0,232,212,0.9) 0%, transparent 100%),
+    radial-gradient(1px 1px at 65% 15%, rgba(255,184,0,0.8) 0%, transparent 100%),
+    radial-gradient(2px 2px at 33% 42%, rgba(255,122,26,0.7) 0%, transparent 100%),
+    radial-gradient(1.5px 1.5px at 77% 58%, rgba(155,61,255,0.8) 0%, transparent 100%),
+    radial-gradient(1px 1px at 92% 72%, rgba(255,122,26,0.6) 0%, transparent 100%),
+    radial-gradient(1px 1px at 20% 30%, rgba(255,255,255,0.8) 0%, transparent 100%),
+    radial-gradient(1px 1px at 50% 50%, rgba(255,255,255,0.4) 0%, transparent 100%),
+    radial-gradient(1.5px 1.5px at 95% 25%, rgba(255,255,255,0.8) 0%, transparent 100%),
+    radial-gradient(1px 1px at 30% 70%, rgba(255,255,255,0.6) 0%, transparent 100%),
+    radial-gradient(2px 2px at 8% 40%, rgba(255,255,255,0.5) 0%, transparent 100%);
+}
+.stars-bg::after {
+  animation: twinkle 4s ease-in-out infinite alternate;
+  opacity: 0.6;
+  background-image:
+    radial-gradient(1px 1px at 18% 22%, rgba(255,255,255,0.9) 0%, transparent 100%),
+    radial-gradient(1.5px 1.5px at 42% 58%, rgba(255,255,255,0.8) 0%, transparent 100%),
+    radial-gradient(1px 1px at 67% 12%, rgba(255,255,255,0.7) 0%, transparent 100%),
+    radial-gradient(2px 2px at 83% 47%, rgba(255,255,255,0.6) 0%, transparent 100%),
+    radial-gradient(1px 1px at 52% 78%, rgba(45,212,191,0.7) 0%, transparent 100%),
+    radial-gradient(1px 1px at 28% 92%, rgba(251,191,36,0.6) 0%, transparent 100%),
+    radial-gradient(1.5px 1.5px at 73% 88%, rgba(255,255,255,0.8) 0%, transparent 100%),
+    radial-gradient(1px 1px at 12% 68%, rgba(255,255,255,0.5) 0%, transparent 100%);
+}
+@keyframes twinkle { 0%{opacity:0.4} 100%{opacity:1} }
+
+/* ── NEBULA GLOW ─────────────────────────────────── */
+.nebula {
+  position: fixed; z-index: 0; pointer-events: none;
+  border-radius: 50%; filter: blur(80px); opacity: 0.12;
+}
+.nebula-1 { width:700px; height:700px; background:#00E8D4; top:-200px; right:-150px; opacity:0.14; }
+.nebula-2 { width:600px; height:600px; background:#FF7A1A; bottom:-120px; left:-100px; opacity:0.13; }
+.nebula-3 { width:500px; height:500px; background:#9B3DFF; top:35%; left:25%; opacity:0.09; }
+.nebula-4 { width:400px; height:400px; background:#FFB800; top:10%; left:40%; opacity:0.08; }
+
+/* ── LAYOUT ──────────────────────────────────────── */
+.page { position: relative; z-index: 1; }
+
+/* ── NAV ─────────────────────────────────────────── */
+nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0.75rem 2rem;
+  background: rgba(6,16,30,0.85);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(45,212,191,0.15);
+}
+.nav-logo {
+  display: flex; align-items: center;
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 1.5rem; font-weight: 800;
+  text-decoration: none; letter-spacing: 0.01em;
+  animation: neon-breathe 3s ease-in-out infinite alternate;
+}
+.nav-logo .nl-glow {
+  color: #fff;
+  text-shadow: var(--neon-pink-shadow);
+}
+.nav-logo .nl-daily {
+  color: #fff;
+  text-shadow: var(--neon-cyan-shadow);
+}
+.nav-links { display: flex; gap: 1.8rem; list-style: none; }
+.nav-links a {
+  color: var(--muted); text-decoration: none;
+  font-weight: 600; font-size: 0.9rem; letter-spacing: 0.02em;
+  transition: color 0.2s;
+}
+.nav-links a:hover { color: var(--teal); }
+.nav-cta {
+  background: linear-gradient(135deg, var(--teal), var(--green), var(--teal2));
+  color: var(--space) !important; border-radius: 999px;
+  padding: 0.45rem 1.2rem !important;
+  font-weight: 800 !important; font-size: 0.88rem !important;
+  box-shadow: var(--glow);
+  transition: transform 0.2s, box-shadow 0.2s !important;
+  background-size: 200% auto; animation: shimmer 3s linear infinite;
+}
+.nav-cta:hover { transform: translateY(-1px); box-shadow: 0 0 36px rgba(0,232,212,0.7) !important; }
+
+/* hamburger */
+.hamburger { display: none; flex-direction: column; gap:5px; cursor:pointer; background:none; border:none; padding:4px; }
+.hamburger span { width:24px; height:2px; background:var(--teal); border-radius:2px; transition:0.3s; }
+.mobile-menu {
+  display: none; position: fixed; top: 60px; left: 0; right: 0;
+  background: rgba(6,16,30,0.97); border-bottom: 1px solid rgba(45,212,191,0.2);
+  padding: 1.5rem 2rem; z-index: 99; flex-direction: column; gap: 1.2rem;
+}
+.mobile-menu.open { display: flex; }
+.mobile-menu a { color: var(--white); text-decoration: none; font-weight: 700; font-size: 1.1rem; }
+@media(max-width:720px) {
+  .nav-links { display:none; }
+  .hamburger { display:flex; }
+}
+
+/* ── HERO ────────────────────────────────────────── */
+#home {
+  min-height: 100vh;
+  display: flex; align-items: center; justify-content: center;
+  padding: 6rem 2rem 4rem;
+  position: relative;
+}
+.hero-inner {
+  max-width: 1100px; width: 100%;
+  display: grid; grid-template-columns: 1fr 1fr; gap: 3rem; align-items: center;
+}
+.hero-text h1 {
+  font-size: clamp(2.4rem, 5vw, 3.8rem);
+  line-height: 1.1; font-weight: 700;
+  margin-bottom: 1rem;
+}
+.hero-neon-sign {
+  margin-bottom: 1.2rem;
+  line-height: 1;
+}
+.hero-neon-sign .neon-line1 {
+  display: block;
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: clamp(2.8rem, 8vw, 5.2rem);
+  font-weight: 900; letter-spacing: 0.02em;
+  color: #fff;
+  text-shadow: var(--neon-pink-shadow);
+  animation: neon-breathe 3s ease-in-out infinite alternate;
+}
+.hero-neon-sign .neon-line2 {
+  display: block;
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: clamp(1.6rem, 4.5vw, 3rem);
+  font-weight: 700; letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #fff;
+  text-shadow: var(--neon-cyan-shadow);
+  animation: neon-breathe 3s ease-in-out infinite alternate;
+  animation-delay: 0.4s;
+}
+@keyframes neon-breathe {
+  0%   { opacity: 1; }
+  92%  { opacity: 1; }
+  93%  { opacity: 0.75; }
+  94%  { opacity: 1; }
+  96%  { opacity: 0.8; }
+  97%  { opacity: 1; }
+  100% { opacity: 0.95; }
+}
+.hero-text h1 {
+  font-size: clamp(1.6rem, 3vw, 2.2rem); font-weight: 600;
+  color: var(--muted); margin-bottom: 1rem; line-height: 1.4;
+}
+.hero-text h1 .glow-word {
+  color: #fff; text-shadow: var(--neon-pink-shadow);
+  animation: neon-breathe 3s ease-in-out infinite alternate;
+}
+.hero-text h1 .gold-word {
+  color: #fff; text-shadow: var(--neon-cyan-shadow);
+  animation: neon-breathe 3s ease-in-out infinite alternate;
+  animation-delay: 0.2s;
+}
+.hero-tagline {
+  font-size: 1.1rem; color: var(--muted); line-height: 1.7;
+  margin-bottom: 2rem; max-width: 480px;
+}
+.hero-btns { display: flex; gap: 1rem; flex-wrap: wrap; }
+.btn-primary {
+  display: inline-flex; align-items: center; gap: 0.5rem;
+  background: linear-gradient(135deg, var(--teal), var(--green), var(--teal2));
+  color: var(--space); font-weight: 800; font-size: 1rem;
+  padding: 0.85rem 2rem; border-radius: 999px; border: none;
+  cursor: pointer; text-decoration: none;
+  box-shadow: var(--glow); transition: transform 0.2s, box-shadow 0.2s;
+  background-size: 200% auto; animation: shimmer 3s linear infinite;
+}
+.btn-primary:hover { transform: translateY(-2px); box-shadow: 0 0 48px rgba(0,232,212,0.7); }
+@keyframes shimmer { 0%{background-position:0%} 100%{background-position:200%} }
+.btn-outline {
+  display: inline-flex; align-items: center; gap: 0.5rem;
+  border: 2px solid var(--teal); color: var(--teal);
+  font-weight: 800; font-size: 1rem;
+  padding: 0.85rem 2rem; border-radius: 999px;
+  cursor: pointer; text-decoration: none; background: transparent;
+  transition: background 0.2s, color 0.2s;
+}
+.btn-outline:hover { background: rgba(45,212,191,0.1); }
+
+.hero-mascot {
+  display: flex; justify-content: center; align-items: center;
+}
+.mascot-wrap {
+  position: relative; width: 380px; max-width: 100%;
+}
+.mascot-wrap img {
+  width: 100%; border-radius: 24px;
+  box-shadow: 0 0 60px rgba(45,212,191,0.4), 0 0 120px rgba(45,212,191,0.2);
+  animation: float 6s ease-in-out infinite;
+  display: block;
+}
+.mascot-placeholder {
+  width: 100%; aspect-ratio: 1;
+  border-radius: 50%; border: 3px dashed rgba(45,212,191,0.4);
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  color: var(--muted); font-size: 0.9rem; text-align: center; padding: 2rem;
+  box-shadow: 0 0 40px rgba(45,212,191,0.2);
+}
+.mascot-placeholder .big-emoji { font-size: 4rem; margin-bottom: 0.5rem; }
+.mascot-ring {
+  position: absolute; inset: -12px; border-radius: 32px;
+  border: 3px solid transparent;
+  background: linear-gradient(135deg, var(--teal), var(--orange), var(--purple), var(--gold), var(--teal)) border-box;
+  -webkit-mask: linear-gradient(#fff 0 0) padding-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: destination-out;
+  mask-composite: exclude;
+  animation: spin 10s linear infinite;
+  filter: drop-shadow(0 0 8px rgba(0,232,212,0.6));
+}
+@keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-18px)} }
+@keyframes spin  { to{transform:rotate(360deg)} }
+
+.hero-badges {
+  display: flex; gap: 0.75rem; flex-wrap: wrap; margin-top: 1.5rem;
+}
+.badge {
+  background: rgba(45,212,191,0.1); border: 1px solid rgba(45,212,191,0.3);
+  color: var(--teal2); border-radius: 999px;
+  padding: 0.3rem 0.9rem; font-size: 0.8rem; font-weight: 700;
+}
+
+@media(max-width:780px) {
+  .hero-inner { grid-template-columns: 1fr; text-align: center; }
+  .hero-text h1, .hero-tagline { text-align: center; }
+  .hero-btns { justify-content: center; }
+  .hero-badges { justify-content: center; }
+  .mascot-wrap { width: 260px; margin: 0 auto; }
+  .hero-mascot { order: -1; }
+}
+
+/* ── SECTION COMMON ──────────────────────────────── */
+section { padding: 5rem 2rem; }
+.section-inner { max-width: 1100px; margin: 0 auto; }
+.section-label {
+  font-size: 0.78rem; font-weight: 800; letter-spacing: 0.15em;
+  text-transform: uppercase; color: var(--teal); margin-bottom: 0.6rem;
+}
+.section-title {
+  font-size: clamp(1.8rem, 3.5vw, 2.6rem);
+  font-weight: 700; margin-bottom: 0.75rem;
+}
+.section-sub { color: var(--muted); font-size: 1.05rem; line-height: 1.7; max-width: 600px; }
+
+/* ── SPECIALS BANNER ─────────────────────────────── */
+#specials { padding: 2.5rem 2rem; }
+.special-card {
+  background: linear-gradient(135deg, rgba(255,122,26,0.13), rgba(155,61,255,0.08), rgba(0,232,212,0.08));
+  border: 1px solid rgba(255,122,26,0.45);
+  border-radius: 20px; padding: 2rem 2.5rem;
+  display: flex; align-items: center; justify-content: space-between; gap: 2rem;
+  box-shadow: var(--glow-orange), var(--glow-purple); flex-wrap: wrap;
+}
+.special-left { display: flex; align-items: center; gap: 1.2rem; }
+.special-icon { font-size: 3rem; }
+.special-badge-label {
+  font-size: 0.72rem; font-weight: 800; letter-spacing: 0.14em;
+  text-transform: uppercase; color: var(--orange); margin-bottom: 0.2rem;
+}
+.special-name { font-size: 1.6rem; font-weight: 800; color: var(--white); }
+.special-desc { color: var(--muted); font-size: 0.95rem; margin-top: 0.2rem; }
+.special-price-wrap { text-align: right; }
+.special-price { font-size: 2.2rem; font-weight: 800; color: var(--gold); line-height: 1; }
+.special-price-note { color: var(--muted); font-size: 0.85rem; margin-top: 0.2rem; }
+.hidden { display: none !important; }
+
+/* ── MENU ────────────────────────────────────────── */
+#menu { padding-top: 4rem; }
+.menu-controls {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 1rem; flex-wrap: wrap; margin-bottom: 2.5rem;
+}
+.price-toggle {
+  display: flex; background: rgba(255,255,255,0.05); border-radius: 999px;
+  border: 1px solid rgba(45,212,191,0.2); overflow: hidden;
+}
+.price-toggle button {
+  background: none; border: none; color: var(--muted);
+  padding: 0.5rem 1.2rem; font-family: 'Nunito', sans-serif;
+  font-weight: 700; font-size: 0.9rem; cursor: pointer; transition: 0.2s;
+}
+.price-toggle button.active {
+  background: var(--teal); color: var(--space); border-radius: 999px;
+}
+.menu-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 1.25rem;
+}
+@media (max-width: 768px) and (orientation: portrait) {
+  .menu-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.75rem;
+  }
+}
+.menu-card {
+  background: var(--card-bg); border: 1px solid rgba(0,232,212,0.15);
+  border-radius: 16px; padding: 1.4rem 1.2rem;
+  display: flex; flex-direction: column; align-items: center; gap: 0.6rem;
+  text-align: center; cursor: pointer;
+  transition: transform 0.2s, border-color 0.2s, box-shadow 0.2s;
+  position: relative; user-select: none;
+}
+.menu-card:hover { transform: translateY(-4px); border-color: rgba(0,232,212,0.5); box-shadow: var(--glow); }
+.menu-card.selected { border-color: var(--teal); box-shadow: var(--glow); background: rgba(0,232,212,0.09); }
+.menu-card:nth-child(3n) { border-color: rgba(255,122,26,0.15); }
+.menu-card:nth-child(3n):hover { border-color: var(--orange); box-shadow: var(--glow-orange); }
+.menu-card:nth-child(3n).selected { border-color: var(--orange); box-shadow: var(--glow-orange); background: rgba(255,122,26,0.09); }
+.menu-card:nth-child(3n) .card-price { color: var(--orange); }
+.menu-card:nth-child(5n) { border-color: rgba(155,61,255,0.15); }
+.menu-card:nth-child(5n):hover { border-color: var(--purple); box-shadow: var(--glow-purple); }
+.menu-card:nth-child(5n).selected { border-color: var(--purple); box-shadow: var(--glow-purple); background: rgba(155,61,255,0.09); }
+.menu-card:nth-child(5n) .card-price { color: var(--purple2); }
+.menu-card.pack-card { border-color: rgba(255,184,0,0.3); }
+.menu-card.pack-card:hover { border-color: var(--gold); box-shadow: var(--glow-gold); }
+.menu-card.pack-card.selected { border-color: var(--gold); background: rgba(255,184,0,0.09); box-shadow: var(--glow-gold); }
+.card-drink-img {
+  display: flex; justify-content: center; align-items: flex-end;
+  height: 90px; margin-bottom: 0.1rem;
+}
+.card-drink-img svg { overflow: visible; }
+.card-name { font-weight: 700; font-size: 0.95rem; color: var(--white); line-height: 1.3; }
+.card-price { font-weight: 800; font-size: 1.1rem; color: var(--teal); }
+.pack-card .card-price { color: var(--gold); }
+.card-pack-label {
+  font-size: 0.7rem; font-weight: 800; letter-spacing: 0.1em;
+  color: var(--gold); text-transform: uppercase;
+}
+.card-flavors {
+  font-size: 0.72rem; color: var(--muted); line-height: 1.5;
+  text-align: center; margin-top: 0.1rem;
+}
+@media (max-width: 768px) and (orientation: portrait) {
+  .card-drink-img { height: 70px; }
+  .card-drink-img svg { width: 52px !important; height: 65px !important; }
+  .card-name   { font-size: 0.82rem; }
+  .card-price  { font-size: 0.95rem; }
+  .card-flavors{ font-size: 0.67rem; }
+  .menu-card   { padding: 1rem 0.7rem; gap: 0.35rem; }
+}
+.qty-control {
+  display: none; align-items: center; gap: 0.5rem; margin-top: 0.3rem;
+}
+.menu-card.selected .qty-control { display: flex; }
+.qty-btn {
+  width: 28px; height: 28px; border-radius: 50%; border: none;
+  background: rgba(45,212,191,0.2); color: var(--teal);
+  font-size: 1.2rem; font-weight: 800; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: background 0.2s;
+}
+.qty-btn:hover { background: rgba(45,212,191,0.4); }
+.pack-card .qty-btn { background: rgba(251,191,36,0.2); color: var(--gold); }
+.pack-card .qty-btn:hover { background: rgba(251,191,36,0.4); }
+.qty-num { font-weight: 800; font-size: 1rem; min-width: 20px; text-align: center; }
+
+.menu-loading { text-align: center; color: var(--muted); padding: 3rem 0; font-size: 1.1rem; }
+
+/* ── CART SUMMARY ────────────────────────────────── */
+.cart-summary {
+  margin-top: 2.5rem; background: var(--card-bg);
+  border: 1px solid rgba(45,212,191,0.2); border-radius: 16px; padding: 1.5rem 2rem;
+}
+.cart-title { font-size: 1rem; font-weight: 800; color: var(--teal); margin-bottom: 1rem; }
+.cart-items { display: flex; flex-direction: column; gap: 0.5rem; margin-bottom: 1rem; }
+.cart-row {
+  display: flex; justify-content: space-between; align-items: center;
+  font-size: 0.95rem; color: var(--white);
+}
+.cart-row .item-name { color: var(--muted); }
+.cart-total-row {
+  display: flex; justify-content: space-between; align-items: center;
+  border-top: 1px solid rgba(45,212,191,0.15); padding-top: 0.75rem;
+  font-weight: 800; font-size: 1.1rem;
+}
+.cart-total-row .total-price { color: var(--teal); font-size: 1.3rem; }
+.empty-cart { color: var(--muted); font-size: 0.95rem; text-align: center; padding: 0.5rem 0; }
+
+/* ── ORDER ───────────────────────────────────────── */
+#order { padding-top: 1rem; }
+.order-form {
+  background: var(--card-bg); border: 1px solid rgba(45,212,191,0.15);
+  border-radius: 20px; padding: 2.5rem; margin-top: 2rem;
+}
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; }
+@media(max-width:600px) { .form-row { grid-template-columns: 1fr; } }
+.form-group { display: flex; flex-direction: column; gap: 0.4rem; }
+.form-group label { font-weight: 700; font-size: 0.88rem; color: var(--teal2); }
+.form-group input, .form-group select, .form-group textarea {
+  background: rgba(255,255,255,0.05); border: 1px solid rgba(45,212,191,0.2);
+  border-radius: 10px; color: var(--white); font-family: 'Nunito', sans-serif;
+  font-size: 0.95rem; padding: 0.7rem 1rem;
+  transition: border-color 0.2s, box-shadow 0.2s; outline: none;
+}
+.form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+  border-color: var(--teal); box-shadow: 0 0 0 3px rgba(45,212,191,0.15);
+}
+.form-group select option { background: var(--navy); }
+.form-group textarea { resize: vertical; min-height: 80px; }
+.form-section-title {
+  font-size: 0.8rem; font-weight: 800; letter-spacing: 0.12em;
+  text-transform: uppercase; color: var(--teal); margin: 1.5rem 0 0.75rem;
+}
+.payment-options { display: flex; gap: 0.75rem; flex-wrap: wrap; margin-top: 0.25rem; }
+.pay-option {
+  flex: 1; min-width: 100px; background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(45,212,191,0.2); border-radius: 12px;
+  padding: 0.75rem 1rem; cursor: pointer; text-align: center;
+  transition: 0.2s;
+}
+.pay-option:hover { border-color: rgba(45,212,191,0.5); }
+.pay-option.selected { border-color: var(--teal); background: rgba(45,212,191,0.1); }
+.pay-option input { display: none; }
+.pay-option .pay-icon { font-size: 1.5rem; display: block; margin-bottom: 0.2rem; }
+.pay-option .pay-label { font-size: 0.85rem; font-weight: 700; color: var(--white); }
+.address-block { display: none; }
+.address-block.show { display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; margin-top: 0.75rem; }
+@media(max-width:600px) { .address-block.show { grid-template-columns: 1fr; } }
+
+.submit-row { margin-top: 2rem; display: flex; align-items: center; gap: 1.5rem; flex-wrap: wrap; }
+.btn-submit {
+  background: linear-gradient(135deg, var(--teal), var(--green));
+  color: var(--space); font-weight: 800; font-size: 1.05rem;
+  padding: 0.9rem 2.5rem; border-radius: 999px; border: none;
+  cursor: pointer; font-family: 'Nunito', sans-serif;
+  box-shadow: var(--glow); transition: transform 0.2s, box-shadow 0.2s;
+  min-width: 180px;
+}
+.btn-submit:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 0 40px rgba(45,212,191,0.6); }
+.btn-submit:disabled { opacity: 0.5; cursor: not-allowed; }
+.submit-note { color: var(--muted); font-size: 0.88rem; line-height: 1.5; }
+.order-confirm {
+  text-align: center; padding: 3rem 1rem;
+  animation: fadeIn 0.5s ease;
+}
+.order-confirm .confirm-icon { font-size: 4rem; margin-bottom: 1rem; }
+.order-confirm h3 { font-size: 1.8rem; color: var(--teal); margin-bottom: 0.75rem; }
+.order-confirm p { color: var(--muted); line-height: 1.7; }
+.order-id { font-weight: 800; color: var(--gold); }
+@keyframes fadeIn { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
+.form-error { color: #F87171; font-size: 0.85rem; margin-top: 0.25rem; }
+
+/* ── PACK PICKER MODAL ───────────────────────────── */
+.pack-overlay {
+  position: fixed; inset: 0; z-index: 300;
+  background: rgba(4,12,24,0.88); backdrop-filter: blur(8px);
+  display: flex; align-items: center; justify-content: center;
+  padding: 1rem; opacity: 0; pointer-events: none;
+  transition: opacity 0.3s;
+}
+.pack-overlay.open { opacity: 1; pointer-events: auto; }
+.pack-modal {
+  background: #0D1B2E; border: 1px solid rgba(255,184,0,0.35);
+  border-radius: 24px; width: 100%; max-width: 620px;
+  max-height: 90vh; display: flex; flex-direction: column;
+  box-shadow: 0 0 60px rgba(255,184,0,0.2), 0 0 120px rgba(0,232,212,0.1);
+  animation: popIn 0.3s ease;
+}
+@keyframes popIn { from{transform:scale(0.92);opacity:0} to{transform:scale(1);opacity:1} }
+.pack-modal-head {
+  padding: 1.5rem 1.8rem 1rem;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+.pack-modal-head h3 { font-size: 1.4rem; font-weight: 800; color: var(--gold); margin-bottom: 0.5rem; }
+.pack-modal-head p  { color: var(--muted); font-size: 0.9rem; }
+.pack-progress-wrap { margin-top: 0.9rem; }
+.pack-progress-bar {
+  height: 8px; background: rgba(255,255,255,0.08); border-radius: 999px; overflow: hidden;
+}
+.pack-progress-fill {
+  height: 100%; border-radius: 999px;
+  background: linear-gradient(90deg, var(--teal), var(--gold));
+  transition: width 0.3s ease;
+}
+.pack-count-label {
+  display: flex; justify-content: space-between;
+  font-size: 0.82rem; font-weight: 700; margin-bottom: 0.4rem;
+}
+.pack-count-label .count-num { color: var(--gold); font-size: 1rem; }
+.pack-flavor-list {
+  overflow-y: auto; padding: 1rem 1.2rem;
+  display: grid; grid-template-columns: 1fr 1fr; gap: 0.6rem;
+  flex: 1;
+}
+@media(max-width:480px) { .pack-flavor-list { grid-template-columns: 1fr; } }
+.pack-flavor-row {
+  display: flex; align-items: center; gap: 0.6rem;
+  background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 12px; padding: 0.55rem 0.75rem;
+  transition: border-color 0.2s, background 0.2s;
+}
+.pack-flavor-row.has-qty {
+  border-color: rgba(255,184,0,0.4); background: rgba(255,184,0,0.07);
+}
+.pack-flavor-dot {
+  width: 14px; height: 14px; border-radius: 50%; flex-shrink: 0;
+}
+.pack-flavor-name { flex: 1; font-size: 0.85rem; font-weight: 700; color: var(--white); }
+.pack-flavor-ctrl { display: flex; align-items: center; gap: 0.35rem; }
+.pfbtn {
+  width: 26px; height: 26px; border-radius: 50%; border: none;
+  background: rgba(255,184,0,0.15); color: var(--gold);
+  font-size: 1rem; font-weight: 800; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: background 0.15s;
+}
+.pfbtn:hover { background: rgba(255,184,0,0.35); }
+.pfbtn:disabled { opacity: 0.3; cursor: not-allowed; }
+.pack-flavor-qty { font-weight: 800; font-size: 0.95rem; min-width: 18px; text-align: center; color: var(--gold); }
+.pack-modal-foot {
+  padding: 1rem 1.8rem 1.5rem;
+  border-top: 1px solid rgba(255,255,255,0.08);
+  display: flex; gap: 1rem; align-items: center; flex-wrap: wrap;
+}
+.pack-modal-foot .btn-cancel {
+  background: none; border: 1px solid rgba(255,255,255,0.2);
+  color: var(--muted); border-radius: 999px;
+  padding: 0.7rem 1.5rem; font-family: 'Nunito',sans-serif;
+  font-weight: 700; cursor: pointer; transition: 0.2s;
+}
+.pack-modal-foot .btn-cancel:hover { border-color: var(--muted); color: var(--white); }
+.pack-add-btn {
+  background: linear-gradient(135deg, var(--gold), var(--orange));
+  color: var(--space); font-weight: 800; font-size: 1rem;
+  padding: 0.7rem 1.8rem; border-radius: 999px; border: none;
+  cursor: pointer; font-family: 'Nunito',sans-serif;
+  box-shadow: var(--glow-gold); transition: transform 0.2s, box-shadow 0.2s;
+}
+.pack-add-btn:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 0 36px rgba(255,184,0,0.6); }
+.pack-add-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+/* ── ABOUT ───────────────────────────────────────── */
+#about { background: rgba(13,27,46,0.4); }
+.about-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 4rem; align-items: center; }
+@media(max-width:720px) { .about-grid { grid-template-columns: 1fr; } }
+.about-pills { display: flex; flex-wrap: wrap; gap: 0.75rem; margin-top: 1.5rem; }
+.about-pill {
+  display: flex; align-items: center; gap: 0.5rem;
+  background: rgba(45,212,191,0.08); border: 1px solid rgba(45,212,191,0.25);
+  border-radius: 12px; padding: 0.6rem 1rem; font-weight: 700; font-size: 0.92rem;
+}
+.about-pill .pill-icon { font-size: 1.3rem; }
+.about-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-top: 1.5rem; }
+.stat-card {
+  background: rgba(45,212,191,0.06); border: 1px solid rgba(45,212,191,0.15);
+  border-radius: 16px; padding: 1.4rem; text-align: center;
+}
+.stat-num { font-size: 2.4rem; font-weight: 800; color: var(--teal); line-height: 1; }
+.stat-label { color: var(--muted); font-size: 0.88rem; margin-top: 0.3rem; }
+
+/* ── CONTACT ─────────────────────────────────────── */
+#contact {}
+.contact-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1.25rem; margin-top: 2.5rem; }
+.contact-card {
+  background: var(--card-bg); border: 1px solid rgba(45,212,191,0.12);
+  border-radius: 16px; padding: 1.8rem 1.5rem; text-align: center;
+  transition: transform 0.2s, border-color 0.2s;
+}
+.contact-card:hover { transform: translateY(-3px); border-color: rgba(45,212,191,0.35); }
+.contact-icon { font-size: 2.2rem; margin-bottom: 0.75rem; }
+.contact-type { font-weight: 800; font-size: 1rem; margin-bottom: 0.3rem; }
+.contact-val { color: var(--teal); font-weight: 700; font-size: 0.95rem; }
+.contact-val.muted { color: var(--muted); }
+.venmo-handle { color: var(--gold); }
+
+/* ── FOOTER ──────────────────────────────────────── */
+footer {
+  text-align: center; padding: 2rem;
+  border-top: 1px solid rgba(45,212,191,0.1);
+  color: var(--muted); font-size: 0.88rem;
+}
+footer .footer-logo {
+  font-weight: 800;
+  text-shadow: 0 0 10px var(--neon-pink), 0 0 20px var(--neon-pink);
+  color: #fff;
+}
+footer a { color: var(--teal); text-decoration: none; }
+
+/* ── FLOATING NAV (mobile portrait only) ─────────── */
+.float-nav {
+  display: none;
+  position: fixed;
+  bottom: 1.5rem;
+  right: 1.2rem;
+  z-index: 200;
+  flex-direction: column;
+  gap: 0.6rem;
+  opacity: 0;
+  transform: translateY(12px);
+  transition: opacity 0.3s, transform 0.3s;
+  pointer-events: none;
+}
+.float-nav.visible {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+.float-btn {
+  width: 52px; height: 52px;
+  border-radius: 50%; border: none;
+  font-size: 1.1rem; font-weight: 800;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+  transition: transform 0.15s;
+}
+.float-btn:active { transform: scale(0.92); }
+.float-btn-top {
+  background: rgba(8,22,40,0.92);
+  border: 2px solid var(--teal);
+  color: var(--teal);
+}
+.float-btn-order {
+  background: linear-gradient(135deg, var(--teal), var(--green));
+  color: var(--space);
+}
+@media (max-width: 768px) and (orientation: portrait) {
+  .float-nav { display: flex; }
+}
+
+/* ── TOAST ───────────────────────────────────────── */
+.toast {
+  position: fixed; bottom: 2rem; right: 2rem; z-index: 999;
+  background: var(--teal); color: var(--space);
+  padding: 0.9rem 1.5rem; border-radius: 12px;
+  font-weight: 800; font-size: 0.95rem;
+  box-shadow: var(--glow); animation: slideUp 0.4s ease;
+  max-width: 300px;
+}
+@keyframes slideUp { from{transform:translateY(20px);opacity:0} to{transform:translateY(0);opacity:1} }
+
+/* ── DIVIDER ─────────────────────────────────────── */
+.cosmic-divider {
+  height: 1px; background: linear-gradient(90deg, transparent, rgba(45,212,191,0.3), transparent);
+  margin: 0;
+}
+</style>
+</head>
+<body>
+
+<!-- Stars & Nebula -->
+<div class="stars-bg"></div>
+<div class="nebula nebula-1"></div>
+<div class="nebula nebula-2"></div>
+<div class="nebula nebula-3"></div>
+<div class="nebula nebula-4"></div>
+
+<div class="page">
+
+<!-- ── NAV ──────────────────────────────────────── -->
+<nav>
+  <a class="nav-logo" href="#home"><span class="nl-glow">Glow</span><span class="nl-daily">Daily</span></a>
+  <ul class="nav-links">
+    <li><a href="#menu">Menu</a></li>
+    <li><a href="#specials">Specials</a></li>
+    <li><a href="#about">About</a></li>
+    <li><a href="#contact">Contact</a></li>
+    <li><a href="#order" class="nav-cta">Order Now ✨</a></li>
+  </ul>
+  <button class="hamburger" onclick="toggleMobile()" aria-label="Menu">
+    <span></span><span></span><span></span>
+  </button>
+</nav>
+<div class="mobile-menu" id="mobileMenu">
+  <a href="#menu"     onclick="closeMobile()">Menu</a>
+  <a href="#specials" onclick="closeMobile()">Specials</a>
+  <a href="#about"    onclick="closeMobile()">About</a>
+  <a href="#contact"  onclick="closeMobile()">Contact</a>
+  <a href="#order"    onclick="closeMobile()" class="nav-cta" style="text-align:center;">Order Now ✨</a>
+</div>
+
+<!-- ── HERO ──────────────────────────────────────── -->
+<section id="home">
+  <div class="hero-inner">
+    <div class="hero-text">
+      <div class="hero-neon-sign">
+        <span class="neon-line1">GlowDaily</span>
+        <span class="neon-line2">Nutrition</span>
+      </div>
+      <h1>
+        Fuel Your <span class="glow-word">Glow</span> Every <span class="gold-word">Day</span>
+      </h1>
+      <p class="hero-tagline">
+        Loaded teas packed with nutrients, energy, and real flavor — crafted to keep you feeling great, not crash you like a soda. Your body deserves better than sugar bombs.
+      </p>
+      <div class="hero-btns">
+        <a href="#menu" class="btn-primary">🌌 View Menu</a>
+        <a href="#order" class="btn-outline">Place an Order</a>
+      </div>
+      <div class="hero-badges">
+        <span class="badge">💪 Protein</span>
+        <span class="badge">💧 Electrolytes</span>
+        <span class="badge">⚡ Natural Caffeine</span>
+        <span class="badge">🅱️ Vitamin B Complex</span>
+        <span class="badge">✨ Collagen</span>
+        <span class="badge">🍵 17+ Flavors</span>
+        <span class="badge">🚀 Ship Nationwide</span>
+      </div>
+    </div>
+    <div class="hero-mascot">
+      <div class="mascot-wrap">
+        <div class="mascot-ring"></div>
+        <img src="mascot.jpg" alt="GlowDaily mascot" id="mascotImg"
+             onerror="this.style.display='none';document.getElementById('mascotPlaceholder').style.display='flex'"/>
+        <div class="mascot-placeholder" id="mascotPlaceholder" style="display:none">
+          <div class="big-emoji">🌌</div>
+          <div>Save your mascot image as <strong>mascot.jpg</strong> in this folder to display it here!</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="cosmic-divider"></div>
+
+<!-- ── MONTHLY SPECIAL ───────────────────────────── -->
+<section id="specials">
+  <div class="section-inner">
+    <div class="special-card" id="specialCard">
+      <div class="special-left">
+        <div class="special-icon" id="specialIcon">🎁</div>
+        <div>
+          <div class="special-badge-label">⭐ Monthly Special</div>
+          <div class="special-name" id="specialName">Loading…</div>
+          <div class="special-desc" id="specialDesc">Check back for this month's featured deal</div>
+        </div>
+      </div>
+      <div class="special-price-wrap">
+        <div class="special-price" id="specialPrice">—</div>
+        <div class="special-price-note" id="specialNote"></div>
+        <button class="btn-primary" style="margin-top:0.75rem;font-size:0.9rem;padding:0.6rem 1.4rem;" onclick="openPackPicker()">
+          Get It ✨
+        </button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="cosmic-divider"></div>
+
+<!-- ── MENU ──────────────────────────────────────── -->
+<section id="menu">
+  <div class="section-inner">
+    <div class="menu-controls">
+      <div>
+        <p class="section-label">What We're Serving</p>
+        <h2 class="section-title">Our Menu</h2>
+      </div>
+      <div class="price-toggle">
+        <button id="btnPickup" class="active" onclick="setPriceMode('pickup')">In-Person / Pickup</button>
+        <button id="btnShip" onclick="setPriceMode('ship')">Shipped</button>
+      </div>
+    </div>
+    <div id="menuGrid" class="menu-grid">
+      <div class="menu-loading">🌌 Loading menu from the cosmos…</div>
+    </div>
+
+    <!-- Cart Summary -->
+    <div class="cart-summary" id="cartSummary" style="display:none">
+      <div class="cart-title">🛒 Your Order</div>
+      <div class="cart-items" id="cartItems"></div>
+      <div class="cart-total-row">
+        <span>Total</span>
+        <span class="total-price" id="cartTotal">$0.00</span>
+      </div>
+      <div style="margin-top:1rem;">
+        <a href="#order" class="btn-primary" style="font-size:0.95rem;padding:0.7rem 1.8rem;">
+          Proceed to Order →
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="cosmic-divider"></div>
+
+<!-- ── ORDER FORM ─────────────────────────────────── -->
+<section id="order">
+  <div class="section-inner">
+    <p class="section-label">Ready to Glow?</p>
+    <h2 class="section-title">Place Your Order</h2>
+    <p class="section-sub">Select your items in the menu above, then fill in your details below. We'll confirm via your contact info.</p>
+
+    <div class="order-form" id="orderFormWrap">
+      <!-- CONTACT -->
+      <div class="form-section-title">👤 Contact Info</div>
+      <div class="form-row">
+        <div class="form-group">
+          <label for="custName">Name *</label>
+          <input type="text" id="custName" placeholder="Your name"/>
+        </div>
+        <div class="form-group">
+          <label for="custContact">Phone or Email *</label>
+          <input type="text" id="custContact" placeholder="Best way to reach you"/>
+        </div>
+      </div>
+
+      <!-- FULFILLMENT -->
+      <div class="form-section-title">📦 Fulfillment</div>
+      <div class="form-group" style="max-width:360px">
+        <label for="fulfillment">How would you like to receive your order?</label>
+        <select id="fulfillment" onchange="onFulfillChange()">
+          <option value="pickup">In-Person Pickup</option>
+          <option value="event">Event / Pop-Up</option>
+          <option value="ship">Ship to Me</option>
+        </select>
+      </div>
+      <!-- Address block (ships only) -->
+      <div class="address-block" id="addressBlock">
+        <div class="form-group" style="grid-column:1/-1">
+          <label for="addrStreet">Street Address</label>
+          <input type="text" id="addrStreet" placeholder="123 Main St"/>
+        </div>
+        <div class="form-group">
+          <label for="addrCity">City</label>
+          <input type="text" id="addrCity" placeholder="City"/>
+        </div>
+        <div class="form-group">
+          <label for="addrState">State</label>
+          <input type="text" id="addrState" placeholder="State" style="max-width:120px"/>
+        </div>
+        <div class="form-group">
+          <label for="addrZip">ZIP</label>
+          <input type="text" id="addrZip" placeholder="ZIP"/>
+        </div>
+      </div>
+
+      <!-- PAYMENT -->
+      <div class="form-section-title">💳 Payment Method</div>
+      <div class="payment-options" id="paymentOptions">
+        <label class="pay-option selected" onclick="selectPay(this,'venmo')">
+          <input type="radio" name="pay" value="venmo" checked/>
+          <span class="pay-icon">💙</span>
+          <span class="pay-label">Venmo</span>
+        </label>
+        <label class="pay-option" onclick="selectPay(this,'square')">
+          <input type="radio" name="pay" value="square"/>
+          <span class="pay-icon">🟦</span>
+          <span class="pay-label">Square</span>
+        </label>
+        <label class="pay-option" onclick="selectPay(this,'cash')">
+          <input type="radio" name="pay" value="cash"/>
+          <span class="pay-icon">💵</span>
+          <span class="pay-label">Cash</span>
+        </label>
+      </div>
+      <div style="margin-top:0.5rem;color:var(--muted);font-size:0.85rem" id="payNote">
+        💙 Venmo: @GlowDaily — send after placing your order.
+      </div>
+
+      <!-- NOTES -->
+      <div class="form-section-title">📝 Notes</div>
+      <div class="form-group">
+        <label for="orderNote">Anything we should know? (flavor swaps, allergies, etc.)</label>
+        <textarea id="orderNote" placeholder="Optional notes…"></textarea>
+      </div>
+
+      <!-- SUBMIT -->
+      <div class="submit-row">
+        <button class="btn-submit" id="submitBtn" onclick="submitOrder()">✨ Place Order</button>
+        <p class="submit-note">
+          We'll reach out to confirm details &amp; send payment instructions. No card required now.
+        </p>
+      </div>
+      <div id="formError" class="form-error" style="display:none"></div>
+    </div>
+
+    <div class="order-confirm hidden" id="orderConfirm">
+      <div class="confirm-icon">🚀</div>
+      <h3>Order Sent to the Stars!</h3>
+      <p>
+        Order <span class="order-id" id="confirmId"></span> is confirmed.<br/>
+        We'll contact you at <strong id="confirmContact"></strong> to finalize details and payment.<br/><br/>
+        <span style="color:var(--teal)">Thanks for glowing with us! ✨</span>
+      </p>
+      <br/>
+      <button class="btn-primary" onclick="newOrder()" style="border:none;cursor:pointer;font-family:'Nunito',sans-serif;">
+        Place Another Order
+      </button>
+    </div>
+  </div>
+</section>
+
+<div class="cosmic-divider"></div>
+
+<!-- ── ABOUT ──────────────────────────────────────── -->
+<section id="about">
+  <div class="section-inner">
+    <div class="about-grid">
+      <div>
+        <p class="section-label">Our Story</p>
+        <h2 class="section-title">Built on Real Nutrition</h2>
+        <p class="section-sub">
+          Think about how much soda and sugar-packed drinks people reach for every single day — it's practically screaming diabetes. We started GlowDaily because we believe you can have amazing flavor <em>and</em> actually fuel your body at the same time.
+        </p>
+        <p class="section-sub" style="margin-top:1rem">
+          Every loaded tea we make is built on Herbalife nutrition — real ingredients that support your energy, metabolism, and hydration. No sugar bombs. Just glow.
+        </p>
+        <div class="about-pills">
+          <div class="about-pill"><span class="pill-icon">⚡</span> Energy Support</div>
+          <div class="about-pill"><span class="pill-icon">💧</span> Hydration Boost</div>
+          <div class="about-pill"><span class="pill-icon">🌿</span> Herbal Ingredients</div>
+          <div class="about-pill"><span class="pill-icon">🚫</span> No Sugar Bombs</div>
+          <div class="about-pill"><span class="pill-icon">🎨</span> 17+ Flavors</div>
+          <div class="about-pill"><span class="pill-icon">📦</span> Ships Nationwide</div>
+        </div>
+      </div>
+      <div>
+        <div class="about-stats">
+          <div class="stat-card">
+            <div class="stat-num">17+</div>
+            <div class="stat-label">Unique Tea Flavors</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-num">$8</div>
+            <div class="stat-label">Starting Price</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-num">12pk</div>
+            <div class="stat-label">Monthly Bundle</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-num">🌌</div>
+            <div class="stat-label">Cosmic Flavor Vibes</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="cosmic-divider"></div>
+
+<!-- ── CONTACT ─────────────────────────────────────── -->
+<section id="contact">
+  <div class="section-inner">
+    <p class="section-label">Find Us</p>
+    <h2 class="section-title">Get in Touch</h2>
+    <p class="section-sub">We do in-person pickups, pop-up events, and ship 12-pack bundles nationwide. Reach out and we'll take care of you.</p>
+    <div class="contact-grid">
+      <div class="contact-card">
+        <div class="contact-icon">💙</div>
+        <div class="contact-type">Venmo</div>
+        <div class="contact-val venmo-handle">@GlowDaily</div>
+        <div class="contact-val muted" style="font-size:0.82rem;margin-top:0.3rem">Most orders paid here</div>
+      </div>
+      <div class="contact-card">
+        <div class="contact-icon">📞</div>
+        <div class="contact-type">Jennifer</div>
+        <div class="contact-val">402.217.1574</div>
+        <div class="contact-val muted" style="font-size:0.82rem;margin-top:0.3rem">Call or text anytime</div>
+      </div>
+      <div class="contact-card">
+        <div class="contact-icon">📧</div>
+        <div class="contact-type">Email</div>
+        <div class="contact-val">glowdailynutrition@gmail.com</div>
+        <div class="contact-val muted" style="font-size:0.82rem;margin-top:0.3rem">Orders &amp; questions</div>
+      </div>
+      <div class="contact-card">
+        <div class="contact-icon">📍</div>
+        <div class="contact-type">Location</div>
+        <div class="contact-val muted">In-person &amp; Pop-up Events</div>
+        <div class="contact-val muted" style="font-size:0.82rem;margin-top:0.3rem">Follow us for event dates</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── FOOTER ─────────────────────────────────────── -->
+<footer>
+  <p><span class="footer-logo">GlowDaily Nutrition</span> · Herbalife Independent Distributor</p>
+  <p style="margin-top:0.4rem">Fuel your glow, every single day. ✨</p>
+  <p style="margin-top:0.5rem;font-size:0.78rem;opacity:0.5">
+    These statements have not been evaluated by the Food and Drug Administration. These products are not intended to diagnose, treat, cure, or prevent any disease.
+  </p>
+</footer>
+
+</div><!-- end .page -->
+
+<!-- 12-Pack Flavor Picker -->
+<div class="pack-overlay" id="packOverlay" onclick="closePackPicker(event)">
+  <div class="pack-modal" onclick="event.stopPropagation()">
+    <div class="pack-modal-head">
+      <h3>🎁 Build Your 12-Pack</h3>
+      <p>Mix and match any of our 17 loaded teas. Choose your 12 favorites.</p>
+      <div class="pack-progress-wrap">
+        <div class="pack-count-label">
+          <span>Flavors selected</span>
+          <span class="count-num"><span id="packCountNum">0</span> / 12</span>
+        </div>
+        <div class="pack-progress-bar">
+          <div class="pack-progress-fill" id="packProgressFill" style="width:0%"></div>
+        </div>
+      </div>
+    </div>
+    <div class="pack-flavor-list" id="packFlavorList"></div>
+    <div class="pack-modal-foot">
+      <button class="btn-cancel" onclick="closePackPicker()">Cancel</button>
+      <button class="pack-add-btn" id="packAddBtn" onclick="confirmPackFlavors()" disabled>
+        Add to Order →
+      </button>
+      <span id="packFootNote" style="color:var(--muted);font-size:0.82rem;flex:1;text-align:right"></span>
+    </div>
+  </div>
+</div>
+
+<!-- Floating mobile nav -->
+<div class="float-nav" id="floatNav">
+  <button class="float-btn float-btn-order" onclick="document.getElementById('order').scrollIntoView({behavior:'smooth'})" aria-label="Order">✨</button>
+  <button class="float-btn float-btn-top" onclick="window.scrollTo({top:0,behavior:'smooth'})" aria-label="Back to top">↑</button>
+</div>
+
+<!-- ── SCRIPTS ────────────────────────────────────── -->
+<script>
+// ── DRINK VISUALS ─────────────────────────────────
+const DRINK_COLORS = {
+  1:  { stops:['#FF0A2E','#FFFFFF','#0033FF'], glow:'#FF0A2E', bands:true },  // American Bomb Pop
+  2:  { stops:['#6600CC','#110044','#3300AA'], glow:'#9933FF', galaxy:true }, // Galaxy Blast
+  3:  { stops:['#FFE033','#FF85C0','#CC77FF'], glow:'#FFE033' },              // County Fair
+  4:  { stops:['#FF8000','#FFA500','#FFF5CC'], glow:'#FF8000', bands:true },  // Orange Push Pop
+  5:  { stops:['#FF0066','#FF9900','#FFEE00','#00CC55','#0055FF'], glow:'#FF9900' }, // Crazy Funhouse
+  6:  { stops:['#CC0000','#004400'], glow:'#CC0000', bands:true },            // Poison Apple
+  7:  { stops:['#FF0077','#FF44AA','#FFB6D0'], glow:'#FF0077' },              // Countryside Blush
+  8:  { stops:['#7B0030','#3D0066','#800055'], glow:'#8B0037' },              // Pom Berry
+  9:  { stops:['#00AAFF','#EAFAFF','#FF88BB'], glow:'#00AAFF', bands:true },  // Chum Bucket
+  10: { stops:['#7700CC','#CC44DD','#FF88CC'], glow:'#9900DD' },              // Purple Passion
+  11: { stops:['#990011','#CC0033','#FFF0E8'], glow:'#CC0033', bands:true },  // Cherri Sherri
+  12: { stops:['#FF6600','#FFB800','#FF4488'], glow:'#FF6600' },              // Tropical Sunrise
+  13: { stops:['#CC0011','#0022CC'], glow:'#CC0011', bands:true },            // Mario the Plumber
+  14: { stops:['#00CCDD','#00EE88','#0088FF'], glow:'#00CCDD' },              // Mystery Machine
+  15: { stops:['#22CC22','#FF5533','#FF0088'], glow:'#22CC22', bands:true },  // Bella-Rita
+  16: { stops:['#880099','#0011CC','#CC1133'], glow:'#880099' },              // MadDogg
+  17: { stops:['#FF8800','#FFD700','#AAEE55'], glow:'#FF8800' },              // Robert Marlicious
+  18: { stops:['#FFD700','#FF8C00','#FF44BB','#8800FF','#00BBFF'], glow:'#FFD700' }, // 12-Pack
+};
+
+function drinkSVG(id) {
+  const cfg = DRINK_COLORS[id];
+  if (!cfg) return '<div style="font-size:2.2rem">🍵</div>';
+  const { stops, glow, bands, galaxy } = cfg;
+  const u = `p${id}`;
+
+  // Build gradient
+  let gradDef, fill;
+  if (galaxy) {
+    gradDef = `<radialGradient id="rg${u}" cx="40%" cy="40%" r="70%">
+      <stop offset="0%" stop-color="#CC55FF"/>
+      <stop offset="35%" stop-color="#3300AA"/>
+      <stop offset="70%" stop-color="#110044"/>
+      <stop offset="100%" stop-color="#05001A"/>
+    </radialGradient>`;
+    fill = `url(#rg${u})`;
+  } else if (bands && stops.length >= 2) {
+    const n = stops.length;
+    const bstops = stops.flatMap((c,i) => {
+      const a = Math.round(i/n*100), b = Math.round((i+1)/n*100)-2;
+      return [`<stop offset="${a}%" stop-color="${c}"/>`,`<stop offset="${Math.max(a+1,b)}%" stop-color="${c}"/>`];
+    }).join('');
+    gradDef = `<linearGradient id="lg${u}" x1="0" y1="0" x2="0" y2="1">${bstops}</linearGradient>`;
+    fill = `url(#lg${u})`;
+  } else {
+    const gstops = stops.map((c,i)=>`<stop offset="${Math.round(i/(stops.length-1)*100)}%" stop-color="${c}"/>`).join('');
+    gradDef = `<linearGradient id="lg${u}" x1="0.2" y1="0" x2="0.8" y2="1">${gstops}</linearGradient>`;
+    fill = `url(#lg${u})`;
+  }
+
+  // Watercolor splash behind cup
+  const splash = `<ellipse cx="45" cy="54" rx="32" ry="36" fill="${glow}" opacity="0.10"/>
+    <ellipse cx="38" cy="70" rx="22" ry="18" fill="${glow}" opacity="0.08"/>`;
+
+  // Galaxy swirl overlay
+  const galaxyFx = galaxy ? `
+    <ellipse cx="42" cy="50" rx="16" ry="10" fill="rgba(200,80,255,0.18)" transform="rotate(-25,42,50)"/>
+    <ellipse cx="50" cy="58" rx="10" ry="7" fill="rgba(80,180,255,0.12)" transform="rotate(35,50,58)"/>
+    <circle cx="35" cy="42" r="2" fill="rgba(255,255,255,0.4)"/>
+    <circle cx="54" cy="62" r="1.5" fill="rgba(200,150,255,0.5)"/>
+    <circle cx="42" cy="72" r="1" fill="rgba(255,255,255,0.35)"/>` : '';
+
+  return `<svg viewBox="0 0 90 108" xmlns="http://www.w3.org/2000/svg" width="68" height="84" style="overflow:visible;filter:drop-shadow(0 0 9px ${glow}99)">
+  <defs>
+    ${gradDef}
+    <linearGradient id="sh${u}" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="rgba(255,255,255,0.22)"/>
+      <stop offset="35%" stop-color="rgba(255,255,255,0.04)"/>
+      <stop offset="100%" stop-color="rgba(0,0,0,0.18)"/>
+    </linearGradient>
+    <clipPath id="cc${u}"><path d="M20,20 L70,20 L62,87 L28,87 Z"/></clipPath>
+  </defs>
+  ${splash}
+  <!-- Bottom glow -->
+  <ellipse cx="45" cy="90" rx="20" ry="4" fill="${glow}" opacity="0.4"/>
+  <!-- Cup fill -->
+  <g clip-path="url(#cc${u})">
+    <path d="M20,20 L70,20 L62,87 L28,87 Z" fill="${fill}"/>
+    ${galaxyFx}
+    <!-- Shine -->
+    <path d="M20,20 L70,20 L62,87 L28,87 Z" fill="url(#sh${u})"/>
+    <!-- Ice cubes -->
+    <rect x="26" y="33" width="14" height="11" rx="3" fill="rgba(255,255,255,0.22)" stroke="rgba(255,255,255,0.5)" stroke-width="0.5"/>
+    <rect x="46" y="46" width="12" height="10" rx="3" fill="rgba(255,255,255,0.17)" stroke="rgba(255,255,255,0.4)" stroke-width="0.5"/>
+    <rect x="31" y="63" width="13" height="10" rx="3" fill="rgba(255,255,255,0.14)" stroke="rgba(255,255,255,0.3)" stroke-width="0.5"/>
+    <!-- Bubbles -->
+    <circle cx="40" cy="39" r="2"   fill="rgba(255,255,255,0.32)"/>
+    <circle cx="55" cy="57" r="1.5" fill="rgba(255,255,255,0.25)"/>
+    <circle cx="33" cy="73" r="1.8" fill="rgba(255,255,255,0.2)"/>
+  </g>
+  <!-- Cup outline -->
+  <path d="M20,20 L70,20 L62,87 L28,87 Z" fill="none" stroke="rgba(255,255,255,0.28)" stroke-width="1.2"/>
+  <line x1="28" y1="87" x2="62" y2="87" stroke="rgba(255,255,255,0.4)" stroke-width="1.2"/>
+  <!-- Dome lid -->
+  <path d="M17,20 Q45,7 73,20" fill="rgba(255,255,255,0.12)" stroke="rgba(255,255,255,0.38)" stroke-width="1"/>
+  <line x1="17" y1="20" x2="73" y2="20" stroke="rgba(255,255,255,0.45)" stroke-width="0.8"/>
+  <!-- Straw -->
+  <rect x="55" y="1" width="4" height="50" rx="2" fill="rgba(255,255,255,0.8)"/>
+  <rect x="55" y="1" width="4" height="50" rx="2" fill="${glow}" opacity="0.35"/>
+  <!-- Sparkles -->
+  <text x="4"  y="26" font-size="8" fill="${glow}" opacity="0.8">✦</text>
+  <text x="74" y="44" font-size="6" fill="${glow}" opacity="0.65">✦</text>
+  <text x="7"  y="75" font-size="5" fill="${glow}" opacity="0.5">✦</text>
+</svg>`;
+}
+
+// ── CONFIG ────────────────────────────────────────
+const SUPABASE_URL = 'https://irfwztshbtgpcwewztgc.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlyZnd6dHNoYnRncGN3ZXd6dGdjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE0MjM1NjYsImV4cCI6MjA5Njk5OTU2Nn0.LSuqQiOgPrDR2ZjeCvXGwqcbEP-Dgjas2tC0qvNDuMo';
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+// Fallback menu (matches dashboard INIT_PRODUCTS)
+const FALLBACK_PRODUCTS = [
+  { id:1,  name:"American Bomb Pop", emoji:"🎆", price:10.00, togoPrice:9.00, active:true, flavors:"Blue Blast · Cherry" },
+  { id:2,  name:"Galaxy Blast",      emoji:"🌌", price:10.00, togoPrice:9.00, active:true, flavors:"Blackberry · Blue Blast · Lemonade · Wild Berry" },
+  { id:3,  name:"County Fair",       emoji:"🎡", price:10.00, togoPrice:9.00, active:true, flavors:"Lemonade · Wild Berry · Strawberry · Cotton Candy" },
+  { id:4,  name:"Orange Push Pop",   emoji:"🍊", price:10.00, togoPrice:9.00, active:true, flavors:"Orange LO · Cherry · Orange · Vanilla" },
+  { id:5,  name:"Crazy Funhouse",    emoji:"🎪", price:10.00, togoPrice:9.00, active:true, flavors:"Pomegranate · Rainbow Candy · Strawberry · Blue Raspberry · Sour Green Apple" },
+  { id:6,  name:"Poison Apple",      emoji:"🍎", price:10.00, togoPrice:9.00, active:true, flavors:"Lime · Sour Apple · Red Raspberry · Cherry" },
+  { id:7,  name:"Countryside Blush",     emoji:"🌸", price:10.00, togoPrice:9.00, active:true, flavors:"Pomegranate · Cotton Candy · Strawberry Starburst · Red Raspberry · Watermelon" },
+  { id:8,  name:"Pom Berry",         emoji:"🍇", price:10.00, togoPrice:9.00, active:true, flavors:"Pomegranate · Wild Berry" },
+  { id:9,  name:"Chum Bucket",       emoji:"🫧", price:10.00, togoPrice:9.00, active:true, flavors:"Blue Blast · Strawberry · White Grape" },
+  { id:10, name:"Purple Passion",    emoji:"💜", price:10.00, togoPrice:9.00, active:true, flavors:"Strawberry Starburst · Cotton Candy · Wild Berry · Lemonade" },
+  { id:11, name:"Cherri Sherri",     emoji:"🍒", price:10.00, togoPrice:9.00, active:true, flavors:"Cherry · Pomegranate · Cranberry · Vanilla · Cherry Cold Foam" },
+  { id:12, name:"Tropical Sunrise",  emoji:"🌅", price:10.00, togoPrice:9.00, active:true, flavors:"Tropical Liftoff · Pineapple · Coconut · Cherry" },
+  { id:13, name:"Mario the Plumber", emoji:"🍄", price:10.00, togoPrice:9.00, active:true, flavors:"Pomegranate · Cherry · Watermelon · Blue Raspberry · Blue Blast" },
+  { id:14, name:"Mystery Machine",   emoji:"🔮", price:10.00, togoPrice:9.00, active:true, flavors:"Pineapple · Green Apple · Blue Raspberry · Blue Blast" },
+  { id:15, name:"Bella-Rita",        emoji:"🍹", price:10.00, togoPrice:9.00, active:true, flavors:"Margarita · Strawberry Starburst · Raspberry · Strawberry · Lime" },
+  { id:16, name:"MadDogg",           emoji:"🐕", price:10.00, togoPrice:9.00, active:true, flavors:"Wild Berry · Cherry · Blue Razz · Pomegranate · Blackberry" },
+  { id:17, name:"Robert Marlicious", emoji:"🧃", price:10.00, togoPrice:9.00, active:true, flavors:"Orange Liftoff · Lemon Tea · Fruit Punch · Sour Apple" },
+  { id:18, name:"Monthly 12-Pack",   emoji:"🎁", price:89.00, togoPrice:89.00, isPack:true, packSize:12, active:true, flavors:"Mix & match any 12 teas — your choice!" },
+];
+
+// ── STATE ─────────────────────────────────────────
+let products      = [];
+let cart          = {};   // { productId: qty }
+let priceMode     = 'pickup';
+let selectedPay   = 'venmo';
+
+const payNotes = {
+  venmo:  '💙 Venmo: @GlowDaily — send after placing your order. Questions? Text Jennifer at 402.217.1574.',
+  square: '🟦 Square: we\'ll send you a payment link after confirming. Questions? Text 402.217.1574.',
+  cash:   '💵 Cash: bring exact change to pickup, or we\'ll arrange for events/delivery. Text 402.217.1574.',
+};
+
+// ── NAV ───────────────────────────────────────────
+function toggleMobile() {
+  document.getElementById('mobileMenu').classList.toggle('open');
+}
+function closeMobile() {
+  document.getElementById('mobileMenu').classList.remove('open');
+}
+
+// ── LOAD PRODUCTS ─────────────────────────────────
+async function loadProducts() {
+  let loaded = false;
+
+  // Helper: merge flavors from FALLBACK_PRODUCTS by ID
+  function mergeFlavors(list) {
+    return list.map(p => {
+      if (p.flavors) return p;
+      const ref = FALLBACK_PRODUCTS.find(f => f.id == p.id);
+      return ref?.flavors ? { ...p, flavors: ref.flavors } : p;
+    });
+  }
+
+  // Try cloud store first (dashboard saves full product data there)
+  try {
+    const { data } = await sb.from('gd_store').select('value').eq('key','products').maybeSingle();
+    if (data?.value && Array.isArray(data.value) && data.value.length > 0) {
+      products = mergeFlavors(data.value.filter(p => p.active !== false));
+      loaded = true;
+    }
+  } catch(e) {}
+
+  // Try products table
+  if (!loaded) {
+    try {
+      const { data, error } = await sb.from('products').select('*').eq('active', true).order('id');
+      if (!error && data && data.length > 0) {
+        products = mergeFlavors(data.map(p => ({ ...p, togoPrice: (p.togoPrice ?? p.price + 2) })));
+        loaded = true;
+      }
+    } catch(e) {}
+  }
+
+  // Fallback
+  if (!loaded) products = FALLBACK_PRODUCTS.filter(p => p.active);
+
+  renderMenu();
+}
+
+// ── LOAD MONTHLY SPECIAL ──────────────────────────
+async function loadSpecial() {
+  try {
+    const { data } = await sb.from('gd_store').select('value').eq('key','monthly_special').maybeSingle();
+    if (data?.value && data.value.active) {
+      const s = data.value;
+      document.getElementById('specialIcon').textContent  = s.emoji  || '🎁';
+      document.getElementById('specialName').textContent  = s.name   || 'Monthly Special';
+      document.getElementById('specialDesc').textContent  = s.description || '';
+      document.getElementById('specialPrice').textContent = s.price ? `$${Number(s.price).toFixed(2)}` : '';
+      document.getElementById('specialNote').textContent  = s.note   || '';
+      return;
+    }
+  } catch(e) {}
+
+  // Default special: 12-pack
+  document.getElementById('specialIcon').textContent  = '🎁';
+  document.getElementById('specialName').textContent  = 'Monthly 12-Pack Bundle';
+  document.getElementById('specialDesc').textContent  = 'Pick any 12 loaded teas — mix and match your favorites. Perfect for gifting or stocking up!';
+  document.getElementById('specialPrice').textContent = '$89.00';
+  document.getElementById('specialNote').textContent  = 'Ships nationwide · Save vs. individual pricing';
+}
+
+// ── RENDER MENU ───────────────────────────────────
+function renderMenu() {
+  const grid = document.getElementById('menuGrid');
+  if (!products.length) {
+    grid.innerHTML = '<div class="menu-loading">No menu items found.</div>';
+    return;
+  }
+
+  grid.innerHTML = products.map(p => {
+    const price     = priceMode === 'ship' ? (p.togoPrice ?? p.price) : p.price;
+    const qty       = cart[p.id] || 0;
+    const selected  = qty > 0 ? 'selected' : '';
+    const isPack    = p.isPack ? 'pack-card' : '';
+
+    return `
+    <div class="menu-card ${selected} ${isPack}" id="card-${p.id}" onclick="toggleItem(${p.id})">
+      <div class="card-drink-img">${drinkSVG(p.id)}</div>
+      ${p.isPack ? `<div class="card-pack-label">📦 ${p.packSize || 12}-Pack Bundle</div>` : ''}
+      <div class="card-name">${p.name}</div>
+      <div class="card-price">$${Number(price).toFixed(2)}</div>
+      ${p.flavors ? `<div class="card-flavors">${p.flavors}</div>` : ''}
+      <div class="qty-control" id="qty-${p.id}" onclick="event.stopPropagation()">
+        <button class="qty-btn" onclick="changeQty(${p.id},-1)">−</button>
+        <span class="qty-num" id="qnum-${p.id}">${qty}</span>
+        <button class="qty-btn" onclick="changeQty(${p.id},+1)">+</button>
+      </div>
+    </div>`;
+  }).join('');
+
+  updateCart();
+}
+
+// ── CART ACTIONS ──────────────────────────────────
+function toggleItem(id) {
+  if (cart[id]) {
+    delete cart[id];
+  } else {
+    cart[id] = 1;
+  }
+  renderMenu();
+}
+
+function changeQty(id, delta) {
+  cart[id] = Math.max(0, (cart[id] || 0) + delta);
+  if (cart[id] === 0) delete cart[id];
+  const card = document.getElementById(`card-${id}`);
+  const qnum = document.getElementById(`qnum-${id}`);
+  if (cart[id] > 0) { card.classList.add('selected'); } else { card.classList.remove('selected'); }
+  if (qnum) qnum.textContent = cart[id] || 0;
+  updateCart();
+}
+
+function updateCart() {
+  const summary = document.getElementById('cartSummary');
+  const items   = Object.entries(cart);
+  if (!items.length) { summary.style.display = 'none'; return; }
+
+  summary.style.display = 'block';
+  let total = 0;
+  const rows = items.filter(([id])=>id!=='_packFlavors').map(([id, qty]) => {
+    const p     = products.find(x => x.id == id);
+    if (!p) return '';
+    const price = priceMode === 'ship' ? (p.togoPrice ?? p.price) : p.price;
+    const sub   = price * qty;
+    total += sub;
+    // For pack, show flavor breakdown
+    let flavorLine = '';
+    if (p.isPack && cart._packFlavors) {
+      const fl = Object.entries(cart._packFlavors).map(([pid,q])=>{
+        const fp = products.find(x=>x.id==pid);
+        return fp ? `${fp.name} ×${q}` : '';
+      }).filter(Boolean).join(', ');
+      flavorLine = fl ? `<div style="font-size:0.75rem;color:var(--gold);margin-top:0.2rem;padding-left:0.5rem">${fl}</div>` : '';
+    }
+    return `<div class="cart-row" style="flex-direction:column;align-items:flex-start;gap:0.1rem">
+      <div style="display:flex;justify-content:space-between;width:100%">
+        <span class="item-name">${p.emoji} ${p.name} ×${qty}</span><span>$${sub.toFixed(2)}</span>
+      </div>${flavorLine}</div>`;
+  }).join('');
+
+  document.getElementById('cartItems').innerHTML = rows || '<div class="empty-cart">No items yet</div>';
+  document.getElementById('cartTotal').textContent = `$${total.toFixed(2)}`;
+}
+
+function setPriceMode(mode) {
+  priceMode = mode;
+  document.getElementById('btnPickup').classList.toggle('active', mode === 'pickup');
+  document.getElementById('btnShip').classList.toggle('active', mode === 'ship');
+  renderMenu();
+}
+
+// ── ORDER FORM ────────────────────────────────────
+function onFulfillChange() {
+  const val   = document.getElementById('fulfillment').value;
+  const block = document.getElementById('addressBlock');
+  block.classList.toggle('show', val === 'ship');
+  if (val === 'ship') setPriceMode('ship'); else setPriceMode('pickup');
+}
+
+function selectPay(el, val) {
+  document.querySelectorAll('.pay-option').forEach(o => o.classList.remove('selected'));
+  el.classList.add('selected');
+  selectedPay = val;
+  document.getElementById('payNote').textContent = payNotes[val];
+}
+
+async function submitOrder() {
+  const name    = document.getElementById('custName').value.trim();
+  const contact = document.getElementById('custContact').value.trim();
+  const fulfill = document.getElementById('fulfillment').value;
+  const note    = document.getElementById('orderNote').value.trim();
+  const errEl   = document.getElementById('formError');
+  errEl.style.display = 'none';
+
+  const cartEntries = Object.entries(cart);
+  if (!name)           { showErr('Please enter your name.'); return; }
+  if (!contact)        { showErr('Please enter a phone number or email.'); return; }
+  if (!cartEntries.length) { showErr('Please select at least one item from the menu above.'); return; }
+
+  if (fulfill === 'ship') {
+    const street = document.getElementById('addrStreet').value.trim();
+    const city   = document.getElementById('addrCity').value.trim();
+    const state  = document.getElementById('addrState').value.trim();
+    const zip    = document.getElementById('addrZip').value.trim();
+    if (!street || !city || !state || !zip) { showErr('Please fill in your shipping address.'); return; }
+  }
+
+  const btn = document.getElementById('submitBtn');
+  btn.disabled = true;
+  btn.textContent = '🌌 Sending…';
+
+  // Build pack flavor note if applicable
+  let packFlavorNote = '';
+  if (cart._packFlavors && Object.keys(cart._packFlavors).length) {
+    const lines = Object.entries(cart._packFlavors).map(([pid, q]) => {
+      const p = products.find(x => x.id == pid);
+      return p ? `${p.name} ×${q}` : '';
+    }).filter(Boolean);
+    packFlavorNote = ' | 12-Pack flavors: ' + lines.join(', ');
+  }
+
+  const items = cartEntries.filter(([id])=>id!=='_packFlavors').map(([id, qty]) => {
+    const p     = products.find(x => x.id == id);
+    const price = priceMode === 'ship' ? (p.togoPrice ?? p.price) : p.price;
+    const base  = { id: Number(id), name: p.name, emoji: p.emoji, qty, price, type: priceMode === 'ship' ? 'togo' : 'kit' };
+    if (p.isPack && cart._packFlavors && Object.keys(cart._packFlavors).length) {
+      base.isPack      = true;
+      base.packSize    = p.packSize || 12;
+      base.packFlavors = { ...cart._packFlavors };
+    }
+    return base;
+  });
+
+  const total = items.reduce((s, i) => s + i.price * i.qty, 0);
+  const orderId = 'GD-' + Date.now().toString(36).toUpperCase();
+
+  let shipping = fulfill;
+  if (fulfill === 'ship') {
+    const street = document.getElementById('addrStreet').value.trim();
+    const city   = document.getElementById('addrCity').value.trim();
+    const state  = document.getElementById('addrState').value.trim();
+    const zip    = document.getElementById('addrZip').value.trim();
+    shipping = `${street}, ${city}, ${state} ${zip}`;
+  }
+
+  const orderRow = {
+    id:       orderId,
+    date:     new Date().toISOString().split('T')[0],
+    customer: name,
+    items:    items,
+    total:    total,
+    status:   'Received',
+    shipping: shipping,
+    note:     `Contact: ${contact} | Pay: ${selectedPay}${packFlavorNote}${note ? ' | ' + note : ''}`,
+  };
+
+  try {
+    // Primary: write to gd_store (what the dashboard reads from)
+    const { data: existing, error: readErr } = await sb.from('gd_store').select('value').eq('key','orders').maybeSingle();
+    if (readErr) throw readErr;
+    const prev = Array.isArray(existing?.value) ? existing.value : [];
+    // Avoid duplicates
+    const alreadyExists = prev.some(o => o.id === orderRow.id);
+    const merged = alreadyExists ? prev : [orderRow, ...prev];
+    const { error: writeErr } = await sb.from('gd_store').upsert(
+      { key: 'orders', value: merged, updated_at: new Date().toISOString() },
+      { onConflict: 'key' }
+    );
+    if (writeErr) throw writeErr;
+
+    // Send email notification
+    try {
+      const itemLines = orderRow.items.map(i => `${i.emoji || ''} ${i.name} x${i.qty} — $${(i.price * i.qty).toFixed(2)}`).join('\n');
+      await emailjs.send('service_9umcv8b', 'template_g1rpfut', {
+        order_id:    orderRow.id,
+        date:        orderRow.date,
+        customer:    orderRow.customer,
+        contact:     contact,
+        items:       itemLines,
+        total:       `$${orderRow.total.toFixed(2)}`,
+        payment:     selectedPay,
+        fulfillment: orderRow.shipping,
+        tracking:    orderRow.tracking ? `Tracking: ${orderRow.tracking}` : '',
+        notes:       orderRow.note || '—',
+      });
+    } catch(emailErr) { console.warn('Email notification failed:', emailErr); }
+
+    // Secondary: also write to orders table (bonus backup, ignore if it fails)
+    try {
+      await sb.from('orders').insert([orderRow]);
+    } catch(e2) {}
+
+    showConfirm(orderId, contact);
+  } catch(err) {
+    // Save locally as fallback — user can restore via dashboard Backup/Restore
+    try {
+      const prev = JSON.parse(localStorage.getItem('gd_web_orders') || '[]');
+      localStorage.setItem('gd_web_orders', JSON.stringify([orderRow, ...prev]));
+    } catch(e) {}
+    showConfirm(orderId, contact);
+    showToast('Order saved locally. Check Supabase connection.');
+  }
+
+  btn.disabled = false;
+  btn.textContent = '✨ Place Order';
+}
+
+function showErr(msg) {
+  const el = document.getElementById('formError');
+  el.textContent = msg; el.style.display = 'block';
+}
+
+function showConfirm(id, contact) {
+  document.getElementById('orderFormWrap').style.display = 'none';
+  const conf = document.getElementById('orderConfirm');
+  conf.classList.remove('hidden');
+  document.getElementById('confirmId').textContent      = id;
+  document.getElementById('confirmContact').textContent = contact;
+  cart = {}; packFlavors = {};
+  updateCart();
+  document.getElementById('cartSummary').style.display = 'none';
+  window.scrollTo({ top: document.getElementById('order').offsetTop - 80, behavior:'smooth' });
+}
+
+function newOrder() {
+  document.getElementById('orderFormWrap').style.display = 'block';
+  document.getElementById('orderConfirm').classList.add('hidden');
+  document.getElementById('custName').value    = '';
+  document.getElementById('custContact').value = '';
+  document.getElementById('orderNote').value   = '';
+  document.getElementById('formError').style.display = 'none';
+  window.scrollTo({ top: document.getElementById('menu').offsetTop - 80, behavior:'smooth' });
+}
+
+// ── TOAST ─────────────────────────────────────────
+function showToast(msg, duration = 4000) {
+  const t = document.createElement('div');
+  t.className = 'toast'; t.textContent = msg;
+  document.body.appendChild(t);
+  setTimeout(() => t.remove(), duration);
+}
+
+// ── 12-PACK FLAVOR PICKER ─────────────────────────
+const PACK_SIZE = 12;
+let packFlavors = {}; // { productId: qty }
+
+// Dot color per drink (matches SVG glow colors)
+const DRINK_DOT = {
+  1:'#FF0A2E', 2:'#9933FF', 3:'#FFE033', 4:'#FF8000', 5:'#FF9900',
+  6:'#CC0000', 7:'#FF0077', 8:'#8B0037', 9:'#00AAFF', 10:'#9900DD',
+  11:'#CC0033', 12:'#FF6600', 13:'#CC0011', 14:'#00CCDD', 15:'#22CC22',
+  16:'#880099', 17:'#FF8800',
+};
+
+function packTotal() {
+  return Object.values(packFlavors).reduce((s,n)=>s+n, 0);
+}
+
+function openPackPicker() {
+  packFlavors = {};
+  renderPackPicker();
+  document.getElementById('packOverlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closePackPicker(e) {
+  if (e && e.target !== document.getElementById('packOverlay')) return;
+  document.getElementById('packOverlay').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+function renderPackPicker() {
+  const teas = products.filter(p => !p.isPack && p.active !== false);
+  const total = packTotal();
+  const pct   = Math.round(total / PACK_SIZE * 100);
+
+  document.getElementById('packCountNum').textContent = total;
+  document.getElementById('packProgressFill').style.width = pct + '%';
+  document.getElementById('packAddBtn').disabled = total !== PACK_SIZE;
+  document.getElementById('packFootNote').textContent =
+    total < PACK_SIZE ? `${PACK_SIZE - total} more to go` :
+    total > PACK_SIZE ? `${total - PACK_SIZE} too many — remove some` : '✅ Perfect!';
+
+  document.getElementById('packFlavorList').innerHTML = teas.map(p => {
+    const qty     = packFlavors[p.id] || 0;
+    const dotClr  = DRINK_DOT[p.id] || '#2DD4BF';
+    const hasQty  = qty > 0 ? 'has-qty' : '';
+    const canAdd  = total < PACK_SIZE;
+    return `<div class="pack-flavor-row ${hasQty}" id="pfr-${p.id}">
+      <div class="pack-flavor-dot" style="background:${dotClr};box-shadow:0 0 6px ${dotClr}88"></div>
+      <span class="pack-flavor-name">${p.name}</span>
+      <div class="pack-flavor-ctrl">
+        <button class="pfbtn" onclick="changePackFlavor(${p.id},-1)" ${qty===0?'disabled':''}>−</button>
+        <span class="pack-flavor-qty">${qty || '—'}</span>
+        <button class="pfbtn" onclick="changePackFlavor(${p.id},+1)" ${!canAdd?'disabled':''}>+</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function changePackFlavor(id, delta) {
+  packFlavors[id] = Math.max(0, (packFlavors[id] || 0) + delta);
+  if (!packFlavors[id]) delete packFlavors[id];
+  renderPackPicker();
+}
+
+function confirmPackFlavors() {
+  if (packTotal() !== PACK_SIZE) return;
+  // Add pack to cart with flavor breakdown stored
+  cart[18] = 1;
+  // Store flavor selection for order note
+  cart._packFlavors = { ...packFlavors };
+  closePackPicker(null); // force close
+  document.getElementById('packOverlay').classList.remove('open');
+  document.body.style.overflow = '';
+  renderMenu();
+  showToast('🎁 12-Pack added! Scroll down to order.');
+  setTimeout(()=>document.getElementById('cartSummary').scrollIntoView({behavior:'smooth',block:'nearest'}), 400);
+}
+
+// Override toggleItem for pack card
+const _origToggle = toggleItem;
+window.toggleItem = function(id) {
+  if (id === 18) { openPackPicker(); return; }
+  _origToggle(id);
+};
+
+// ── FLOATING NAV ─────────────────────────────────
+const floatNav = document.getElementById('floatNav');
+window.addEventListener('scroll', () => {
+  floatNav.classList.toggle('visible', window.scrollY > 320);
+}, { passive: true });
+
+// ── INIT ──────────────────────────────────────────
+loadProducts();
+loadSpecial();
+</script>
+</body>
+</html>
