@@ -261,6 +261,64 @@
       @keyframes confettiFall { 0%{opacity:1;transform:translateY(-12vh) rotate(0)} 100%{opacity:.9;transform:translateY(108vh) rotate(760deg)} }
       @media(prefers-reduced-motion:reduce){ .confetti-piece{animation:none} .bar-fill{transition:none} }
 
+      /* ═══ COMPETITION — $250 prize + player leaderboard ═══ */
+      .prize-banner { display:flex; align-items:center; gap:16px; margin-top:18px;
+        background:linear-gradient(135deg, rgba(255,184,0,.16), rgba(214,242,36,.07));
+        border:1px solid rgba(255,184,0,.5); border-radius:16px; padding:15px 20px;
+        box-shadow:0 0 34px -8px rgba(255,184,0,.5); }
+      .prize-emoji { font-size:2.3rem; line-height:1; filter:drop-shadow(0 0 10px rgba(255,184,0,.6));
+        animation:prizeBob 3s ease-in-out infinite; }
+      @keyframes prizeBob { 0%,100%{transform:translateY(0) rotate(-4deg)} 50%{transform:translateY(-4px) rotate(4deg)} }
+      .prize-title { font-family:'Space Grotesk',sans-serif; font-weight:800; font-size:1.18rem; color:#fff; line-height:1.15; }
+      .prize-title span { color:var(--gold); text-shadow:0 0 16px rgba(255,184,0,.55); }
+      .prize-sub { color:var(--muted); font-size:.9rem; margin-top:3px; }
+      .prize-sub strong { color:var(--gold2); }
+      @media(prefers-reduced-motion:reduce){ .prize-emoji{animation:none} }
+
+      .board-head { display:flex; align-items:baseline; justify-content:space-between; gap:12px;
+        flex-wrap:wrap; margin:32px 0 2px; }
+      .board-head h3 { font-size:1.35rem; }
+      .board-note { font-size:.85rem; color:var(--muted); font-weight:700; }
+      .board-note strong { color:var(--teal); }
+
+      .player-board { display:grid; grid-template-columns:repeat(2,1fr); gap:14px; margin-top:14px; }
+      @media(min-width:760px){ .player-board{ grid-template-columns:repeat(3,1fr); } }
+      @media(max-width:520px){ .player-board{ grid-template-columns:1fr; } }
+      .player-card { position:relative; overflow:hidden; background:var(--card-bg);
+        border:1px solid rgba(255,255,255,.08); border-radius:14px; padding:15px 16px;
+        transition:transform .2s ease, box-shadow .2s ease, border-color .2s ease; }
+      .player-card:hover { transform:translateY(-3px); box-shadow:0 14px 32px rgba(0,0,0,.42); }
+      .player-rank { position:absolute; top:11px; right:13px; font-size:.72rem; font-weight:900;
+        color:var(--muted); letter-spacing:.04em; }
+      .player-top { display:flex; align-items:center; gap:11px; margin-bottom:11px; }
+      .player-num { display:flex; align-items:center; justify-content:center; min-width:40px; height:40px; padding:0 7px;
+        border-radius:11px; font-family:'Space Grotesk',sans-serif; font-weight:800; font-size:1.1rem; color:#fff;
+        background:linear-gradient(135deg, rgba(155,61,255,.4), rgba(0,232,212,.2)); border:1px solid rgba(255,255,255,.1); }
+      .player-name { font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:1.04rem; line-height:1.1; }
+      .player-sub { font-size:.74rem; color:var(--muted); margin-top:1px; }
+      .player-bar { position:relative; height:12px; border-radius:999px; background:rgba(4,12,24,.75);
+        border:1px solid rgba(255,255,255,.08); overflow:hidden; }
+      .player-fill { height:100%; width:0; border-radius:999px;
+        background:linear-gradient(90deg, var(--purple), var(--teal)); box-shadow:0 0 12px rgba(0,232,212,.5);
+        transition:width 1s cubic-bezier(.22,.9,.3,1); }
+      .player-meta { display:flex; justify-content:space-between; margin-top:8px; font-size:.85rem; font-weight:800; }
+      .player-meta .amt { color:var(--teal); }
+      .player-meta .pct { color:var(--muted); }
+      .player-card.podium { border-color:rgba(155,61,255,.5); }
+      .player-card.leader { border-color:rgba(255,184,0,.75);
+        background:linear-gradient(150deg, rgba(255,184,0,.12), var(--card-bg) 62%);
+        box-shadow:0 0 36px -6px rgba(255,184,0,.55); }
+      .player-card.leader .player-fill { background:linear-gradient(90deg, var(--orange), var(--gold), var(--blaze-volt));
+        box-shadow:0 0 14px rgba(255,184,0,.6); }
+      .player-card.leader .player-meta .amt { color:var(--gold); }
+      .player-card.leader .player-num { background:linear-gradient(135deg, var(--gold), var(--orange)); color:#2A1500; }
+      .player-card.leader .player-rank { color:var(--gold); }
+      .crown { position:absolute; top:0; left:0; background:linear-gradient(135deg,var(--gold),var(--gold2));
+        color:#2A1500; font-size:.64rem; font-weight:900; padding:3px 9px 3px 8px;
+        border-radius:0 0 11px 0; letter-spacing:.05em; }
+      .player-card.done .player-fill { background:linear-gradient(90deg, var(--green), var(--teal)); }
+      .player-card.done .player-meta .pct { color:var(--green); }
+
       /* ═══ MENU ═══ */
       .menu-band { display:flex; align-items:baseline; gap:12px; flex-wrap:wrap;
         background:linear-gradient(90deg,var(--teal),var(--teal2)); color:#04262A;
@@ -491,29 +549,52 @@
       <!-- ── TRACKER ── -->
       <section id="tracker" style="padding-top: 8px">
         <div class="section-wrap">
+          <header class="section-head" style="text-align:center; max-width:640px; margin:0 auto 20px">
+            <h2>Competition &amp; Goals</h2>
+            <p style="margin:0 auto">Every kit is credited to a player. The highest individual raiser wins
+              <strong style="color:var(--gold)">$250 cash</strong> — meters update automatically from real orders.</p>
+          </header>
+
+          <!-- TEAM METER -->
           <div class="tracker" id="trackerCard">
-            <span class="overachieved-badge">🏆 Overachieved</span>
+            <span class="overachieved-badge">🏆 Team goal crushed</span>
             <div class="tracker-head">
               <div>
-                <p class="tracker-label" id="trackerLabel">Raised so far for Blaze Remix</p>
+                <p class="tracker-label" id="trackerLabel">Team total raised</p>
                 <p class="tracker-raised" id="raisedAmt">$0</p>
-                <p class="tracker-goal">of our <strong>$500</strong> goal</p>
+                <p class="tracker-goal">of our <strong id="teamGoalText">$0</strong> team goal</p>
               </div>
               <div class="tracker-right">
-                <p class="tracker-remaining" id="remainingAmt">$500<small id="remainingLabel">Still to go</small></p>
+                <p class="tracker-remaining" id="remainingAmt">$0<small id="remainingLabel">Still to go</small></p>
               </div>
             </div>
             <div class="bar-outer">
               <div class="bar-fill" id="barFill"></div>
-              <div class="bar-marker" id="barMarker" title="$500 goal"></div>
+              <div class="bar-marker" id="barMarker" title="team goal"></div>
             </div>
             <div class="bar-caption">
               <span>$0</span>
-              <span id="barCapRight">$500 goal</span>
+              <span id="barCapRight">team goal</span>
             </div>
             <p class="overage-line" id="overageLine"></p>
             <p class="tracker-note"><span class="dot"></span><span id="trackerNote">Updates automatically as orders come in.</span></p>
           </div>
+
+          <!-- $250 PRIZE -->
+          <div class="prize-banner">
+            <span class="prize-emoji" aria-hidden="true">🏆</span>
+            <div>
+              <p class="prize-title">Highest raiser wins <span>$250 cash!</span></p>
+              <p class="prize-sub" id="prizeLeader">Be the first on the board — every order counts toward a player.</p>
+            </div>
+          </div>
+
+          <!-- PLAYER LEADERBOARD -->
+          <div class="board-head">
+            <h3>Player leaderboard</h3>
+            <span class="board-note">Each player's goal: <strong>$500</strong></span>
+          </div>
+          <div class="player-board" id="playerBoard"></div>
         </div>
       </section>
 
@@ -637,27 +718,37 @@
               <p class="form-section-title">Your kits</p>
               <div class="qty-grid" id="qtyFields"></div>
 
-              <p class="form-section-title">Shipping</p>
-              <div class="ship-callout">
-                <span>📦 Direct shipping &mdash; flat rate, straight to your door</span>
-                <b>$9.00</b>
+              <p class="form-section-title">How would you like to get it?</p>
+              <div class="pay-grid" id="fulfillOptions">
+                <label class="pay-option selected" onclick="selectFulfill(this,'pickup')">
+                  <input type="radio" name="fulfill" value="pickup" checked />
+                  <span class="pay-icon">🏠</span>
+                  <span class="pay-name">Local / In-Person Pickup</span>
+                  <span class="pay-sub">No shipping charge</span>
+                </label>
+                <label class="pay-option" onclick="selectFulfill(this,'ship')">
+                  <input type="radio" name="fulfill" value="ship" />
+                  <span class="pay-icon">📦</span>
+                  <span class="pay-name">Ship to me</span>
+                  <span class="pay-sub">Flat $9.00 shipping</span>
+                </label>
               </div>
-              <div class="form-grid" style="margin-top: 14px">
+              <div class="form-grid" id="shipAddress" style="margin-top: 14px; display: none">
                 <label class="span-2">
                   Street address *
-                  <input type="text" id="addrStreet" placeholder="123 Main St" autocomplete="address-line1" required />
+                  <input type="text" id="addrStreet" placeholder="123 Main St" autocomplete="address-line1" />
                 </label>
                 <label>
                   City *
-                  <input type="text" id="addrCity" placeholder="Des Moines" autocomplete="address-level2" required />
+                  <input type="text" id="addrCity" placeholder="Des Moines" autocomplete="address-level2" />
                 </label>
                 <label>
                   State *
-                  <input type="text" id="addrState" placeholder="IA" maxlength="2" autocomplete="address-level1" required />
+                  <input type="text" id="addrState" placeholder="IA" maxlength="2" autocomplete="address-level1" />
                 </label>
                 <label class="span-2">
                   ZIP *
-                  <input type="text" id="addrZip" placeholder="50309" inputmode="numeric" autocomplete="postal-code" required />
+                  <input type="text" id="addrZip" placeholder="50309" inputmode="numeric" autocomplete="postal-code" />
                 </label>
               </div>
 
@@ -763,17 +854,27 @@
          ══════════════════════════════════════════════════════════════ */
 
       /* ── EDIT THESE ───────────────────────────────────────────── */
-      const GOAL         = 500;    // fundraising goal in dollars
-      const SHIP_FLAT    = 9.0;    // direct shipping, flat rate
+      const PLAYER_GOAL  = 500;    // each player's personal goal, in dollars
+      const PRIZE_AMOUNT = 250;    // cash prize for the highest individual raiser
+      const SHIP_FLAT    = 9.0;    // shipping when the customer chooses "Ship to me"
       const TAX_RATE     = 0.08;   // 8% — matches the main site
       const TEAM_SHARE   = 0.5;    // 50% of NET proceeds go to the team
       const COST_PER_KIT = 2.0;    // <<< your cost per individual kit.
-                                   //     Only affects the progress bar,
+                                   //     Only affects the progress bars,
                                    //     never the price a customer pays.
       const FUNDRAISER_TAG = 'blaze';
       const TEAM_NAME      = 'Blaze Remix';
+      // Add players here as "Last #NN" — the team goal grows automatically.
       const ROSTER         = ['Bolton #23','Cochran #13','Heath #1','Heckethorn #25','Mann #14','McAninch #10','Reilly #11','Strope #88','Vyskocil #98','Westcott #27'];
       /* ─────────────────────────────────────────────────────────── */
+
+      // Team goal is derived so the bars always add up: players × $500.
+      const TEAM_GOAL = ROSTER.length * PLAYER_GOAL;
+      // Parse "Last #NN" into structured players (order preserved as roster order).
+      const PLAYERS = ROSTER.map((label) => {
+        const m = label.match(/^(.*?)\s*#\s*(\d+)\s*$/);
+        return { label, name: m ? m[1].trim() : label, number: m ? m[2] : '' };
+      });
 
       const SUPABASE_URL = 'https://irfwztshbtgpcwewztgc.supabase.co';
       const SUPABASE_KEY =
@@ -802,6 +903,7 @@
 
       let cart = {};
       let selectedPay = 'card';
+      let selectedFulfill = 'pickup';   // 'pickup' = free, 'ship' = +$9
       let lastRaised = null;
 
       const PAY_INFO = {
@@ -878,7 +980,8 @@
           units += qty;
         }
         const tax = subtotal * TAX_RATE;
-        const shipping = units > 0 ? SHIP_FLAT : 0;
+        // Shipping only applies when the customer chose "Ship to me".
+        const shipping = (units > 0 && selectedFulfill === 'ship') ? SHIP_FLAT : 0;
         return { subtotal, tax, shipping, total: subtotal + tax + shipping, credit, units };
       }
       function updateCart() {
@@ -911,7 +1014,7 @@
         const breakdown = t.units === 0 ? '' : `
           <div class="totals-row"><span>Subtotal</span><span>${money(t.subtotal)}</span></div>
           <div class="totals-row"><span>Sales tax (8%)</span><span>${money(t.tax)}</span></div>
-          <div class="totals-row"><span>Direct shipping (flat)</span><span>${money(t.shipping)}</span></div>
+          <div class="totals-row"><span>${selectedFulfill === 'ship' ? 'Shipping (flat)' : 'Local / pickup'}</span><span>${t.shipping > 0 ? money(t.shipping) : 'FREE'}</span></div>
           <div class="totals-row grand"><span>Total</span><span>${money(t.total)}</span></div>`;
         $('cartTotals').innerHTML = breakdown;
         $('formTotals').innerHTML =
@@ -944,65 +1047,114 @@
       }
 
       async function loadProgress(animate = true) {
-        let raised = 0, backers = 0;
+        let counted = [];
         try {
           const { data } = await sb.from('gd_store').select('value').eq('key', 'orders').maybeSingle();
           const orders = Array.isArray(data?.value) ? data.value : [];
-          const counted = orders.filter(
+          counted = orders.filter(
             (o) => o && o.fundraiser === FUNDRAISER_TAG && o.status !== 'Backordered' && o.status !== 'Cancelled'
           );
-          raised = counted.reduce((s, o) => s + creditFromOrder(o), 0);
-          backers = counted.length;
         } catch (e) {
           console.warn('Progress unavailable:', e);
           $('trackerNote').textContent =
-            'Live total is temporarily unavailable — your order will still be counted.';
+            'Live totals are temporarily unavailable — your order will still be counted.';
           return;
         }
-        renderProgress(raised, backers, animate);
+        // Group credit by the player each order was attributed to.
+        // Team total = sum of every counted blaze order.
+        const perPlayer = {};
+        PLAYERS.forEach((p) => { perPlayer[p.label] = 0; });
+        let total = 0, backers = 0;
+        for (const o of counted) {
+          const c = creditFromOrder(o);
+          total += c; backers += 1;
+          const key = o.fundraiserPlayer;
+          if (key && key in perPlayer) perPlayer[key] += c;
+        }
+        renderTeam(total, backers, animate);
+        renderPlayers(perPlayer);
       }
 
-      function renderProgress(raised, backers, animate) {
+      function renderTeam(raised, backers, animate) {
         const card = $('trackerCard');
-        const crushed = raised >= GOAL;
-        const pct = GOAL > 0 ? (raised / GOAL) * 100 : 0;
-        const remaining = Math.max(0, GOAL - raised);
-        const over = Math.max(0, raised - GOAL);
+        const crushed = raised >= TEAM_GOAL;
+        const pct = TEAM_GOAL > 0 ? (raised / TEAM_GOAL) * 100 : 0;
+        const remaining = Math.max(0, TEAM_GOAL - raised);
+        const over = Math.max(0, raised - TEAM_GOAL);
 
         $('raisedAmt').textContent = money0(raised);
+        $('teamGoalText').textContent = money0(TEAM_GOAL);
 
         if (crushed) {
-          // The bar stays full and the goal marker slides back, so the overage
-          // is always visible — we never hide how far past $500 we got.
           $('barFill').style.width = '100%';
-          $('barMarker').style.left = Math.max(4, (GOAL / raised) * 100) + '%';
-          $('trackerLabel').textContent = 'Goal crushed for ' + TEAM_NAME + '!';
+          $('barMarker').style.left = Math.max(4, (TEAM_GOAL / raised) * 100) + '%';
+          $('trackerLabel').textContent = 'Team goal crushed!';
           $('barCapRight').textContent = money0(raised) + ' raised';
           if (over >= 1) {
             $('remainingAmt').innerHTML = '+' + money0(over) + '<small>Overachieved by</small>';
             $('overageLine').innerHTML =
-              `🏆 <span class="big">GOAL CRUSHED!</span> ${money0(raised)} raised — we overachieved by ${money0(over)}!`;
+              `🏆 <span class="big">TEAM GOAL CRUSHED!</span> ${money0(raised)} raised — ${money0(over)} past the ${money0(TEAM_GOAL)} goal!`;
           } else {
             $('remainingAmt').innerHTML = '100%<small>Of goal reached</small>';
             $('overageLine').innerHTML =
-              `🏆 <span class="big">GOAL REACHED!</span> ${money0(raised)} raised — right on the nose. Every order from here is a bonus!`;
+              `🏆 <span class="big">TEAM GOAL REACHED!</span> ${money0(raised)} raised — right on target!`;
           }
         } else {
           $('barFill').style.width = Math.min(100, pct) + '%';
-          $('trackerLabel').textContent = 'Raised so far for ' + TEAM_NAME;
+          $('trackerLabel').textContent = 'Team total raised';
           $('remainingAmt').innerHTML = moneyUp(remaining) + '<small>Still to go</small>';
-          $('barCapRight').textContent = money0(GOAL) + ' goal';
+          $('barCapRight').textContent = money0(TEAM_GOAL) + ' goal';
         }
         card.classList.toggle('crushed', crushed);
 
-        const who = backers === 1 ? '1 supporter has' : backers + ' supporters have';
+        const who = backers === 1 ? '1 order' : backers + ' orders';
         $('trackerNote').textContent =
           backers > 0
-            ? `${who} chipped in so far. Updates automatically as orders come in.`
+            ? `${who} in so far across the team. Updates automatically as orders come in.`
             : 'Be the first to support the team — updates automatically as orders come in.';
 
-        if (crushed && animate && lastRaised !== null && lastRaised < GOAL) fireConfetti();
+        if (crushed && animate && lastRaised !== null && lastRaised < TEAM_GOAL) fireConfetti();
         lastRaised = raised;
+      }
+
+      function renderPlayers(perPlayer) {
+        const board = $('playerBoard');
+        if (!board) return;
+        const rows = PLAYERS.map((p, i) => ({ ...p, raised: perPlayer[p.label] || 0, order: i }));
+        // Leaderboard order: most raised first, ties keep roster order.
+        const ranked = [...rows].sort((a, b) => b.raised - a.raised || a.order - b.order);
+        const rankOf = new Map();
+        ranked.forEach((r, idx) => rankOf.set(r.label, idx + 1));
+        const leader = ranked[0];
+
+        if (leader && leader.raised > 0) {
+          $('prizeLeader').innerHTML =
+            `Current leader: <strong>${esc(leader.name)} #${esc(leader.number)}</strong> with ${money0(leader.raised)} raised — think you can beat them?`;
+        } else {
+          $('prizeLeader').textContent = 'Be the first on the board — every order counts toward a player.';
+        }
+
+        board.innerHTML = ranked.map((r) => {
+          const rank = rankOf.get(r.label);
+          const pct = Math.min(100, PLAYER_GOAL > 0 ? (r.raised / PLAYER_GOAL) * 100 : 0);
+          const done = r.raised >= PLAYER_GOAL;
+          const isLeader = rank === 1 && r.raised > 0;
+          const podium = rank <= 3 && r.raised > 0;
+          const cls = ['player-card', isLeader ? 'leader' : '', (!isLeader && podium) ? 'podium' : '', done ? 'done' : ''].filter(Boolean).join(' ');
+          return `<article class="${cls}">
+            ${isLeader ? '<span class="crown">👑 LEADER</span>' : ''}
+            <span class="player-rank">#${rank}</span>
+            <div class="player-top">
+              <span class="player-num">${esc(r.number)}</span>
+              <div>
+                <div class="player-name">${esc(r.name)}</div>
+                <div class="player-sub">Goal $${PLAYER_GOAL}</div>
+              </div>
+            </div>
+            <div class="player-bar"><div class="player-fill" style="width:${pct}%"></div></div>
+            <div class="player-meta"><span class="amt">${money0(r.raised)}</span><span class="pct">${done ? '✓ Goal!' : Math.floor(pct) + '%'}</span></div>
+          </article>`;
+        }).join('');
       }
 
       function fireConfetti() {
@@ -1024,11 +1176,19 @@
 
       /* ── FORM HELPERS ─────────────────────────────────────────── */
       function selectPay(el, val) {
-        document.querySelectorAll('.pay-option').forEach((o) => o.classList.remove('selected'));
+        el.closest('#paymentOptions').querySelectorAll('.pay-option').forEach((o) => o.classList.remove('selected'));
         el.classList.add('selected');
         el.querySelector('input').checked = true;
         selectedPay = val;
         $('payInfo').innerHTML = PAY_INFO[val];
+        updateCart();
+      }
+      function selectFulfill(el, val) {
+        el.closest('#fulfillOptions').querySelectorAll('.pay-option').forEach((o) => o.classList.remove('selected'));
+        el.classList.add('selected');
+        el.querySelector('input').checked = true;
+        selectedFulfill = val;
+        $('shipAddress').style.display = val === 'ship' ? 'grid' : 'none';
         updateCart();
       }
       function showErr(msg, focusId) {
@@ -1047,21 +1207,10 @@
       }
       function buildPlayerField() {
         const sel = $('playerName');
-        if (ROSTER.length) {
-          sel.innerHTML =
-            '<option value="">Select a player…</option>' +
-            ROSTER.map((n) => `<option value="${esc(n)}">${esc(n)}</option>`).join('') +
-            '<option value="Team — no specific player">Team — no specific player</option>';
-        } else {
-          // No roster configured: use a free-text box instead of an empty dropdown.
-          const input = document.createElement('input');
-          input.type = 'text';
-          input.id = 'playerName';
-          input.required = true;
-          input.placeholder = "Player's name (or 'Team')";
-          input.setAttribute('autocomplete', 'off');
-          sel.replaceWith(input);
-        }
+        // Every order must be attributed to exactly one player — no "team" option.
+        sel.innerHTML =
+          '<option value="" disabled selected>Select a player…</option>' +
+          PLAYERS.map((p) => `<option value="${esc(p.label)}">${esc(p.name)} — #${esc(p.number)}</option>`).join('');
       }
 
       /* ── SUBMIT ───────────────────────────────────────────────── */
@@ -1088,10 +1237,13 @@
         if (!phone)  return showErr('Phone number is required.', 'custPhone');
         if (!email)  return showErr('Email is required.', 'custEmail');
         if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return showErr('Please enter a valid email address.', 'custEmail');
-        if (!street) return showErr('Street address is required for shipping.', 'addrStreet');
-        if (!city)   return showErr('City is required for shipping.', 'addrCity');
-        if (!state)  return showErr('State is required for shipping.', 'addrState');
-        if (!zip)    return showErr('ZIP code is required for shipping.', 'addrZip');
+        // Address is only required when the customer chose to have it shipped.
+        if (selectedFulfill === 'ship') {
+          if (!street) return showErr('Street address is required for shipping.', 'addrStreet');
+          if (!city)   return showErr('City is required for shipping.', 'addrCity');
+          if (!state)  return showErr('State is required for shipping.', 'addrState');
+          if (!zip)    return showErr('ZIP code is required for shipping.', 'addrZip');
+        }
 
         const btn = $('submitBtn');
         btn.disabled = true;
@@ -1105,12 +1257,14 @@
         });
 
         const orderId = 'GD-' + Date.now().toString(36).toUpperCase();
-        const shipping = `${street}, ${city}, ${state} ${zip}`;
+        const isShip = selectedFulfill === 'ship';
+        const shipping = isShip ? `${street}, ${city}, ${state} ${zip}` : 'Local / In-Person Pickup';
+        const fulfillLabel = isShip ? 'Ship to me ($9)' : 'Local / In-Person Pickup';
         const payLabel = selectedPay === 'venmo' ? 'Venmo (@GlowDaily)' : 'Card (payment link)';
         const noteStr =
           `FUNDRAISER: ${TEAM_NAME} | Player: ${player}` +
           (org ? ` | From: ${org}` : '') +
-          ` | Phone: ${phone} | Email: ${email} | Pay: ${payLabel}` +
+          ` | Phone: ${phone} | Email: ${email} | Pay: ${payLabel} | Fulfillment: ${fulfillLabel}` +
           ` | Subtotal: ${money(t.subtotal)} | Tax (8%): ${money(t.tax)} | Shipping: ${money(t.shipping)} | Total: ${money(t.total)}` +
           ` | To team: ${money(t.credit)}` +
           (selectedPay === 'venmo' ? ' | Please send payment via Venmo to @GlowDaily' : '') +
@@ -1129,9 +1283,11 @@
           status: 'Received',
           shipping,
           note: noteStr,
+          fulfillment: fulfillLabel,
           fundraiser: FUNDRAISER_TAG,
           fundraiserTeam: TEAM_NAME,
           fundraiserPlayer: player,
+          fundraiserPlayerNumber: (PLAYERS.find((p) => p.label === player) || {}).number || null,
           fundraiserOrg: org || null,
           fundraiserCredit: Number(t.credit.toFixed(2)),
           payment: selectedPay
@@ -1169,7 +1325,7 @@
               items: itemLines + '\n\n' + breakdown,
               total: money(orderRow.total),
               payment: payLabel,
-              fulfillment: 'Direct shipping — ' + shipping,
+              fulfillment: fulfillLabel + (isShip ? ' — ' + shipping : ''),
               tracking: '',
               notes: orderRow.note
             });
@@ -1219,6 +1375,9 @@
         ['orgName','custName','custPhone','custEmail','addrStreet','addrCity','addrState','addrZip','orderNote']
           .forEach((id) => { const el = $(id); if (el) el.value = ''; });
         const pl = $('playerName'); if (pl) pl.value = '';
+        // reset fulfillment back to the free pickup default
+        const pickupOpt = document.querySelector('#fulfillOptions .pay-option');
+        if (pickupOpt) selectFulfill(pickupOpt, 'pickup');
         clearErr();
         $('menu').scrollIntoView({ behavior: 'smooth', block: 'start' });
       }
