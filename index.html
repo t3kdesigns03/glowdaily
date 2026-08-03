@@ -723,6 +723,77 @@ footer a { color: var(--teal); text-decoration: none; }
   height: 1px; background: linear-gradient(90deg, transparent, rgba(45,212,191,0.3), transparent);
   margin: 0;
 }
+
+/* ── BLAZE FUNDRAISER BANNER + BADGE (added for /blaze) ───────── */
+.blaze-band { padding: 2.5rem 2rem; }
+.blaze-card {
+  position: relative; overflow: hidden;
+  display: grid; gap: 1.75rem; align-items: center;
+  background: linear-gradient(135deg, rgba(155,61,255,0.18), rgba(214,242,36,0.07), rgba(0,232,212,0.06));
+  border: 1px solid rgba(155,61,255,0.5);
+  border-radius: 22px; padding: 1.6rem;
+  box-shadow: var(--glow-purple);
+}
+@media (min-width: 860px) { .blaze-card { grid-template-columns: 0.95fr 1.05fr; padding: 1.9rem 2.2rem; } }
+.blaze-card-art { position: relative; }
+.blaze-card-art img {
+  width: 100%; display: block;
+  -webkit-mask-image: radial-gradient(ellipse 88% 84% at 50% 48%, #000 58%, transparent 100%);
+  mask-image: radial-gradient(ellipse 88% 84% at 50% 48%, #000 58%, transparent 100%);
+}
+.blaze-eyebrow {
+  display: inline-block; background: var(--blaze-volt, #D6F224); color: #1B2400;
+  font-size: 0.7rem; font-weight: 900; letter-spacing: 0.11em; text-transform: uppercase;
+  padding: 0.25rem 0.75rem; border-radius: 999px; margin-bottom: 0.7rem;
+}
+.blaze-card h2 { font-size: clamp(1.5rem, 3.4vw, 2.1rem); margin-bottom: 0.5rem; line-height: 1.1; }
+.blaze-card h2 em {
+  font-style: normal; display: block;
+  background: linear-gradient(100deg, #D6F224 0%, #B8E986 42%, #C47BFF 100%);
+  -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; color: #D6F224;
+}
+.blaze-card p.blaze-lead { color: var(--muted); font-size: 0.95rem; line-height: 1.65; margin-bottom: 1rem; }
+.blaze-card p.blaze-lead strong { color: var(--white); }
+.blaze-mini-bar { height: 18px; border-radius: 999px; background: rgba(4,12,24,0.75);
+  border: 1px solid rgba(155,61,255,0.35); overflow: hidden; position: relative; }
+.blaze-mini-fill { height: 100%; width: 0; border-radius: 999px;
+  background: linear-gradient(90deg, var(--purple), var(--teal), var(--green));
+  background-size: 200% auto; animation: shimmer 3s linear infinite;
+  transition: width 1s cubic-bezier(.22,.9,.3,1); }
+.blaze-card.crushed .blaze-mini-fill { background: linear-gradient(90deg, var(--orange), var(--gold), #D6F224); }
+.blaze-card.crushed { border-color: rgba(255,184,0,0.7); box-shadow: 0 0 40px rgba(255,184,0,0.4); }
+.blaze-mini-meta { display: flex; justify-content: space-between; gap: 1rem; flex-wrap: wrap;
+  margin-top: 0.55rem; font-size: 0.82rem; font-weight: 800; color: var(--muted); }
+.blaze-mini-meta .raised { color: var(--teal); font-size: 1rem; }
+.blaze-card.crushed .blaze-mini-meta .raised { color: var(--gold); }
+.blaze-actions { display: flex; gap: 0.7rem; flex-wrap: wrap; margin-top: 1.15rem; }
+.btn-volt {
+  display: inline-flex; align-items: center; gap: 0.5rem;
+  background: linear-gradient(135deg, #D6F224, #A8E000); color: #1B2400;
+  font-weight: 900; font-size: 0.95rem; padding: 0.8rem 1.7rem; border-radius: 999px;
+  border: none; cursor: pointer; text-decoration: none;
+  box-shadow: 0 8px 28px rgba(214,242,36,0.3); transition: transform 0.2s, box-shadow 0.2s;
+}
+.btn-volt:hover { transform: translateY(-2px); box-shadow: 0 10px 34px rgba(214,242,36,0.5); }
+
+/* floating Support BLAZE badge */
+.blaze-badge-float {
+  position: fixed; left: 1.1rem; bottom: 1.5rem; z-index: 200;
+  display: inline-flex; align-items: center; gap: 0.55rem;
+  background: linear-gradient(135deg, #9B3DFF, #6B21C4); color: #fff;
+  text-decoration: none; font-weight: 900; font-size: 0.86rem;
+  padding: 0.7rem 1.15rem; border-radius: 999px;
+  box-shadow: 0 6px 26px rgba(155,61,255,0.55);
+  opacity: 0; transform: translateY(12px); pointer-events: none;
+  transition: opacity 0.3s, transform 0.3s, box-shadow 0.2s;
+}
+.blaze-badge-float.visible { opacity: 1; transform: translateY(0); pointer-events: auto; }
+.blaze-badge-float:hover { box-shadow: 0 8px 32px rgba(155,61,255,0.8); }
+.blaze-badge-float .bb-ball { font-size: 1.05rem; }
+@media (max-width: 768px) and (orientation: portrait) {
+  .blaze-badge-float { bottom: 1.5rem; left: 1rem; font-size: 0.8rem; padding: 0.6rem 0.95rem; }
+}
+@media (prefers-reduced-motion: reduce) { .blaze-mini-fill { transition: none; } }
 </style>
 </head>
 <body>
@@ -820,6 +891,38 @@ footer a { color: var(--teal); text-decoration: none; }
         <button class="btn-primary" style="margin-top:0.75rem;font-size:0.9rem;padding:0.6rem 1.4rem;" onclick="openPackPicker()">
           Get It ✨
         </button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── BLAZE REMIX FUNDRAISER ──────────────────────── -->
+<section class="blaze-band" id="blaze">
+  <div class="section-inner">
+    <div class="blaze-card" id="blazeCard">
+      <div class="blaze-card-art">
+        <img src="./blaze/assets/team-jerseys.webp"
+             alt="Blaze Remix 12U fastpitch softball team jerseys"
+             width="1400" height="933" loading="lazy"/>
+      </div>
+      <div>
+        <span class="blaze-eyebrow">🥎 Fundraiser</span>
+        <h2>Support <em>BLAZE REMIX!</em></h2>
+        <p class="blaze-lead">
+          Power Tea Kits for the Blaze Remix 12U fastpitch team — raising money for
+          <strong>new uniforms and team travel</strong>.
+          <strong>50% of net proceeds go directly back to the team.</strong>
+        </p>
+        <div class="blaze-mini-bar">
+          <div class="blaze-mini-fill" id="blazeMiniFill"></div>
+        </div>
+        <div class="blaze-mini-meta">
+          <span class="raised" id="blazeRaised">$0 raised</span>
+          <span id="blazeGoal">$500 goal</span>
+        </div>
+        <div class="blaze-actions">
+          <a class="btn-volt" href="./blaze/">Support BLAZE! 🥎</a>
+        </div>
       </div>
     </div>
   </div>
@@ -1104,6 +1207,10 @@ footer a { color: var(--teal); text-decoration: none; }
 </div>
 
 <!-- Floating mobile nav -->
+<a class="blaze-badge-float" id="blazeBadge" href="./blaze/">
+  <span class="bb-ball">🥎</span> Support BLAZE!
+</a>
+
 <div class="float-nav" id="floatNav">
   <button class="float-btn float-btn-order" onclick="document.getElementById('order').scrollIntoView({behavior:'smooth'})" aria-label="Order">✨</button>
   <button class="float-btn float-btn-top" onclick="window.scrollTo({top:0,behavior:'smooth'})" aria-label="Back to top">↑</button>
@@ -1766,9 +1873,52 @@ window.addEventListener('scroll', () => {
   floatNav.classList.toggle('visible', window.scrollY > 320);
 }, { passive: true });
 
+
+// ── BLAZE FUNDRAISER PROGRESS (banner + floating badge) ──────────
+const BLAZE_GOAL = 500;
+const BLAZE_COST_PER_KIT = 2.00;   // keep in sync with blaze/index.html
+const BLAZE_PRICES = { E1:[40,6],E2:[40,6],E3:[40,6],E4:[40,6],L5:[40,6],L6:[40,6],L7:[40,6],PTK:[80,12] };
+function blazeCredit(sku, qty) {
+  const p = BLAZE_PRICES[sku]; if (!p) return 0;
+  return Math.max(0, p[0] - BLAZE_COST_PER_KIT * p[1]) * 0.5 * qty;
+}
+async function loadBlazeProgress() {
+  const fill = document.getElementById('blazeMiniFill');
+  if (!fill) return;
+  try {
+    const { data } = await sb.from('gd_store').select('value').eq('key','orders').maybeSingle();
+    const orders = Array.isArray(data?.value) ? data.value : [];
+    const raised = orders
+      .filter(o => o && o.fundraiser === 'blaze' && o.status !== 'Backordered' && o.status !== 'Cancelled')
+      .reduce((s,o) => s + (typeof o.fundraiserCredit === 'number' && isFinite(o.fundraiserCredit)
+        ? o.fundraiserCredit
+        : (Array.isArray(o.items) ? o.items.reduce((a,i) => a + blazeCredit(i.sku, Number(i.qty)||0), 0) : 0)), 0);
+    const crushed = raised >= BLAZE_GOAL;
+    const money0 = n => '$' + Math.floor(n).toLocaleString();
+    fill.style.width = Math.min(100, (raised / BLAZE_GOAL) * 100) + '%';
+    document.getElementById('blazeCard').classList.toggle('crushed', crushed);
+    document.getElementById('blazeRaised').textContent = money0(raised) + ' raised';
+    document.getElementById('blazeGoal').textContent = crushed
+      ? 'Goal crushed by ' + money0(raised - BLAZE_GOAL) + '! 🏆'
+      : money0(BLAZE_GOAL) + ' goal';
+  } catch (e) {
+    // Never let the fundraiser widget break the homepage — just leave it static.
+    console.warn('Blaze progress unavailable:', e);
+  }
+}
+
+// floating badge reveal
+const blazeBadge = document.getElementById('blazeBadge');
+if (blazeBadge) {
+  window.addEventListener('scroll', () => {
+    blazeBadge.classList.toggle('visible', window.scrollY > 320);
+  }, { passive: true });
+}
+
 // ── INIT ──────────────────────────────────────────
 loadProducts();
 loadSpecial();
+loadBlazeProgress();
 </script>
 </body>
 </html>

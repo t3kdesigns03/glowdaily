@@ -97,6 +97,7 @@ const INIT_INGREDIENTS = [
 ];
 
 const INIT_PRODUCTS = [
+  { id:19, name:"Flavor Friday",     emoji:"🌟", price:10.00, togoPrice:9.00, active:true, isCustomFlavor:true, badge:"Weekly Special" },
   { id:1,  name:"American Bomb Pop", emoji:"🎆", price:10.00, togoPrice:9.00, active:true },
   { id:2,  name:"Galaxy Blast",      emoji:"🌌", price:10.00, togoPrice:9.00, active:true },
   { id:3,  name:"County Fair",       emoji:"🎡", price:10.00, togoPrice:9.00, active:true },
@@ -306,7 +307,7 @@ function FlavorChart({ orders }) {
 function PackFlavorPicker({ products, packSize, flavors, onChange }) {
   const total     = Object.values(flavors).reduce((s,n) => s+n, 0);
   const remaining = packSize - total;
-  const nonPack   = products.filter(p => p.active && !p.isPack);
+  const nonPack   = products.filter(p => p.active && !p.isPack && !p.isCustomFlavor);
 
   function adjust(id, delta) {
     const cur = flavors[id] || 0;
@@ -1084,6 +1085,11 @@ function Orders({ ingredients, products, orders, setOrders, setTransactions }) {
                                     </span>
                                   ) : null;
                                 })}
+                              </div>
+                            )}
+                            {item.customFlavor && (
+                              <div className="ml-4 text-xs text-amber-700 bg-amber-50 border border-amber-100 rounded-lg px-2 py-1 inline-block">
+                                🌟 Custom: {item.customFlavor}
                               </div>
                             )}
                           </div>
