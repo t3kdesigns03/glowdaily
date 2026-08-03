@@ -1580,12 +1580,175 @@ function BackupModal({ ingredients, products, orders, transactions, onRestore, o
 }
 
 // ══════════════════════════════════════════════════════
+//  BLAZE FUNDRAISER
+// ══════════════════════════════════════════════════════
+// Roster mirrors the public /blaze page. Keep these in sync — add players
+// here as "Last #NN" and the team goal (players × $500) grows automatically.
+const BLAZE_ROSTER = ['Bolton #23','Cochran #13','Heath #1','Heckethorn #25','Mann #14','McAninch #10','Reilly #11','Strope #88','Vyskocil #98','Westcott #27'];
+const BLAZE_PLAYER_GOAL = 500;
+const BLAZE_PRIZE = 250;
+const BLAZE_COST_PER_KIT = 4.71;   // real cost per kit — keep in sync with /blaze
+const BLAZE_TEAM_SHARE  = 0.5;     // 50% of net proceeds go to the team
+
+function blazeParse(label) {
+  const m = String(label || '').match(/^(.*?)\s*#\s*(\d+)\s*$/);
+  return { name: m ? m[1].trim() : (label || '—'), number: m ? m[2] : '' };
+}
+
+// Credit toward the team goal for one order = 50% of net (price − cost×packSize),
+// recomputed from the order's line items using the CURRENT cost so existing
+// orders reflect the real cost too. Falls back to the stored value if needed.
+function blazeCreditOf(o) {
+  if (Array.isArray(o.items)) {
+    return o.items.reduce((s, it) => {
+      const price = Number(it.price) || 0;
+      const packSize = Number(it.packSize) || 1;
+      const qty = Number(it.qty) || 0;
+      return s + Math.max(0, price - BLAZE_COST_PER_KIT * packSize) * BLAZE_TEAM_SHARE * qty;
+    }, 0);
+  }
+  return Number(o.fundraiserCredit) || 0;
+}
+
+function BlazeFundraiser({ orders }) {
+  // Same rule as /blaze: count blaze orders that aren't Backordered/Cancelled.
+  const blaze = (orders || []).filter(
+    o => o && o.fundraiser === 'blaze' && o.status !== 'Backordered' && o.status !== 'Cancelled'
+  );
+  const totalRaised = blaze.reduce((s, o) => s + blazeCreditOf(o), 0);
+  const teamGoal = BLAZE_ROSTER.length * BLAZE_PLAYER_GOAL;
+  const teamPct  = teamGoal > 0 ? Math.min(100, totalRaised / teamGoal * 100) : 0;
+  const teamHit  = totalRaised >= teamGoal;
+
+  // Per-player totals: every roster player starts at 0, then add credit by player.
+  const map = {};
+  BLAZE_ROSTER.forEach(l => { map[l] = 0; });
+  blaze.forEach(o => { const k = o.fundraiserPlayer; if (k) map[k] = (map[k] || 0) + blazeCreditOf(o); });
+  const players = Object.entries(map)
+    .map(([label, raised]) => ({ label, ...blazeParse(label), raised }))
+    .sort((a, b) => b.raised - a.raised || a.label.localeCompare(b.label));
+  const leader = players[0];
+  const hasMoney = leader && leader.raised > 0;
+
+  const recent = [...blaze]
+    .sort((a, b) => String(b.date||'').localeCompare(String(a.date||'')) || String(b.id||'').localeCompare(String(a.id||'')))
+    .slice(0, 10);
+
+  return (
+    <div className="space-y-5">
+      {blaze.length === 0 && (
+        <div className="bg-gradient-to-r from-purple-500 to-fuchsia-500 rounded-2xl p-5 text-white">
+          <p className="font-bold text-lg">Blaze Remix Fundraiser 🥎</p>
+          <p className="text-sm text-purple-100 mt-1">No Blaze orders yet. As orders come in on the /blaze page, team and player progress will show up here automatically.</p>
+        </div>
+      )}
+
+      {/* Team overview */}
+      <div className="bg-white rounded-2xl border shadow-sm p-5">
+        <div className="flex items-start justify-between gap-3 flex-wrap">
+          <div>
+            <p className="text-xs font-bold uppercase tracking-wide text-purple-500">Team total raised</p>
+            <p className="text-3xl font-black text-gray-900 leading-tight">{fmt(totalRaised)}</p>
+            <p className="text-sm text-gray-500">of {fmt(teamGoal)} team goal · {BLAZE_ROSTER.length} players</p>
+          </div>
+          <div className="text-right">
+            <p className={`text-2xl font-black ${teamHit ? 'text-amber-500' : 'text-purple-600'}`}>{teamHit ? '🏆 Goal!' : fmt(Math.max(0, teamGoal - totalRaised))}</p>
+            <p className="text-xs text-gray-400 font-semibold uppercase">{teamHit ? 'Team goal reached' : 'still to go'}</p>
+          </div>
+        </div>
+        <div className="mt-3 h-3 rounded-full bg-gray-100 overflow-hidden">
+          <div className={`h-full rounded-full transition-all duration-500 ${teamHit ? 'bg-gradient-to-r from-amber-400 to-yellow-400' : 'bg-gradient-to-r from-purple-500 to-fuchsia-500'}`} style={{width:`${teamPct}%`}}/>
+        </div>
+        <div className="flex justify-between mt-1.5 text-xs text-gray-400 font-semibold">
+          <span>{teamPct.toFixed(0)}% funded</span>
+          <span>{blaze.length} Blaze order{blaze.length === 1 ? '' : 's'}</span>
+        </div>
+      </div>
+
+      {/* $250 prize */}
+      <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4 flex items-center gap-3">
+        <span className="text-2xl">🏆</span>
+        <div>
+          <p className="font-bold text-gray-800">Highest raiser wins ${BLAZE_PRIZE} cash</p>
+          <p className="text-sm text-gray-500">
+            {hasMoney
+              ? <span>Leader: <strong className="text-amber-600">{leader.name} #{leader.number}</strong> — {fmt(leader.raised)} raised</span>
+              : 'No leader yet — the first order takes the lead.'}
+          </p>
+        </div>
+      </div>
+
+      {/* Player leaderboard */}
+      <div>
+        <div className="flex items-baseline justify-between mb-2">
+          <h2 className="font-bold text-gray-800">Player leaderboard</h2>
+          <span className="text-xs text-gray-400 font-semibold">Goal ${BLAZE_PLAYER_GOAL} each</span>
+        </div>
+        <div className="space-y-2">
+          {players.map((p, i) => {
+            const ppct = Math.min(100, BLAZE_PLAYER_GOAL > 0 ? p.raised / BLAZE_PLAYER_GOAL * 100 : 0);
+            const done = p.raised >= BLAZE_PLAYER_GOAL;
+            const isLeader = i === 0 && p.raised > 0;
+            return (
+              <div key={p.label} className={`bg-white rounded-2xl border shadow-sm p-4 ${isLeader ? 'border-amber-300 ring-1 ring-amber-200' : ''}`}>
+                <div className="flex items-center gap-3">
+                  <div className={`w-9 h-9 flex-shrink-0 rounded-lg flex items-center justify-center font-black text-sm ${isLeader ? 'bg-amber-400 text-white' : 'bg-purple-100 text-purple-700'}`}>{p.number || '–'}</div>
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className="font-bold text-gray-800 truncate">{p.name}</span>
+                      {isLeader && <span className="text-xs bg-amber-100 text-amber-700 font-bold px-2 py-0.5 rounded-full">👑 Leader · wins ${BLAZE_PRIZE}</span>}
+                      {done && !isLeader && <span className="text-xs bg-emerald-100 text-emerald-700 font-bold px-2 py-0.5 rounded-full">✓ Goal</span>}
+                    </div>
+                    <div className="mt-1.5 h-2 rounded-full bg-gray-100 overflow-hidden">
+                      <div className={`h-full rounded-full transition-all duration-500 ${done ? 'bg-emerald-400' : isLeader ? 'bg-gradient-to-r from-amber-400 to-yellow-400' : 'bg-gradient-to-r from-purple-500 to-fuchsia-500'}`} style={{width:`${ppct}%`}}/>
+                    </div>
+                  </div>
+                  <div className="text-right flex-shrink-0">
+                    <div className={`font-black ${isLeader ? 'text-amber-600' : 'text-gray-800'}`}>{fmt(p.raised)}</div>
+                    <div className="text-xs text-gray-400 font-semibold">{done ? '✓ $500' : `${ppct.toFixed(0)}%`}</div>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Recent blaze orders */}
+      {recent.length > 0 && (
+        <div className="bg-white rounded-2xl border shadow-sm p-4">
+          <h2 className="font-bold text-gray-800 mb-3">Recent Blaze orders</h2>
+          <div className="divide-y">
+            {recent.map(o => {
+              const pl = blazeParse(o.fundraiserPlayer);
+              return (
+                <div key={o.id} className="py-2.5 flex items-center justify-between gap-3">
+                  <div className="min-w-0">
+                    <p className="font-semibold text-gray-800 text-sm truncate">{o.customer || '—'}</p>
+                    <p className="text-xs text-gray-500 truncate">{pl.name}{pl.number ? ` #${pl.number}` : ''} · {o.date || ''} · {o.fulfillment || '—'}</p>
+                  </div>
+                  <div className="text-right flex-shrink-0">
+                    <p className="font-bold text-purple-600 text-sm">{fmt(blazeCreditOf(o))}</p>
+                    <p className="text-xs text-gray-400">{fmt(Number(o.total) || 0)} order</p>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ══════════════════════════════════════════════════════
 //  APP SHELL
 // ══════════════════════════════════════════════════════
 
 const NAV = [
   { id:'dashboard',   label:'Home',        icon:'🏠' },
   { id:'orders',      label:'Orders',      icon:'📦' },
+  { id:'blaze',       label:'Blaze',       icon:'🥎' },
   { id:'ingredients', label:'Ingredients', icon:'🧪' },
   { id:'margins',     label:'Margins',     icon:'📊' },
   { id:'books',       label:'Books',       icon:'💳' },
@@ -1594,6 +1757,7 @@ const NAV = [
 const TITLES = {
   dashboard:   'Dashboard',
   orders:      'Orders',
+  blaze:       'Blaze Fundraiser',
   ingredients: 'Ingredients',
   margins:     'Profit & Margins',
   books:       'Bookkeeping',
@@ -1685,6 +1849,7 @@ function App() {
   const PAGE = {
     dashboard:   <Dashboard   ingredients={ingredients} products={products} orders={orders} transactions={transactions} setPage={setPage}/>,
     orders:      <Orders      ingredients={ingredients} products={products} orders={orders} setOrders={setOrders} setTransactions={setTransactions}/>,
+    blaze:       <BlazeFundraiser orders={orders}/>,
     ingredients: <Ingredients ingredients={ingredients} setIngredients={setIngredients}/>,
     margins:     <Margins     ingredients={ingredients} products={products} orders={orders} transactions={transactions} setProducts={setProducts}/>,
     books:       <Bookkeeping transactions={transactions} setTransactions={setTransactions} ingredients={ingredients}/>,

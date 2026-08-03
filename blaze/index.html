@@ -290,14 +290,19 @@
       .player-card:hover { transform:translateY(-3px); box-shadow:0 14px 32px rgba(0,0,0,.42); }
       .player-rank { position:absolute; top:11px; right:13px; font-size:.72rem; font-weight:900;
         color:var(--muted); letter-spacing:.04em; }
-      .player-top { display:flex; align-items:center; gap:11px; margin-bottom:11px; }
-      .player-num { display:flex; align-items:center; justify-content:center; min-width:40px; height:40px; padding:0 7px;
-        border-radius:11px; font-family:'Space Grotesk',sans-serif; font-weight:800; font-size:1.1rem; color:#fff;
-        background:linear-gradient(135deg, rgba(155,61,255,.4), rgba(0,232,212,.2)); border:1px solid rgba(255,255,255,.1); }
-      .player-name { font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:1.04rem; line-height:1.1; }
-      .player-sub { font-size:.74rem; color:var(--muted); margin-top:1px; }
-      .player-bar { position:relative; height:12px; border-radius:999px; background:rgba(4,12,24,.75);
-        border:1px solid rgba(255,255,255,.08); overflow:hidden; }
+      .player-top { display:flex; align-items:center; gap:13px; }
+      .player-info { flex:1; min-width:0; }
+      .player-jersey { flex-shrink:0; width:76px; height:64px; border-radius:11px; overflow:hidden;
+        background:#0b1120; border:1px solid rgba(255,255,255,.1); box-shadow:0 4px 12px rgba(0,0,0,.4); }
+      .player-jersey img { width:100%; height:100%; object-fit:cover; object-position:center 32%; display:block; }
+      .player-jersey--num { display:flex; align-items:center; justify-content:center;
+        font-family:'Space Grotesk',sans-serif; font-weight:800; font-size:1.4rem; color:#fff;
+        background:linear-gradient(135deg, rgba(155,61,255,.4), rgba(0,232,212,.2)); }
+      .player-name { font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:1.02rem; line-height:1.1;
+        white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+      .player-hashnum { color:var(--muted); font-weight:800; font-size:.86em; }
+      .player-bar { position:relative; height:11px; border-radius:999px; background:rgba(4,12,24,.75);
+        border:1px solid rgba(255,255,255,.08); overflow:hidden; margin-top:8px; }
       .player-fill { height:100%; width:0; border-radius:999px;
         background:linear-gradient(90deg, var(--purple), var(--teal)); box-shadow:0 0 12px rgba(0,232,212,.5);
         transition:width 1s cubic-bezier(.22,.9,.3,1); }
@@ -311,7 +316,8 @@
       .player-card.leader .player-fill { background:linear-gradient(90deg, var(--orange), var(--gold), var(--blaze-volt));
         box-shadow:0 0 14px rgba(255,184,0,.6); }
       .player-card.leader .player-meta .amt { color:var(--gold); }
-      .player-card.leader .player-num { background:linear-gradient(135deg, var(--gold), var(--orange)); color:#2A1500; }
+      .player-card.leader .player-jersey { border-color:rgba(255,184,0,.65); box-shadow:0 4px 16px rgba(255,184,0,.4); }
+      .player-card.leader .player-jersey--num { background:linear-gradient(135deg, var(--gold), var(--orange)); color:#2A1500; }
       .player-card.leader .player-rank { color:var(--gold); }
       .crown { position:absolute; top:0; left:0; background:linear-gradient(135deg,var(--gold),var(--gold2));
         color:#2A1500; font-size:.64rem; font-weight:900; padding:3px 9px 3px 8px;
@@ -859,7 +865,7 @@
       const SHIP_FLAT    = 9.0;    // shipping when the customer chooses "Ship to me"
       const TAX_RATE     = 0.08;   // 8% — matches the main site
       const TEAM_SHARE   = 0.5;    // 50% of NET proceeds go to the team
-      const COST_PER_KIT = 2.0;    // <<< your cost per individual kit.
+      const COST_PER_KIT = 4.71;   // <<< real cost per individual kit.
                                    //     Only affects the progress bars,
                                    //     never the price a customer pays.
       const FUNDRAISER_TAG = 'blaze';
@@ -875,6 +881,13 @@
         const m = label.match(/^(.*?)\s*#\s*(\d+)\s*$/);
         return { label, name: m ? m[1].trim() : label, number: m ? m[2] : '' };
       });
+
+      // Individual jersey crops (from the hero photo) shown on the leaderboard.
+      const JERSEY = {
+        'Heath #1':'heath', 'Westcott #27':'westcott', 'Mann #14':'mann', 'McAninch #10':'mcaninch',
+        'Strope #88':'strope', 'Heckethorn #25':'heckethorn', 'Vyskocil #98':'vyskocil',
+        'Reilly #11':'reilly', 'Cochran #13':'cochran', 'Bolton #23':'bolton'
+      };
 
       const SUPABASE_URL = 'https://irfwztshbtgpcwewztgc.supabase.co';
       const SUPABASE_KEY =
@@ -1040,10 +1053,23 @@
       }
 
       /* ── PROGRESS TRACKER ─────────────────────────────────────── */
+      // Recompute credit from each order's stored line items using the CURRENT
+      // COST_PER_KIT, so every meter reflects the real cost — even for orders
+      // placed under an older cost estimate. Falls back to the stored value only
+      // if the order has no usable line items.
+      function creditFromItems(items) {
+        if (!Array.isArray(items)) return null;
+        return items.reduce((s, it) => {
+          const price = Number(it.price) || 0;
+          const packSize = Number(it.packSize) || 1;
+          const qty = Number(it.qty) || 0;
+          return s + Math.max(0, price - COST_PER_KIT * packSize) * TEAM_SHARE * qty;
+        }, 0);
+      }
       function creditFromOrder(o) {
-        if (typeof o.fundraiserCredit === 'number' && isFinite(o.fundraiserCredit)) return o.fundraiserCredit;
-        if (!Array.isArray(o.items)) return 0;
-        return o.items.reduce((s, it) => s + creditFor(it.sku, Number(it.qty) || 0), 0);
+        const c = creditFromItems(o.items);
+        if (c !== null) return c;
+        return (typeof o.fundraiserCredit === 'number' && isFinite(o.fundraiserCredit)) ? o.fundraiserCredit : 0;
       }
 
       async function loadProgress(animate = true) {
@@ -1141,18 +1167,20 @@
           const isLeader = rank === 1 && r.raised > 0;
           const podium = rank <= 3 && r.raised > 0;
           const cls = ['player-card', isLeader ? 'leader' : '', (!isLeader && podium) ? 'podium' : '', done ? 'done' : ''].filter(Boolean).join(' ');
+          const jersey = JERSEY[r.label]
+            ? `<div class="player-jersey"><img src="./assets/jerseys/${JERSEY[r.label]}.webp" alt="${esc(r.name)} #${esc(r.number)} jersey" loading="lazy"/></div>`
+            : `<div class="player-jersey player-jersey--num">${esc(r.number) || '–'}</div>`;
           return `<article class="${cls}">
             ${isLeader ? '<span class="crown">👑 LEADER</span>' : ''}
             <span class="player-rank">#${rank}</span>
             <div class="player-top">
-              <span class="player-num">${esc(r.number)}</span>
-              <div>
-                <div class="player-name">${esc(r.name)}</div>
-                <div class="player-sub">Goal $${PLAYER_GOAL}</div>
+              ${jersey}
+              <div class="player-info">
+                <div class="player-name">${esc(r.name)} <span class="player-hashnum">#${esc(r.number)}</span></div>
+                <div class="player-bar"><div class="player-fill" style="width:${pct}%"></div></div>
+                <div class="player-meta"><span class="amt">${money0(r.raised)}</span><span class="pct">${done ? '✓ Goal!' : Math.floor(pct) + '%'}</span></div>
               </div>
             </div>
-            <div class="player-bar"><div class="player-fill" style="width:${pct}%"></div></div>
-            <div class="player-meta"><span class="amt">${money0(r.raised)}</span><span class="pct">${done ? '✓ Goal!' : Math.floor(pct) + '%'}</span></div>
           </article>`;
         }).join('');
       }
