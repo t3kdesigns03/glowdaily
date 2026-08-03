@@ -91,6 +91,9 @@
       .nav { display:flex; gap:22px; }
       .nav a { color:var(--muted); text-decoration:none; font-weight:700; font-size:.9rem; transition:color .2s; }
       .nav a:hover { color:var(--teal); }
+      .nav a.nav-blaze { color:var(--blaze-volt); }
+      .nav a.nav-blaze.is-current { color:var(--blaze-volt); text-shadow:0 0 12px rgba(214,242,36,.5); }
+      .nav a.nav-blaze:hover { color:#E4FF4D; text-shadow:0 0 12px rgba(214,242,36,.55); }
       .header-actions { display:flex; align-items:center; gap:10px; }
       .nav-cta { display:inline-flex; align-items:center; gap:8px; text-decoration:none;
         background:linear-gradient(135deg,var(--teal),var(--green),var(--teal2)); background-size:200% auto;
@@ -225,17 +228,34 @@
       .fund-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:16px; margin-top:18px; }
       @media(max-width:900px){ .fund-grid{grid-template-columns:repeat(2,1fr)} }
       @media(max-width:420px){ .fund-grid{grid-template-columns:1fr} }
-      .fund-card { background:var(--card-bg); border:1px solid rgba(0,232,212,.18); border-radius:var(--radius);
+      .fund-card { position:relative; overflow:hidden;
+        background:linear-gradient(180deg, rgba(14,31,54,.92) 0%, rgba(8,22,40,.94) 100%);
+        border:1px solid rgba(255,255,255,.08); border-radius:18px;
         padding:14px; display:flex; flex-direction:column;
-        transition:transform .2s ease, box-shadow .2s ease, border-color .2s ease; }
-      .fund-card:hover { transform:translateY(-4px); border-color:rgba(0,232,212,.5); box-shadow:0 0 32px rgba(0,232,212,.18); }
+        transition:transform .28s ease, box-shadow .28s ease, border-color .28s ease; }
+      .fund-card::before { content:''; position:absolute; top:0; left:12%; right:12%; height:1px;
+        background:linear-gradient(90deg, transparent, rgba(255,255,255,.28), transparent); }
+      .fund-card:hover { transform:translateY(-6px);
+        border-color:color-mix(in srgb, var(--gl,#00E8D4) 55%, transparent);
+        box-shadow:0 20px 46px rgba(0,0,0,.5), 0 0 40px -8px var(--gl,#00E8D4); }
       .fund-card.in-cart { border-color:var(--teal); box-shadow:0 0 30px rgba(0,232,212,.3); }
-      .fund-shot { position:relative; height:180px; margin-bottom:12px; display:flex;
+      .fund-shot { position:relative; height:214px; margin-bottom:14px; display:flex;
         align-items:flex-end; justify-content:center; }
-      .fund-shot img { max-height:172px; width:auto; filter:drop-shadow(0 10px 22px rgba(0,0,0,.55)); }
-      .sku-tag { position:absolute; top:2px; left:0; background:var(--navy2);
-        border:1px solid rgba(214,242,36,.5); color:var(--blaze-volt);
-        font-size:11px; font-weight:900; letter-spacing:.06em; padding:3px 8px; border-radius:6px; }
+      .fund-shot::before { content:''; position:absolute; left:50%; top:44%; width:158px; height:158px;
+        transform:translate(-50%,-50%); border-radius:50%;
+        background:radial-gradient(circle, var(--gl,#00E8D4) 0%, transparent 68%);
+        opacity:.32; filter:blur(8px); transition:opacity .28s ease; }
+      .fund-shot::after { content:''; position:absolute; bottom:8px; left:50%; transform:translateX(-50%);
+        width:118px; height:15px; border-radius:50%;
+        background:radial-gradient(ellipse, var(--gl,#00E8D4) 0%, transparent 72%); opacity:.5; filter:blur(3px); }
+      .fund-shot img { position:relative; z-index:1; max-height:204px; width:auto;
+        filter:drop-shadow(0 16px 26px rgba(0,0,0,.6)); transition:transform .28s ease; }
+      .fund-card:hover .fund-shot img { transform:translateY(-5px) scale(1.05); }
+      .fund-card:hover .fund-shot::before { opacity:.55; }
+      .sku-tag { position:absolute; z-index:2; top:8px; left:8px; background:rgba(14,31,54,.85);
+        backdrop-filter:blur(4px); border:1px solid rgba(214,242,36,.5); color:var(--blaze-volt);
+        font-size:11px; font-weight:900; letter-spacing:.06em; padding:3px 9px; border-radius:7px;
+        box-shadow:0 2px 8px rgba(0,0,0,.4); }
       .fund-card h3 { font-size:1.15rem; margin-bottom:4px; }
       .fund-desc { font-size:13px; color:var(--muted); line-height:1.5; flex:1; }
       .fund-meta { margin-top:8px; font-size:12px; font-weight:800; color:var(--gold2); }
@@ -251,7 +271,9 @@
         background:linear-gradient(135deg, rgba(155,61,255,.16), rgba(255,122,26,.08));
         border:1px solid rgba(155,61,255,.5); border-radius:var(--radius-lg); box-shadow:var(--glow-purple); }
       @media(min-width:860px){ .ptk-card{grid-template-columns:1fr 1fr} }
-      .ptk-card img { border-radius:12px; box-shadow:0 10px 34px rgba(0,0,0,.5); }
+      .ptk-card img { border-radius:14px; box-shadow:0 14px 40px rgba(0,0,0,.55), 0 0 34px -6px rgba(0,232,212,.4);
+        border:1px solid rgba(255,255,255,.08); transition:transform .28s ease, box-shadow .28s ease; }
+      .ptk-card:hover img { transform:translateY(-4px); box-shadow:0 20px 48px rgba(0,0,0,.6), 0 0 44px -4px rgba(0,232,212,.55); }
       .ptk-tag { display:inline-block; background:var(--blaze-volt); color:#1B2400; font-size:11px;
         font-weight:900; letter-spacing:.1em; text-transform:uppercase; padding:4px 11px; border-radius:999px; margin-bottom:10px; }
       .ptk-card h3 { font-size:1.55rem; margin-bottom:8px; }
@@ -374,7 +396,7 @@
           <span class="logo-text"><span class="nl-glow">Glow</span><span class="nl-daily">Daily</span></span>
         </a>
         <nav class="nav nav--desktop" aria-label="Primary">
-          <a href="#tracker">Our goal</a>
+          <a href="#top" class="nav-blaze is-current">🥎 Support Blaze</a>
           <a href="#menu">Flavors</a>
           <a href="#order">Order</a>
           <a href="../index.html">Main site</a>
@@ -723,6 +745,12 @@
       ];
       const BY_SKU = Object.fromEntries(CATALOG.map((p) => [p.sku, p]));
 
+      // Per-flavor accent glow — presentation only, keyed to each drink's real color.
+      const GLOW = {
+        E1:'#FF3B5C', E2:'#3B7BFF', E3:'#9B3DFF', E4:'#FFB020',
+        L5:'#FFCF3B', L6:'#FF5C63', L7:'#A24BFF', PTK:'#00E8D4'
+      };
+
       let cart = {};
       let selectedPay = 'card';
       let lastRaised = null;
@@ -751,7 +779,7 @@
       /* ── RENDER MENU ──────────────────────────────────────────── */
       function cardHtml(p) {
         return `
-          <article class="fund-card" id="card-${p.sku}">
+          <article class="fund-card" id="card-${p.sku}" style="--gl:${GLOW[p.sku] || '#00E8D4'}">
             <div class="fund-shot">
               <span class="sku-tag">${p.sku}</span>
               <img src="./assets/${p.img}" alt="${esc(p.name)} loaded tea" loading="lazy"/>
