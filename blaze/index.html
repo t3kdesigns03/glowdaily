@@ -391,18 +391,50 @@
       .capacity-note.done strong, .capacity-note strong { color:var(--teal2); }
       .capacity-note.over { color:#FCA5A5; }
       .capacity-note.over strong { color:#FCA5A5; }
-      /* one-click variety 12-pack */
-      .variety-btn { width:100%; margin-top:12px; display:flex; align-items:center; gap:14px; text-align:left;
-        background:linear-gradient(135deg, rgba(155,61,255,.18), rgba(255,184,0,.08));
-        border:1px solid rgba(155,61,255,.5); border-radius:16px; padding:14px 16px; cursor:pointer;
-        color:var(--white); transition:transform .18s ease, box-shadow .18s ease, border-color .18s ease; }
-      .variety-btn:hover { transform:translateY(-2px); border-color:var(--purple2); box-shadow:0 12px 30px -10px rgba(155,61,255,.6); }
-      .variety-emoji { font-size:1.7rem; line-height:1; flex-shrink:0; }
-      .variety-text { flex:1; min-width:0; display:flex; flex-direction:column; }
-      .variety-text strong { font-family:'Space Grotesk',sans-serif; font-weight:800; font-size:1.02rem; }
-      .variety-text small { color:var(--muted); font-size:.78rem; margin-top:2px; }
-      .variety-add { flex-shrink:0; background:linear-gradient(135deg,var(--purple),var(--purple2)); color:#fff;
-        font-weight:800; font-size:.9rem; padding:9px 16px; border-radius:999px; white-space:nowrap; }
+      /* ⭐ Exclusive Variety Pack — the hero product (flyer pink/purple energy) */
+      .variety-hero { position:relative; margin:22px 0 8px; border-radius:22px; overflow:hidden;
+        background:
+          radial-gradient(120% 130% at 12% 0%, rgba(255,46,218,.28) 0%, transparent 55%),
+          radial-gradient(120% 130% at 100% 100%, rgba(155,61,255,.30) 0%, transparent 55%),
+          linear-gradient(135deg, #2a0f3d 0%, #1a0e2e 55%, #120a22 100%);
+        border:1px solid rgba(255,46,218,.5);
+        box-shadow:0 22px 60px -24px rgba(255,46,218,.55), 0 0 60px -18px rgba(155,61,255,.5); }
+      .variety-flag { position:absolute; top:0; left:0; z-index:3;
+        background:linear-gradient(135deg,#FF2EDA,#9B3DFF); color:#fff; font-weight:900;
+        font-size:.72rem; letter-spacing:.1em; text-transform:uppercase; padding:6px 15px 6px 13px;
+        border-radius:0 0 14px 0; box-shadow:0 4px 14px rgba(255,46,218,.5); }
+      .variety-hero-grid { display:grid; grid-template-columns:1fr; align-items:center; }
+      @media(min-width:720px){ .variety-hero-grid{ grid-template-columns:.85fr 1.15fr; } }
+      .variety-hero-art { position:relative; padding:26px 22px 4px; display:flex; align-items:center; justify-content:center; }
+      @media(min-width:720px){ .variety-hero-art{ padding:22px; } }
+      .variety-hero-art::before { content:''; position:absolute; inset:12%;
+        background:radial-gradient(circle,rgba(255,46,218,.4) 0%,transparent 65%); filter:blur(16px); }
+      .variety-hero-art img { position:relative; width:100%; max-width:280px; border-radius:14px; box-shadow:0 16px 44px rgba(0,0,0,.5); }
+      .variety-hero-copy { padding:6px 22px 26px; }
+      @media(min-width:720px){ .variety-hero-copy{ padding:26px 30px 26px 8px; } }
+      .variety-star { font-size:1.5rem; filter:drop-shadow(0 0 10px rgba(255,224,51,.75)); }
+      .variety-hero-copy h3 { font-family:'Space Grotesk',sans-serif; font-size:clamp(1.55rem,4.5vw,2.05rem); line-height:1.05; margin:4px 0 8px; }
+      .variety-pretty { display:inline-block; background:linear-gradient(100deg,#FF2EDA,#C47BFF);
+        -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent; color:#FF2EDA;
+        font-size:.62em; font-weight:800; }
+      .variety-tag { font-weight:800; color:var(--gold2); font-size:1rem; margin-bottom:8px; }
+      .variety-lede { color:var(--muted); font-size:.92rem; line-height:1.65; margin-bottom:14px; }
+      .variety-lede strong { color:#fff; }
+      .variety-facts { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:16px; }
+      .variety-facts span { background:rgba(255,255,255,.06); border:1px solid rgba(255,46,218,.32);
+        border-radius:999px; padding:6px 13px; font-size:.82rem; font-weight:700; color:var(--white); white-space:nowrap; }
+      .variety-cta { width:100%; border:none; cursor:pointer; border-radius:14px; padding:16px 20px;
+        font-family:'Nunito',sans-serif; font-weight:900; font-size:1.08rem; color:#fff;
+        background:linear-gradient(135deg,#FF2EDA 0%,#9B3DFF 55%,#00E8D4 130%); background-size:180% auto;
+        box-shadow:0 12px 30px -8px rgba(255,46,218,.6); animation:shimmer 3s linear infinite;
+        transition:transform .18s ease, box-shadow .18s ease; }
+      .variety-cta:hover { transform:translateY(-2px); box-shadow:0 16px 42px -8px rgba(255,46,218,.85); }
+      .variety-fine { text-align:center; color:var(--muted); font-size:.76rem; margin-top:9px; }
+      @media(prefers-reduced-motion:reduce){ .variety-cta{ animation:none; } }
+
+      .build-divider { display:flex; align-items:center; gap:14px; margin:28px 0 4px;
+        color:var(--muted); font-size:.8rem; font-weight:800; letter-spacing:.08em; text-transform:uppercase; }
+      .build-divider::before, .build-divider::after { content:''; height:1px; flex:1; background:rgba(255,255,255,.12); }
       .fund-flavor-label { font-size:.78rem; font-weight:800; color:var(--muted); text-transform:uppercase; letter-spacing:.04em; }
 
       /* ── compact flavor rows (mix & match) ── */
@@ -840,10 +872,31 @@
         <div class="section-wrap">
           <header class="section-head">
             <h2>Build your fundraiser order</h2>
-            <p>Single-flavor 6-packs, a build-your-own mix of the fundraiser flavors, or the pre-selected Variety 12-Pack.</p>
+            <p>Grab the crowd-favorite Exclusive Variety Pack in one tap — or build your own 6-pack from our fundraiser flavors.</p>
           </header>
 
-          <p class="build-step">1 &middot; Choose your pack(s)</p>
+          <!-- ⭐ HERO: Exclusive Variety Pack (the pretty one) -->
+          <div class="variety-hero">
+            <span class="variety-flag">⚡ Fundraiser Exclusive</span>
+            <div class="variety-hero-grid">
+              <figure class="variety-hero-art">
+                <img src="./assets/ptk-variety-pack.jpg" alt="Power Tea Kits Exclusive Variety Pack — 12 kits, pre-selected mix" width="760" height="997" loading="lazy" />
+              </figure>
+              <div class="variety-hero-copy">
+                <span class="variety-star" aria-hidden="true">⚡</span>
+                <h3>Exclusive Variety Pack <span class="variety-pretty">— the pretty one</span></h3>
+                <p class="variety-tag">12 kits, ready to go — a pre-selected mix of every fundraiser flavor.</p>
+                <p class="variety-lede">Exclusive flavors available <strong>only through this fundraiser</strong>. No picking required — we mixed the perfect assortment for you (tweak it after if you like).</p>
+                <div class="variety-facts"><span>🧋 12 kits</span><span>💵 $80.00</span><span>🥎 $20.50 to the team</span></div>
+                <button type="button" class="variety-cta" onclick="addVariety12()">⚡ Add Exclusive Variety Pack — $80</button>
+                <p class="variety-fine">One tap fills all 12 kits with the official variety mix.</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="build-divider"><span>or build your own</span></div>
+
+          <p class="build-step">Choose your pack size</p>
           <div class="pack-grid">
             <div class="pack-select" id="pack-6">
               <div class="pack-head"><span class="pack-name">6-Pack</span><span class="pack-price">$40.00</span></div>
@@ -865,16 +918,7 @@
             </div>
           </div>
 
-          <button type="button" class="variety-btn" onclick="addVariety12()">
-            <span class="variety-emoji" aria-hidden="true">🎉</span>
-            <span class="variety-text">
-              <strong>One-click Variety 12-Pack</strong>
-              <small>12 kits, pre-selected mix of all fundraiser flavors &middot; $80 &middot; $20.50 to the team</small>
-            </span>
-            <span class="variety-add">+ Add</span>
-          </button>
-
-          <p class="build-step">2 &middot; Pick your flavors <span class="build-step-mix">(choose from the fundraiser flavors only &mdash; single-flavor 6-packs or mix &amp; match)</span></p>
+          <p class="build-step">Pick your flavors <span class="build-step-mix">(from the fundraiser flavors &mdash; single-flavor 6-packs or mix &amp; match)</span></p>
           <div class="capacity-wrap">
             <div class="capacity-bar"><div class="capacity-fill" id="capacityFill"></div></div>
             <p class="capacity-note" id="capacityNote">Choose a 6-pack or 12-pack above, then pick your flavors.</p>
