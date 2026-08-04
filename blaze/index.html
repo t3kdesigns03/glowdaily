@@ -358,6 +358,18 @@
       .capacity-note.done strong, .capacity-note strong { color:var(--teal2); }
       .capacity-note.over { color:#FCA5A5; }
       .capacity-note.over strong { color:#FCA5A5; }
+      /* one-click variety 12-pack */
+      .variety-btn { width:100%; margin-top:12px; display:flex; align-items:center; gap:14px; text-align:left;
+        background:linear-gradient(135deg, rgba(155,61,255,.18), rgba(255,184,0,.08));
+        border:1px solid rgba(155,61,255,.5); border-radius:16px; padding:14px 16px; cursor:pointer;
+        color:var(--white); transition:transform .18s ease, box-shadow .18s ease, border-color .18s ease; }
+      .variety-btn:hover { transform:translateY(-2px); border-color:var(--purple2); box-shadow:0 12px 30px -10px rgba(155,61,255,.6); }
+      .variety-emoji { font-size:1.7rem; line-height:1; flex-shrink:0; }
+      .variety-text { flex:1; min-width:0; display:flex; flex-direction:column; }
+      .variety-text strong { font-family:'Space Grotesk',sans-serif; font-weight:800; font-size:1.02rem; }
+      .variety-text small { color:var(--muted); font-size:.78rem; margin-top:2px; }
+      .variety-add { flex-shrink:0; background:linear-gradient(135deg,var(--purple),var(--purple2)); color:#fff;
+        font-weight:800; font-size:.9rem; padding:9px 16px; border-radius:999px; white-space:nowrap; }
       .fund-flavor-label { font-size:.78rem; font-weight:800; color:var(--muted); text-transform:uppercase; letter-spacing:.04em; }
 
       /* ── compact flavor rows (mix & match) ── */
@@ -711,7 +723,7 @@
         <div class="section-wrap">
           <header class="section-head">
             <h2>Build your fundraiser order</h2>
-            <p>Choose a pack size, then mix &amp; match any flavors to fill it.</p>
+            <p>Single-flavor 6-packs, a build-your-own mix of the fundraiser flavors, or the pre-selected Variety 12-Pack.</p>
           </header>
 
           <p class="build-step">1 &middot; Choose your pack(s)</p>
@@ -736,15 +748,22 @@
             </div>
           </div>
 
-          <p class="build-step">2 &middot; Pick your flavors <span class="build-step-mix">(mix &amp; match &mdash; any from our menu)</span></p>
+          <button type="button" class="variety-btn" onclick="addVariety12()">
+            <span class="variety-emoji" aria-hidden="true">🎉</span>
+            <span class="variety-text">
+              <strong>One-click Variety 12-Pack</strong>
+              <small>12 kits, pre-selected mix of all fundraiser flavors &middot; $80 &middot; $20.50 to the team</small>
+            </span>
+            <span class="variety-add">+ Add</span>
+          </button>
+
+          <p class="build-step">2 &middot; Pick your flavors <span class="build-step-mix">(choose from the fundraiser flavors only &mdash; single-flavor 6-packs or mix &amp; match)</span></p>
           <div class="capacity-wrap">
             <div class="capacity-bar"><div class="capacity-fill" id="capacityFill"></div></div>
             <p class="capacity-note" id="capacityNote">Choose a 6-pack or 12-pack above, then pick your flavors.</p>
           </div>
 
-          <div class="flavor-list" id="flavorList">
-            <p class="order-cart-hint" style="margin:0">Loading our flavors…</p>
-          </div>
+          <div class="flavor-list" id="flavorList"></div>
         </div>
       </section>
 
@@ -994,51 +1013,32 @@
       const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
       emailjs.init('5vEW7OfRzLj8KG5lM');
 
-      /* ── FLAVORS (mix & match) — pulled live from the main-site menu ──
-         Loaded from Supabase gd_store 'products' (same source the homepage
-         uses), so this list always mirrors glowdailynutrition.com/#menu.
-         FALLBACK is used only if the live fetch is unavailable.            */
-      const FALLBACK_FLAVORS = [
-        { id:1,  name:'American Bomb Pop', emoji:'🎆', desc:'Blue Blast · Cherry' },
-        { id:2,  name:'Galaxy Blast',      emoji:'🌌', desc:'Blackberry · Blue Blast · Lemonade · Wild Berry' },
-        { id:3,  name:'County Fair',       emoji:'🎡', desc:'Lemonade · Wild Berry · Strawberry · Cotton Candy' },
-        { id:4,  name:'Orange Push Pop',   emoji:'🍊', desc:'Orange LO · Cherry · Orange · Vanilla' },
-        { id:5,  name:'Crazy Funhouse',    emoji:'🎪', desc:'Pomegranate · Rainbow Candy · Strawberry · Blue Raspberry · Sour Green Apple' },
-        { id:6,  name:'Poison Apple',      emoji:'🍎', desc:'Lime · Sour Apple · Red Raspberry · Cherry' },
-        { id:7,  name:'Countryside Blush', emoji:'🌸', desc:'Pomegranate · Cotton Candy · Strawberry Starburst · Red Raspberry · Watermelon' },
-        { id:8,  name:'Pom Berry',         emoji:'🍇', desc:'Pomegranate · Wild Berry' },
-        { id:9,  name:'Chum Bucket',       emoji:'🫧', desc:'Blue Blast · Strawberry · White Grape' },
-        { id:10, name:'Purple Passion',    emoji:'💜', desc:'Strawberry Starburst · Cotton Candy · Wild Berry · Lemonade' },
-        { id:11, name:'Cherri Sherri',     emoji:'🍒', desc:'Cherry · Pomegranate · Cranberry · Vanilla · Cherry Cold Foam' },
-        { id:12, name:'Tropical Sunrise',  emoji:'🌅', desc:'Tropical Liftoff · Pineapple · Coconut · Cherry' },
-        { id:13, name:'Mario the Plumber', emoji:'🍄', desc:'Pomegranate · Cherry · Watermelon · Blue Raspberry · Blue Blast' },
-        { id:14, name:'Mystery Machine',   emoji:'🔮', desc:'Pineapple · Green Apple · Blue Raspberry · Blue Blast' },
-        { id:15, name:'Bella-Rita',        emoji:'🍹', desc:'Margarita · Strawberry Starburst · Raspberry · Strawberry · Lime' },
-        { id:16, name:'MadDogg',           emoji:'🐕', desc:'Wild Berry · Cherry · Blue Razz · Pomegranate · Blackberry' },
-        { id:17, name:'Robert Marlicious', emoji:'🧃', desc:'Orange Liftoff · Lemon Tea · Fruit Punch · Sour Apple' }
+      /* ── FUNDRAISER FLAVORS ONLY ─────────────────────────────────
+         The ONLY flavors sold through the Blaze fundraiser — the flyer's
+         signature + low/caffeine-free flavors. This page does NOT use the
+         full GlowDaily menu. Customers can build a 6-pack from single
+         flavors or mix & match ACROSS THESE ONLY; the 12-pack is a fixed
+         pre-selected variety of the same flavors.                        */
+      const FUNDRAISER_FLAVORS = [
+        { id:1, name:'Cherry Lime',      emoji:'🍒', desc:'Cherry + Lime + Lemon' },
+        { id:2, name:'Bomb Pop',         emoji:'🎆', desc:'Blue & Red Raspberry + Pomegranate' },
+        { id:3, name:'Grape Escape',     emoji:'🍇', desc:'Grape + Orange + Lemon' },
+        { id:4, name:'Pineapple Push',   emoji:'🍍', desc:'Pineapple + Tropical + Raspberry' },
+        { id:5, name:'Lemon Pom Pom',    emoji:'🍋', desc:'Strawberry Lemonade + Pomegranate' },
+        { id:6, name:'Watermelon Crush', emoji:'🍉', desc:'Orange + Watermelon + Raspberry' },
+        { id:7, name:'Acai Berry Twist', emoji:'🫐', desc:'Strawberry Lemonade + Acai + Orange' }
       ];
-      let FLAVORS = [];          // active flavors (populated by loadFlavors)
-      let FLAVORS_BY_ID = {};
+      let FLAVORS = FUNDRAISER_FLAVORS.slice();
+      let FLAVORS_BY_ID = Object.fromEntries(FLAVORS.map((f) => [String(f.id), f]));
 
-      async function loadFlavors() {
-        let list = null;
-        try {
-          const { data } = await sb.from('gd_store').select('value').eq('key', 'products').maybeSingle();
-          if (Array.isArray(data?.value)) {
-            list = data.value
-              // real, orderable flavors only — no bundles or build-your-own
-              .filter((p) => p && p.active !== false && !p.isPack && !p.isCustomFlavor
-                && !/12.?pack|flavor\s*friday/i.test(String(p.name || '')))
-              .map((p) => {
-                const ref = FALLBACK_FLAVORS.find((f) => String(f.id) === String(p.id));
-                return { id: p.id, name: p.name, emoji: p.emoji || (ref && ref.emoji) || '🥤',
-                         desc: p.flavors || (ref && ref.desc) || '' };
-              });
-          }
-        } catch (e) { console.warn('Live menu unavailable — using fallback flavors:', e); }
-        FLAVORS = (list && list.length) ? list : FALLBACK_FLAVORS.slice();
-        FLAVORS_BY_ID = Object.fromEntries(FLAVORS.map((f) => [String(f.id), f]));
-      }
+      // Pre-selected Variety 12-Pack — a fixed assortment of the 7 flavors
+      // that totals exactly 12 kits:
+      //   Cherry Lime 2, Bomb Pop 2, Grape Escape 2, Pineapple Push 2,
+      //   Lemon Pom Pom 2, Watermelon Crush 1, Acai Berry Twist 1  = 12
+      const VARIETY_12 = { 1: 2, 2: 2, 3: 2, 4: 2, 5: 2, 6: 1, 7: 1 };
+
+      // Flavors are hard-coded above — no Supabase products fetch on this page.
+      async function loadFlavors() { /* fundraiser flavors are fixed; nothing to fetch */ }
 
       // ── Cart state ──────────────────────────────────────────────
       let packs   = { 6: 0, 12: 0 };   // how many 6-packs / 12-packs
@@ -1092,6 +1092,15 @@
       function changePack(size, delta) {
         packs[size] = Math.max(0, (packs[size] || 0) + delta);
         updateCart();
+      }
+      // One-click pre-selected Variety 12-Pack: adds one 12-pack and fills it
+      // with the official VARIETY_12 assortment. Customer can still adjust the
+      // flavor steppers afterward (capacity stays matched).
+      function addVariety12() {
+        packs[12] = (packs[12] || 0) + 1;
+        for (const [id, n] of Object.entries(VARIETY_12)) flavors[id] = (flavors[id] || 0) + n;
+        updateCart();
+        const el = $('flavorList'); if (el && el.scrollIntoView) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
       }
       function changeFlavor(sku, delta) {
         if (delta > 0 && picked() >= capacity()) { flashCapacity(); return; }
