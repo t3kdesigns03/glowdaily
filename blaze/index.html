@@ -353,6 +353,7 @@
         background:rgba(4,12,24,.55); border:1px solid rgba(0,232,212,.3); border-radius:14px; padding:16px 18px; }
       .venmo-box p { margin:5px 0; color:var(--white); font-size:.95rem; line-height:1.5; }
       .venmo-box strong { color:var(--teal2); }
+      .venmo-sub { color:var(--muted) !important; font-size:.8rem !important; margin-top:-2px !important; }
       .venmo-warn { color:var(--gold2) !important; font-weight:800; font-size:.85rem !important;
         margin-top:12px !important; border-top:1px solid rgba(255,184,0,.28); padding-top:11px; }
       .venmo-warn u { color:#fff; }
@@ -783,9 +784,10 @@
               <h3>Thank you for backing <span id="donateThanksWho"></span>!</h3>
               <p>Your <strong id="donateThanksAmt"></strong> is already on <span id="donateThanksWho2"></span>'s meter. To complete your gift:</p>
               <div class="venmo-box">
-                <p>Send <strong id="venmoAmt"></strong> to <strong>@GlowDaily</strong> on <strong>Venmo</strong></p>
+                <p>Send <strong id="venmoAmt"></strong> to <strong>@REMIX-12C-B2</strong> on <strong>Venmo</strong></p>
+                <p class="venmo-sub">(Direct to Team Venmo &ndash; Blaze Remix)</p>
                 <p>Note: <strong id="venmoNote"></strong></p>
-                <p class="venmo-warn">⚠️ IMPORTANT: do <u>NOT</u> turn on the &ldquo;for purchases&rdquo; (Goods &amp; Services) toggle — this is a personal gift, not a purchase.</p>
+                <p class="venmo-warn">⚠️ IMPORTANT: do <u>NOT</u> turn on the &ldquo;for purchases&rdquo; (Goods &amp; Services) toggle — this is a personal gift / direct team support, not a purchase.</p>
               </div>
               <button type="button" class="btn btn-ghost" onclick="resetDonate()">Support another player</button>
             </div>
@@ -1563,11 +1565,12 @@
         const playerName = ((player.match(/^(.*?)\s*#/) || [])[1] || player).trim();
         const amt2 = Number(amt.toFixed(2));
         const orderId = 'GD-' + Date.now().toString(36).toUpperCase();
+        const noteFinal = note || 'SUPPORT BLAZE';   // default entry when left blank
         const noteStr =
           `DIRECT DONATION (no tea) | FUNDRAISER: ${TEAM_NAME} | Player: ${player}` +
           ` | To player: ${money(amt2)} | From: ${name} | Email: ${email}` +
-          (note ? ` | Note: ${note}` : '') +
-          ` | Pay: Venmo @GlowDaily (personal gift — NOT goods & services)`;
+          ` | Note: ${noteFinal} | Ref: ${orderId}` +
+          ` | Pay: Venmo @REMIX-12C-B2 (Direct to Team Venmo — personal gift, NOT goods & services)`;
 
         // Tip-only record — identical write pattern to tea orders, items: [].
         // creditFromOrder() = packCredit(0) + fundraiserTip, so it flows straight
@@ -1580,7 +1583,7 @@
           fulfillment: 'Direct donation',
           fundraiser: FUNDRAISER_TAG, fundraiserTeam: TEAM_NAME, fundraiserPlayer: player,
           fundraiserPlayerNumber: pl.number || null, fundraiserOrg: null,
-          fundraiserPacks: { 6: 0, 12: 0 }, fundraiserFlavors: null,
+          fundraiserPacks: { 6: 0, 12: 0 }, fundraiserFlavors: null, fundraiserDonorNote: noteFinal,
           fundraiserCredit: 0, fundraiserTip: amt2, fundraiserToTeam: amt2,
           type: 'donation', isDonation: true, payment: 'venmo'
         };
@@ -1597,8 +1600,8 @@
           try {
             await emailjs.send('service_9umcv8b', 'template_g1rpfut', {
               order_id: orderId, date: orderRow.date, customer: name, contact: email,
-              items: `DIRECT DONATION (no tea)\nPlayer: ${player}\nAmount: ${money(amt2)}` + (note ? `\nNote: ${note}` : ''),
-              total: money(amt2), payment: 'Venmo (@GlowDaily)', fulfillment: 'Direct donation', tracking: '', notes: noteStr
+              items: `DIRECT DONATION (no tea)\nPlayer: ${player}\nAmount: ${money(amt2)}\nNote: ${noteFinal}\nRef: ${orderId}`,
+              total: money(amt2), payment: 'Venmo (@REMIX-12C-B2 — Direct to Team)', fulfillment: 'Direct donation', tracking: '', notes: noteStr
             });
           } catch (e) { /* email non-critical */ }
           try {
@@ -1607,25 +1610,26 @@
               total: amt2, status: 'Received', is_backorder: false, shipping: orderRow.shipping, note: noteStr
             }]);
           } catch (e) { /* backup non-critical */ }
-          finishDonation(playerName, amt2);
+          finishDonation(playerName, amt2, orderId);
         } catch (err) {
           console.error(err);
           try {
             const p = JSON.parse(localStorage.getItem('gd_web_orders') || '[]');
             localStorage.setItem('gd_web_orders', JSON.stringify([orderRow, ...p]));
           } catch (e) {}
-          finishDonation(playerName, amt2);
+          finishDonation(playerName, amt2, orderId);
         }
         btn.disabled = false; updateDonateBtn();
       }
-      function finishDonation(playerName, amt) {
+      function finishDonation(playerName, amt, orderId) {
         $('donateForm').style.display = 'none';
         $('donateThanks').classList.add('show');
         $('donateThanksWho').textContent = playerName;
         $('donateThanksWho2').textContent = playerName;
         $('donateThanksAmt').textContent = money(amt);
         $('venmoAmt').textContent = money(amt);
-        $('venmoNote').textContent = `Blaze support for ${playerName}`;
+        // Payment note doubles as tracking: player + order reference.
+        $('venmoNote').textContent = `Blaze support for ${playerName} · Ref ${orderId}`;
         loadProgress(true);
         $('donateCard').scrollIntoView({ behavior: 'smooth', block: 'center' });
       }
