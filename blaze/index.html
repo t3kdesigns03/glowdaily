@@ -405,20 +405,14 @@
         background:linear-gradient(135deg,var(--purple),#6B21C4); color:#fff; font-weight:900;
         font-size:.66rem; letter-spacing:.11em; text-transform:uppercase; padding:5px 13px 5px 12px;
         border-radius:0 0 12px 0; box-shadow:0 3px 12px rgba(155,61,255,.5); }
-      .variety-hero-inner { display:grid; grid-template-columns:1fr; gap:16px; align-items:center; padding:32px 22px 22px; }
-      @media(min-width:640px){ .variety-hero-inner{ grid-template-columns:auto 1fr; gap:26px; padding:30px; } }
-      /* "12 KITS" badge = the visual anchor, no poster image */
-      .variety-badge { position:relative; justify-self:center; width:116px; height:116px; border-radius:50%;
-        display:flex; flex-direction:column; align-items:center; justify-content:center;
-        background:radial-gradient(circle at 50% 34%, rgba(155,61,255,.38), rgba(4,12,24,.65));
-        border:1px solid rgba(155,61,255,.5);
-        box-shadow:0 0 0 6px rgba(155,61,255,.08), inset 0 0 30px rgba(0,232,212,.14); }
-      .variety-badge::after { content:'⚡'; position:absolute; top:-6px; right:-2px; font-size:1.3rem;
-        filter:drop-shadow(0 0 8px rgba(255,184,0,.75)); }
-      .variety-badge-num { font-family:'Space Grotesk',sans-serif; font-weight:800; font-size:2.7rem; line-height:1;
-        background:linear-gradient(135deg,var(--teal2),var(--purple2)); -webkit-background-clip:text; background-clip:text;
-        -webkit-text-fill-color:transparent; color:var(--teal2); }
-      .variety-badge-label { font-size:.7rem; font-weight:800; letter-spacing:.2em; color:var(--muted); margin-top:2px; }
+      .variety-hero-inner { display:grid; grid-template-columns:1fr; gap:18px; align-items:center; padding:30px 20px 22px; }
+      @media(min-width:640px){ .variety-hero-inner{ grid-template-columns:minmax(0,0.98fr) 1.08fr; gap:26px; padding:26px 28px; } }
+      /* branded cup composite — fixed aspect via width:100%+height:auto, so it never stretches */
+      .variety-pic { position:relative; border-radius:15px; overflow:hidden;
+        border:1px solid rgba(255,255,255,.08); box-shadow:0 14px 34px rgba(0,0,0,.5); }
+      .variety-pic img { display:block; width:100%; height:auto; }
+      .variety-pic::after { content:''; position:absolute; inset:0; pointer-events:none; border-radius:15px;
+        box-shadow:inset 0 0 30px 6px rgba(10,7,20,.35); }
       .variety-hero-copy { text-align:center; }
       @media(min-width:640px){ .variety-hero-copy{ text-align:left; } }
       .variety-hero-copy h3 { font-family:'Space Grotesk',sans-serif; font-size:clamp(1.4rem,4.2vw,1.9rem); line-height:1.08; margin-bottom:6px; }
@@ -888,9 +882,8 @@
           <div class="variety-hero">
             <span class="variety-flag">⚡ Fundraiser Exclusive</span>
             <div class="variety-hero-inner">
-              <div class="variety-badge" aria-hidden="true">
-                <span class="variety-badge-num">12</span>
-                <span class="variety-badge-label">KITS</span>
+              <div class="variety-pic">
+                <img src="./assets/variety-cups.webp" alt="Blaze Remix Exclusive Variety Pack — a mix of fundraiser flavors" width="900" height="410" loading="lazy" />
               </div>
               <div class="variety-hero-copy">
                 <h3>Exclusive Variety Pack <span class="variety-pretty">— the pretty one</span></h3>
