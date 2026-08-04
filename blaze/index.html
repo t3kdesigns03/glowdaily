@@ -360,6 +360,20 @@
       .capacity-note.over strong { color:#FCA5A5; }
       .fund-flavor-label { font-size:.78rem; font-weight:800; color:var(--muted); text-transform:uppercase; letter-spacing:.04em; }
 
+      /* ── compact flavor rows (mix & match) ── */
+      .flavor-list { display:grid; grid-template-columns:repeat(2,1fr); gap:10px; margin-top:14px; }
+      @media(max-width:640px){ .flavor-list{ grid-template-columns:1fr; } }
+      .flavor-row { display:flex; align-items:center; gap:12px; background:var(--card-bg);
+        border:1px solid rgba(255,255,255,.08); border-radius:13px; padding:11px 13px;
+        transition:border-color .2s ease, box-shadow .2s ease; }
+      .flavor-row.in-cart { border-color:var(--teal); box-shadow:0 0 24px -6px rgba(0,232,212,.55); }
+      .flavor-emoji { font-size:1.65rem; line-height:1; flex-shrink:0; width:34px; text-align:center; }
+      .flavor-meta { flex:1; min-width:0; }
+      .flavor-name { display:block; font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:.98rem; line-height:1.15; }
+      .flavor-desc { display:block; font-size:.72rem; color:var(--muted); line-height:1.3; margin-top:2px;
+        white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+      .flavor-row .stepper { flex-shrink:0; }
+
       /* ── donation banner (prominent, live) ── */
       .donation-banner { display:none; align-items:center; gap:14px; margin-bottom:20px;
         background:linear-gradient(135deg, rgba(31,217,138,.18), rgba(0,232,212,.1));
@@ -722,20 +736,15 @@
             </div>
           </div>
 
-          <p class="build-step">2 &middot; Pick your flavors <span class="build-step-mix">(mix &amp; match)</span></p>
+          <p class="build-step">2 &middot; Pick your flavors <span class="build-step-mix">(mix &amp; match &mdash; any from our menu)</span></p>
           <div class="capacity-wrap">
             <div class="capacity-bar"><div class="capacity-fill" id="capacityFill"></div></div>
             <p class="capacity-note" id="capacityNote">Choose a 6-pack or 12-pack above, then pick your flavors.</p>
           </div>
 
-          <div class="menu-band">
-            Signature Flavors
-            <small>20 calories &middot; 200mg caffeine &middot; B vitamins &middot; metabolism boosting</small>
+          <div class="flavor-list" id="flavorList">
+            <p class="order-cart-hint" style="margin:0">Loading our flavors…</p>
           </div>
-          <div class="fund-grid" id="signatureGrid"></div>
-
-          <div class="menu-band">Low + Caffeine Free Options</div>
-          <div class="fund-grid" id="lowCafGrid"></div>
         </div>
       </section>
 
@@ -985,27 +994,55 @@
       const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
       emailjs.init('5vEW7OfRzLj8KG5lM');
 
-      /* ── FLAVORS (mix & match — choose any to fill your pack) ──── */
-      const CATALOG = [
-        { sku:'E1',  group:'sig', name:'Cherry Lime',          desc:'Cherry + Lime + Lemon',               img:'e1-cherry-lime.webp' },
-        { sku:'E2',  group:'sig', name:'Bomb Pop',             desc:'Blue & Red Raspberry + Pomegranate',  img:'e2-bomb-pop.webp' },
-        { sku:'E3',  group:'sig', name:'Grape Escape',         desc:'Grape + Orange + Lemon',              img:'e3-grape-escape.webp' },
-        { sku:'E4',  group:'sig', name:'Pineapple Push',       desc:'Pineapple + Tropical + Raspberry',    img:'e4-pineapple-push.webp' },
-        { sku:'L5',  group:'low', name:'Lemon Pom Pom',        desc:'Strawberry Lemonade + Pomegranate',   img:'l5-lemon-pom-pom.webp',    meta:'75mg caffeine + collagen' },
-        { sku:'L6',  group:'low', name:'Watermelon Crush',     desc:'Orange + Watermelon + Raspberry',     img:'l6-watermelon-crush.webp', meta:'85mg caffeine + hydration' },
-        { sku:'L7',  group:'low', name:'Acai Berry Twist',     desc:'Strawberry Lemonade + Acai + Orange', img:'l7-acai-berry-twist.webp', meta:'Hydration + collagen' }
+      /* ── FLAVORS (mix & match) — pulled live from the main-site menu ──
+         Loaded from Supabase gd_store 'products' (same source the homepage
+         uses), so this list always mirrors glowdailynutrition.com/#menu.
+         FALLBACK is used only if the live fetch is unavailable.            */
+      const FALLBACK_FLAVORS = [
+        { id:1,  name:'American Bomb Pop', emoji:'🎆', desc:'Blue Blast · Cherry' },
+        { id:2,  name:'Galaxy Blast',      emoji:'🌌', desc:'Blackberry · Blue Blast · Lemonade · Wild Berry' },
+        { id:3,  name:'County Fair',       emoji:'🎡', desc:'Lemonade · Wild Berry · Strawberry · Cotton Candy' },
+        { id:4,  name:'Orange Push Pop',   emoji:'🍊', desc:'Orange LO · Cherry · Orange · Vanilla' },
+        { id:5,  name:'Crazy Funhouse',    emoji:'🎪', desc:'Pomegranate · Rainbow Candy · Strawberry · Blue Raspberry · Sour Green Apple' },
+        { id:6,  name:'Poison Apple',      emoji:'🍎', desc:'Lime · Sour Apple · Red Raspberry · Cherry' },
+        { id:7,  name:'Countryside Blush', emoji:'🌸', desc:'Pomegranate · Cotton Candy · Strawberry Starburst · Red Raspberry · Watermelon' },
+        { id:8,  name:'Pom Berry',         emoji:'🍇', desc:'Pomegranate · Wild Berry' },
+        { id:9,  name:'Chum Bucket',       emoji:'🫧', desc:'Blue Blast · Strawberry · White Grape' },
+        { id:10, name:'Purple Passion',    emoji:'💜', desc:'Strawberry Starburst · Cotton Candy · Wild Berry · Lemonade' },
+        { id:11, name:'Cherri Sherri',     emoji:'🍒', desc:'Cherry · Pomegranate · Cranberry · Vanilla · Cherry Cold Foam' },
+        { id:12, name:'Tropical Sunrise',  emoji:'🌅', desc:'Tropical Liftoff · Pineapple · Coconut · Cherry' },
+        { id:13, name:'Mario the Plumber', emoji:'🍄', desc:'Pomegranate · Cherry · Watermelon · Blue Raspberry · Blue Blast' },
+        { id:14, name:'Mystery Machine',   emoji:'🔮', desc:'Pineapple · Green Apple · Blue Raspberry · Blue Blast' },
+        { id:15, name:'Bella-Rita',        emoji:'🍹', desc:'Margarita · Strawberry Starburst · Raspberry · Strawberry · Lime' },
+        { id:16, name:'MadDogg',           emoji:'🐕', desc:'Wild Berry · Cherry · Blue Razz · Pomegranate · Blackberry' },
+        { id:17, name:'Robert Marlicious', emoji:'🧃', desc:'Orange Liftoff · Lemon Tea · Fruit Punch · Sour Apple' }
       ];
-      const BY_SKU = Object.fromEntries(CATALOG.map((p) => [p.sku, p]));
+      let FLAVORS = [];          // active flavors (populated by loadFlavors)
+      let FLAVORS_BY_ID = {};
 
-      // Per-flavor accent glow — presentation only, keyed to each drink's real color.
-      const GLOW = {
-        E1:'#FF3B5C', E2:'#3B7BFF', E3:'#9B3DFF', E4:'#FFB020',
-        L5:'#FFCF3B', L6:'#FF5C63', L7:'#A24BFF'
-      };
+      async function loadFlavors() {
+        let list = null;
+        try {
+          const { data } = await sb.from('gd_store').select('value').eq('key', 'products').maybeSingle();
+          if (Array.isArray(data?.value)) {
+            list = data.value
+              // real, orderable flavors only — no bundles or build-your-own
+              .filter((p) => p && p.active !== false && !p.isPack && !p.isCustomFlavor
+                && !/12.?pack|flavor\s*friday/i.test(String(p.name || '')))
+              .map((p) => {
+                const ref = FALLBACK_FLAVORS.find((f) => String(f.id) === String(p.id));
+                return { id: p.id, name: p.name, emoji: p.emoji || (ref && ref.emoji) || '🥤',
+                         desc: p.flavors || (ref && ref.desc) || '' };
+              });
+          }
+        } catch (e) { console.warn('Live menu unavailable — using fallback flavors:', e); }
+        FLAVORS = (list && list.length) ? list : FALLBACK_FLAVORS.slice();
+        FLAVORS_BY_ID = Object.fromEntries(FLAVORS.map((f) => [String(f.id), f]));
+      }
 
       // ── Cart state ──────────────────────────────────────────────
       let packs   = { 6: 0, 12: 0 };   // how many 6-packs / 12-packs
-      let flavors = {};                // { flavorSku: qty of kits }
+      let flavors = {};                // { flavorId: qty of kits }
       let tip     = 0;                 // optional tip to the player/team
       let selectedPay = 'card';
       let selectedFulfill = 'pickup';   // 'pickup' = free, 'ship' = +$9
@@ -1024,30 +1061,28 @@
         String(s).replace(/[&<>"']/g, (c) => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;' }[c]));
       const $ = (id) => document.getElementById(id);
 
-      /* ── RENDER FLAVOR MENU (mix & match) ─────────────────────── */
-      function cardHtml(p) {
+      /* ── RENDER FLAVOR MENU (compact mix & match rows) ────────── */
+      function flavorRowHtml(f) {
+        const id = String(f.id);
         return `
-          <article class="fund-card" id="card-${p.sku}" style="--gl:${GLOW[p.sku] || '#00E8D4'}">
-            <div class="fund-shot">
-              <span class="sku-tag">${p.sku}</span>
-              <img src="./assets/${p.img}" alt="${esc(p.name)} loaded tea" loading="lazy"/>
-            </div>
-            <h3>${esc(p.name)}</h3>
-            <p class="fund-desc">${esc(p.desc)}</p>
-            ${p.meta ? `<p class="fund-meta">${esc(p.meta)}</p>` : ''}
-            <div class="fund-foot">
-              <span class="fund-flavor-label">Add to pack</span>
-              <div class="stepper">
-                <button type="button" onclick="changeFlavor('${p.sku}',-1)" aria-label="Remove one ${esc(p.name)}">&minus;</button>
-                <span class="n" id="qty-${p.sku}">0</span>
-                <button type="button" onclick="changeFlavor('${p.sku}',1)" aria-label="Add one ${esc(p.name)}">+</button>
-              </div>
-            </div>
-          </article>`;
+          <div class="flavor-row" id="frow-${id}">
+            <span class="flavor-emoji" aria-hidden="true">${f.emoji || '🥤'}</span>
+            <span class="flavor-meta">
+              <span class="flavor-name">${esc(f.name)}</span>
+              ${f.desc ? `<span class="flavor-desc">${esc(f.desc)}</span>` : ''}
+            </span>
+            <span class="stepper">
+              <button type="button" onclick="changeFlavor('${id}',-1)" aria-label="Remove one ${esc(f.name)}">&minus;</button>
+              <span class="n" id="qty-${id}">0</span>
+              <button type="button" onclick="changeFlavor('${id}',1)" aria-label="Add one ${esc(f.name)}">+</button>
+            </span>
+          </div>`;
       }
       function renderMenu() {
-        $('signatureGrid').innerHTML = CATALOG.filter((p) => p.group === 'sig').map(cardHtml).join('');
-        $('lowCafGrid').innerHTML = CATALOG.filter((p) => p.group === 'low').map(cardHtml).join('');
+        const list = $('flavorList');
+        list.innerHTML = FLAVORS.length
+          ? FLAVORS.map(flavorRowHtml).join('')
+          : '<p class="order-cart-hint" style="margin:0">No flavors available right now — please refresh.</p>';
       }
 
       /* ── CART: packs + mix&match flavors + tip ────────────────── */
@@ -1097,12 +1132,12 @@
 
       function updateCart() {
         // flavor steppers
-        for (const p of CATALOG) {
-          const q = flavors[p.sku] || 0;
-          const bubble = $('qty-' + p.sku);
+        for (const f of FLAVORS) {
+          const q = flavors[f.id] || 0;
+          const bubble = $('qty-' + f.id);
           if (bubble) bubble.textContent = q;
-          const card = $('card-' + p.sku);
-          if (card) card.classList.toggle('in-cart', q > 0);
+          const row = $('frow-' + f.id);
+          if (row) row.classList.toggle('in-cart', q > 0);
         }
         // pack steppers
         $('pack6Qty').textContent = packs[6];
@@ -1142,7 +1177,7 @@
             </div>
           </div>`);
         });
-        const flavorList = Object.entries(flavors).map(([sku, q]) => `${esc(BY_SKU[sku].name)} ×${q}`).join(' · ');
+        const flavorList = Object.entries(flavors).map(([id, q]) => `${esc((FLAVORS_BY_ID[id] || {}).name || id)} ×${q}`).join(' · ');
         if (flavorList) lines.push(`<div class="cart-line"><div class="cart-line-info" style="flex:1"><strong>Flavors</strong><span>${flavorList}</span></div></div>`);
         $('cartLines').innerHTML = lines.join('');
         $('cartHint').style.display = lines.length ? 'none' : 'block';
@@ -1419,7 +1454,7 @@
         btn.textContent = 'Placing order…';
 
         // Flavor selection (mix & match) as a readable summary.
-        const flavorSummary = Object.entries(flavors).map(([sku, q]) => `${BY_SKU[sku].name} x${q}`).join(', ');
+        const flavorSummary = Object.entries(flavors).map(([id, q]) => `${(FLAVORS_BY_ID[id] || {}).name || id} x${q}`).join(', ');
         // items[] = one line per pack size, carrying isPack/packSize so the
         // dashboard's COGS + fixed-credit math works exactly like any order.
         const items = [];
@@ -1565,15 +1600,18 @@
       }
 
       /* ── INIT ─────────────────────────────────────────────────── */
-      document.addEventListener('DOMContentLoaded', () => {
+      document.addEventListener('DOMContentLoaded', async () => {
         $('year').textContent = String(new Date().getFullYear());
         buildPlayerField();
-        renderMenu();
         updateCart();
         $('payInfo').innerHTML = PAY_INFO[selectedPay];
         $('blazeForm').addEventListener('submit', placeOrder);
         loadProgress(false);
         setInterval(() => loadProgress(true), 60000);
+        // Pull the live flavor menu from Supabase, then render the mix & match list.
+        await loadFlavors();
+        renderMenu();
+        updateCart();
       });
     </script>
   </body>
