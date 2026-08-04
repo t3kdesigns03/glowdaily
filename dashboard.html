@@ -1587,27 +1587,25 @@ function BackupModal({ ingredients, products, orders, transactions, onRestore, o
 const BLAZE_ROSTER = ['Bolton #23','Cochran #13','Heath #1','Heckethorn #25','Mann #14','McAninch #10','Reilly #11','Strope #88','Vyskocil #98','Westcott #27'];
 const BLAZE_PLAYER_GOAL = 500;
 const BLAZE_PRIZE = 250;
-const BLAZE_COST_PER_KIT = 4.71;   // real cost per kit — keep in sync with /blaze
-const BLAZE_TEAM_SHARE  = 0.5;     // 50% of net proceeds go to the team
+// Fixed team credit per pack — keep in sync with /blaze.
+const BLAZE_PACK_CREDIT = { 6: 10.50, 12: 20.50 };
 
 function blazeParse(label) {
   const m = String(label || '').match(/^(.*?)\s*#\s*(\d+)\s*$/);
   return { name: m ? m[1].trim() : (label || '—'), number: m ? m[2] : '' };
 }
 
-// Credit toward the team goal for one order = 50% of net (price − cost×packSize),
-// recomputed from the order's line items using the CURRENT cost so existing
-// orders reflect the real cost too. Falls back to the stored value if needed.
+// Amount an order sends to the team = fixed pack credit ($10.50 per 6-pack,
+// $20.50 per 12-pack) + tip. Recomputed from stored line items so meters stay
+// correct; falls back to the stored credit if items are unavailable.
 function blazeCreditOf(o) {
+  let base;
   if (Array.isArray(o.items)) {
-    return o.items.reduce((s, it) => {
-      const price = Number(it.price) || 0;
-      const packSize = Number(it.packSize) || 1;
-      const qty = Number(it.qty) || 0;
-      return s + Math.max(0, price - BLAZE_COST_PER_KIT * packSize) * BLAZE_TEAM_SHARE * qty;
-    }, 0);
+    base = o.items.reduce((s, it) => s + (BLAZE_PACK_CREDIT[Number(it.packSize)] || 0) * (Number(it.qty) || 0), 0);
+  } else {
+    base = Number(o.fundraiserCredit) || 0;
   }
-  return Number(o.fundraiserCredit) || 0;
+  return base + (Number(o.fundraiserTip) || 0);
 }
 
 function BlazeFundraiser({ orders }) {

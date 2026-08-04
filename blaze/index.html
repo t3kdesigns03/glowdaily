@@ -331,6 +331,58 @@
         border-radius:12px; padding:12px 18px; margin:32px 0 4px;
         font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:clamp(1.05rem,2.4vw,1.45rem); }
       .menu-band small { font-family:'Nunito',sans-serif; font-size:12px; font-weight:800; opacity:.8; }
+
+      /* ── build order: pack selectors + capacity ── */
+      .build-step { font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:1.1rem;
+        color:var(--teal2); margin:26px 0 12px; }
+      .build-step-mix { color:var(--muted); font-weight:600; font-size:.85rem; }
+      .pack-grid { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+      @media(max-width:520px){ .pack-grid{grid-template-columns:1fr} }
+      .pack-select { background:var(--card-bg); border:1px solid rgba(255,255,255,.1); border-radius:16px;
+        padding:16px 18px; transition:border-color .2s, box-shadow .2s; }
+      .pack-select.active { border-color:var(--teal); box-shadow:0 0 26px -6px rgba(0,232,212,.5); }
+      .pack-head { display:flex; align-items:baseline; justify-content:space-between; gap:10px; }
+      .pack-name { font-family:'Space Grotesk',sans-serif; font-weight:800; font-size:1.3rem; }
+      .pack-price { font-weight:900; font-size:1.25rem; color:var(--teal); }
+      .pack-sub { font-size:.82rem; color:var(--muted); margin:4px 0 12px; }
+      .pack-sub strong { color:var(--blaze-volt); }
+      .stepper--lg button { width:38px; height:38px; font-size:20px; }
+      .stepper--lg .n { font-size:1.15rem; min-width:28px; }
+      .capacity-wrap { margin-bottom:6px; }
+      .capacity-bar { height:8px; border-radius:999px; background:rgba(4,12,24,.75);
+        border:1px solid rgba(255,255,255,.08); overflow:hidden; }
+      .capacity-fill { height:100%; width:0; border-radius:999px;
+        background:linear-gradient(90deg,var(--purple),var(--teal)); transition:width .4s ease; }
+      .capacity-note { font-size:.86rem; color:var(--muted); font-weight:700; margin-top:7px; }
+      .capacity-note.done { color:var(--green); }
+      .capacity-note.done strong, .capacity-note strong { color:var(--teal2); }
+      .capacity-note.over { color:#FCA5A5; }
+      .capacity-note.over strong { color:#FCA5A5; }
+      .fund-flavor-label { font-size:.78rem; font-weight:800; color:var(--muted); text-transform:uppercase; letter-spacing:.04em; }
+
+      /* ── donation banner (prominent, live) ── */
+      .donation-banner { display:none; align-items:center; gap:14px; margin-bottom:20px;
+        background:linear-gradient(135deg, rgba(31,217,138,.18), rgba(0,232,212,.1));
+        border:1px solid rgba(31,217,138,.5); border-radius:16px; padding:14px 18px;
+        box-shadow:0 0 34px -8px rgba(31,217,138,.5); }
+      .donation-banner.show { display:flex; }
+      .donation-emoji { font-size:2rem; line-height:1; }
+      .donation-line { font-family:'Space Grotesk',sans-serif; font-weight:800; font-size:1.08rem; color:#fff; line-height:1.2; }
+      .donation-line #donationAmt { color:var(--green); font-size:1.35rem; text-shadow:0 0 16px rgba(31,217,138,.5); }
+      .donation-line #donationWho { color:var(--gold); }
+      .donation-break { font-size:.82rem; color:var(--muted); margin-top:3px; font-weight:700; }
+
+      /* ── tip ── */
+      .tip-row { display:flex; gap:10px; align-items:stretch; flex-wrap:wrap; }
+      .tip-quick { display:flex; gap:8px; }
+      .tip-quick button { background:rgba(255,184,0,.12); border:1px solid rgba(255,184,0,.4);
+        color:var(--gold2); font-weight:800; border-radius:10px; padding:0 14px; cursor:pointer;
+        font-size:.9rem; transition:background .18s; }
+      .tip-quick button:hover { background:rgba(255,184,0,.24); }
+      .tip-input-wrap { position:relative; flex:1; min-width:120px; display:flex; align-items:center; }
+      .tip-dollar { position:absolute; left:14px; color:var(--muted); font-weight:800; }
+      .tip-input-wrap input { padding-left:26px; }
+      .tip-hint { font-size:.8rem; color:var(--muted); margin-top:7px; }
       .fund-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:16px; margin-top:18px; }
       @media(max-width:900px){ .fund-grid{grid-template-columns:repeat(2,1fr)} }
       @media(max-width:420px){ .fund-grid{grid-template-columns:1fr} }
@@ -632,43 +684,46 @@
       <section class="menu" id="menu">
         <div class="section-wrap">
           <header class="section-head">
-            <h2>Pick your flavors</h2>
-            <p>Tap the + to add kits. The order form below fills in automatically.</p>
+            <h2>Build your fundraiser order</h2>
+            <p>Choose a pack size, then mix &amp; match any flavors to fill it.</p>
           </header>
 
+          <p class="build-step">1 &middot; Choose your pack(s)</p>
+          <div class="pack-grid">
+            <div class="pack-select" id="pack-6">
+              <div class="pack-head"><span class="pack-name">6-Pack</span><span class="pack-price">$40.00</span></div>
+              <p class="pack-sub">6 kits &middot; <strong>$10.50</strong> to the team &middot; +8% tax</p>
+              <div class="stepper stepper--lg">
+                <button type="button" onclick="changePack(6,-1)" aria-label="Remove one 6-pack">&minus;</button>
+                <span class="n" id="pack6Qty">0</span>
+                <button type="button" onclick="changePack(6,1)" aria-label="Add one 6-pack">+</button>
+              </div>
+            </div>
+            <div class="pack-select" id="pack-12">
+              <div class="pack-head"><span class="pack-name">12-Pack</span><span class="pack-price">$80.00</span></div>
+              <p class="pack-sub">12 kits &middot; <strong>$20.50</strong> to the team &middot; +8% tax</p>
+              <div class="stepper stepper--lg">
+                <button type="button" onclick="changePack(12,-1)" aria-label="Remove one 12-pack">&minus;</button>
+                <span class="n" id="pack12Qty">0</span>
+                <button type="button" onclick="changePack(12,1)" aria-label="Add one 12-pack">+</button>
+              </div>
+            </div>
+          </div>
+
+          <p class="build-step">2 &middot; Pick your flavors <span class="build-step-mix">(mix &amp; match)</span></p>
+          <div class="capacity-wrap">
+            <div class="capacity-bar"><div class="capacity-fill" id="capacityFill"></div></div>
+            <p class="capacity-note" id="capacityNote">Choose a 6-pack or 12-pack above, then pick your flavors.</p>
+          </div>
+
           <div class="menu-band">
-            Signature Flavors &ndash; 6 Packs
+            Signature Flavors
             <small>20 calories &middot; 200mg caffeine &middot; B vitamins &middot; metabolism boosting</small>
           </div>
           <div class="fund-grid" id="signatureGrid"></div>
 
           <div class="menu-band">Low + Caffeine Free Options</div>
           <div class="fund-grid" id="lowCafGrid"></div>
-
-          <div class="ptk-card">
-            <img src="./assets/ptk-variety-pack.jpg" alt="Power Tea Kits Exclusive Variety Pack — 12 kits with exclusive flavors" width="760" height="997" loading="lazy" />
-            <div>
-              <span class="ptk-tag">PTK &middot; Fundraiser exclusive</span>
-              <h3>Exclusive Variety Pack</h3>
-              <p class="fund-desc">
-                Each package contains <strong>12 kits</strong> to make on the go. These exclusive
-                flavors are available <strong>only through fundraisers</strong>.
-              </p>
-              <p class="ptk-flavors">
-                Whatamelon &middot; Cherry Lime &middot; Pineapple Push &middot; Grape Escape &middot;
-                Bomb Pop &middot; Pom Pom Margarita &middot; Orange Berry &middot; Citrus Sunshine &middot;
-                Blackberry Limeade &middot; Peach Ring &middot; Tropical Punch &middot; Blackberry Rambler
-              </p>
-              <div class="fund-foot" style="margin-top: 0">
-                <span class="fund-price">$80.00</span>
-                <div class="stepper">
-                  <button type="button" onclick="changeQty('PTK',-1)" aria-label="Remove one Variety Pack">&minus;</button>
-                  <span class="n" id="qty-PTK">0</span>
-                  <button type="button" onclick="changeQty('PTK',1)" aria-label="Add one Variety Pack">+</button>
-                </div>
-              </div>
-            </div>
-          </div>
         </div>
       </section>
 
@@ -690,11 +745,19 @@
             </p>
 
             <form id="blazeForm" novalidate>
+              <div class="donation-banner" id="donationBanner" aria-live="polite">
+                <span class="donation-emoji" aria-hidden="true">💚</span>
+                <div class="donation-text">
+                  <p class="donation-line"><span id="donationAmt">$0.00</span> goes directly to <span id="donationWho">your player</span> &amp; Blaze Remix</p>
+                  <p class="donation-break" id="donationBreak"></p>
+                </div>
+              </div>
+
               <p class="form-section-title">Who are you supporting?</p>
               <div class="form-grid">
                 <label class="span-2">
                   Player this contribution supports *
-                  <select id="playerName" required>
+                  <select id="playerName" required onchange="updateCart()">
                     <option value="">Select a player…</option>
                     <option value="Team — no specific player">Team — no specific player</option>
                   </select>
@@ -720,9 +783,6 @@
                   <input type="email" id="custEmail" placeholder="you@email.com" autocomplete="email" required />
                 </label>
               </div>
-
-              <p class="form-section-title">Your kits</p>
-              <div class="qty-grid" id="qtyFields"></div>
 
               <p class="form-section-title">How would you like to get it?</p>
               <div class="pay-grid" id="fulfillOptions">
@@ -774,6 +834,20 @@
                 </label>
               </div>
               <p class="pay-info" id="payInfo"></p>
+
+              <p class="form-section-title">Add a tip for the player / team (optional)</p>
+              <div class="tip-row">
+                <div class="tip-quick">
+                  <button type="button" onclick="quickTip(5)">+$5</button>
+                  <button type="button" onclick="quickTip(10)">+$10</button>
+                  <button type="button" onclick="quickTip(20)">+$20</button>
+                </div>
+                <label class="tip-input-wrap">
+                  <span class="tip-dollar">$</span>
+                  <input type="number" id="tipInput" min="0" step="1" inputmode="decimal" placeholder="0.00" oninput="setTip(this.value)" />
+                </label>
+              </div>
+              <p class="tip-hint">💯 100% of your tip goes to the player you selected.</p>
 
               <p class="form-section-title">Anything else?</p>
               <label>
@@ -863,11 +937,10 @@
       const PLAYER_GOAL  = 500;    // each player's personal goal, in dollars
       const PRIZE_AMOUNT = 250;    // cash prize for the highest individual raiser
       const SHIP_FLAT    = 9.0;    // shipping when the customer chooses "Ship to me"
-      const TAX_RATE     = 0.08;   // 8% — matches the main site
-      const TEAM_SHARE   = 0.5;    // 50% of NET proceeds go to the team
-      const COST_PER_KIT = 4.71;   // <<< real cost per individual kit.
-                                   //     Only affects the progress bars,
-                                   //     never the price a customer pays.
+      const TAX_RATE     = 0.08;   // 8% — on the product total only
+      // Pack pricing and the FIXED team credit per pack size.
+      const PACK_PRICE   = { 6: 40.00, 12: 80.00 };   // customer price per pack (+8% tax)
+      const PACK_CREDIT  = { 6: 10.50, 12: 20.50 };   // fixed $ to the team per pack
       const FUNDRAISER_TAG = 'blaze';
       const TEAM_NAME      = 'Blaze Remix';
       // Add players here as "Last #NN" — the team goal grows automatically.
@@ -895,26 +968,28 @@
       const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
       emailjs.init('5vEW7OfRzLj8KG5lM');
 
-      /* ── CATALOG (exact copy from the fundraiser flyer) ───────── */
+      /* ── FLAVORS (mix & match — choose any to fill your pack) ──── */
       const CATALOG = [
-        { sku:'E1',  group:'sig', name:'Cherry Lime',          desc:'Cherry + Lime + Lemon',               price:40, packSize:6,  img:'e1-cherry-lime.webp' },
-        { sku:'E2',  group:'sig', name:'Bomb Pop',             desc:'Blue & Red Raspberry + Pomegranate',  price:40, packSize:6,  img:'e2-bomb-pop.webp' },
-        { sku:'E3',  group:'sig', name:'Grape Escape',         desc:'Grape + Orange + Lemon',              price:40, packSize:6,  img:'e3-grape-escape.webp' },
-        { sku:'E4',  group:'sig', name:'Pineapple Push',       desc:'Pineapple + Tropical + Raspberry',    price:40, packSize:6,  img:'e4-pineapple-push.webp' },
-        { sku:'L5',  group:'low', name:'Lemon Pom Pom',        desc:'Strawberry Lemonade + Pomegranate',   price:40, packSize:6,  img:'l5-lemon-pom-pom.webp',    meta:'75mg caffeine + collagen' },
-        { sku:'L6',  group:'low', name:'Watermelon Crush',     desc:'Orange + Watermelon + Raspberry',     price:40, packSize:6,  img:'l6-watermelon-crush.webp', meta:'85mg caffeine + hydration' },
-        { sku:'L7',  group:'low', name:'Acai Berry Twist',     desc:'Strawberry Lemonade + Acai + Orange', price:40, packSize:6,  img:'l7-acai-berry-twist.webp', meta:'Hydration + collagen' },
-        { sku:'PTK', group:'ptk', name:'Exclusive Variety Pack', desc:'12 kits · exclusive fundraiser flavors', price:80, packSize:12, img:'ptk-variety-pack.jpg' }
+        { sku:'E1',  group:'sig', name:'Cherry Lime',          desc:'Cherry + Lime + Lemon',               img:'e1-cherry-lime.webp' },
+        { sku:'E2',  group:'sig', name:'Bomb Pop',             desc:'Blue & Red Raspberry + Pomegranate',  img:'e2-bomb-pop.webp' },
+        { sku:'E3',  group:'sig', name:'Grape Escape',         desc:'Grape + Orange + Lemon',              img:'e3-grape-escape.webp' },
+        { sku:'E4',  group:'sig', name:'Pineapple Push',       desc:'Pineapple + Tropical + Raspberry',    img:'e4-pineapple-push.webp' },
+        { sku:'L5',  group:'low', name:'Lemon Pom Pom',        desc:'Strawberry Lemonade + Pomegranate',   img:'l5-lemon-pom-pom.webp',    meta:'75mg caffeine + collagen' },
+        { sku:'L6',  group:'low', name:'Watermelon Crush',     desc:'Orange + Watermelon + Raspberry',     img:'l6-watermelon-crush.webp', meta:'85mg caffeine + hydration' },
+        { sku:'L7',  group:'low', name:'Acai Berry Twist',     desc:'Strawberry Lemonade + Acai + Orange', img:'l7-acai-berry-twist.webp', meta:'Hydration + collagen' }
       ];
       const BY_SKU = Object.fromEntries(CATALOG.map((p) => [p.sku, p]));
 
       // Per-flavor accent glow — presentation only, keyed to each drink's real color.
       const GLOW = {
         E1:'#FF3B5C', E2:'#3B7BFF', E3:'#9B3DFF', E4:'#FFB020',
-        L5:'#FFCF3B', L6:'#FF5C63', L7:'#A24BFF', PTK:'#00E8D4'
+        L5:'#FFCF3B', L6:'#FF5C63', L7:'#A24BFF'
       };
 
-      let cart = {};
+      // ── Cart state ──────────────────────────────────────────────
+      let packs   = { 6: 0, 12: 0 };   // how many 6-packs / 12-packs
+      let flavors = {};                // { flavorSku: qty of kits }
+      let tip     = 0;                 // optional tip to the player/team
       let selectedPay = 'card';
       let selectedFulfill = 'pickup';   // 'pickup' = free, 'ship' = +$9
       let lastRaised = null;
@@ -932,15 +1007,7 @@
         String(s).replace(/[&<>"']/g, (c) => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;' }[c]));
       const $ = (id) => document.getElementById(id);
 
-      /* ── TEAM CREDIT: 50% of NET (revenue − product cost) ─────── */
-      function creditFor(sku, qty) {
-        const p = BY_SKU[sku];
-        if (!p) return 0;
-        const net = p.price - COST_PER_KIT * p.packSize;
-        return Math.max(0, net) * TEAM_SHARE * qty;
-      }
-
-      /* ── RENDER MENU ──────────────────────────────────────────── */
+      /* ── RENDER FLAVOR MENU (mix & match) ─────────────────────── */
       function cardHtml(p) {
         return `
           <article class="fund-card" id="card-${p.sku}" style="--gl:${GLOW[p.sku] || '#00E8D4'}">
@@ -952,11 +1019,11 @@
             <p class="fund-desc">${esc(p.desc)}</p>
             ${p.meta ? `<p class="fund-meta">${esc(p.meta)}</p>` : ''}
             <div class="fund-foot">
-              <span class="fund-price">${money(p.price)}</span>
+              <span class="fund-flavor-label">Add to pack</span>
               <div class="stepper">
-                <button type="button" onclick="changeQty('${p.sku}',-1)" aria-label="Remove one ${esc(p.name)}">&minus;</button>
+                <button type="button" onclick="changeFlavor('${p.sku}',-1)" aria-label="Remove one ${esc(p.name)}">&minus;</button>
                 <span class="n" id="qty-${p.sku}">0</span>
-                <button type="button" onclick="changeQty('${p.sku}',1)" aria-label="Add one ${esc(p.name)}">+</button>
+                <button type="button" onclick="changeFlavor('${p.sku}',1)" aria-label="Add one ${esc(p.name)}">+</button>
               </div>
             </div>
           </article>`;
@@ -964,112 +1031,164 @@
       function renderMenu() {
         $('signatureGrid').innerHTML = CATALOG.filter((p) => p.group === 'sig').map(cardHtml).join('');
         $('lowCafGrid').innerHTML = CATALOG.filter((p) => p.group === 'low').map(cardHtml).join('');
-        $('qtyFields').innerHTML = CATALOG.map(
-          (p) => `
-          <label>
-            ${p.sku} · ${esc(p.name)} — ${money(p.price)}
-            <input type="number" id="f-${p.sku}" min="0" step="1" value="0" inputmode="numeric"
-                   onchange="setQty('${p.sku}', this.value)" oninput="setQty('${p.sku}', this.value)"/>
-          </label>`
-        ).join('');
       }
 
-      /* ── CART ─────────────────────────────────────────────────── */
-      function changeQty(sku, delta) {
-        const next = Math.max(0, (cart[sku] || 0) + delta);
-        if (next === 0) delete cart[sku]; else cart[sku] = next;
+      /* ── CART: packs + mix&match flavors + tip ────────────────── */
+      function capacity() { return packs[6] * 6 + packs[12] * 12; }
+      function picked()   { return Object.values(flavors).reduce((s, n) => s + n, 0); }
+
+      function changePack(size, delta) {
+        packs[size] = Math.max(0, (packs[size] || 0) + delta);
         updateCart();
       }
-      function setQty(sku, val) {
-        const n = Math.max(0, parseInt(val, 10) || 0);
-        if (n === 0) delete cart[sku]; else cart[sku] = n;
+      function changeFlavor(sku, delta) {
+        if (delta > 0 && picked() >= capacity()) { flashCapacity(); return; }
+        const next = Math.max(0, (flavors[sku] || 0) + delta);
+        if (next === 0) delete flavors[sku]; else flavors[sku] = next;
         updateCart();
       }
+      function setTip(val) {
+        tip = Math.max(0, Math.round((parseFloat(val) || 0) * 100) / 100);
+        updateCart();
+      }
+      function quickTip(n) {
+        const el = $('tipInput');
+        el.value = ((parseFloat(el.value) || 0) + n).toFixed(2);
+        setTip(el.value);
+      }
+      function flashCapacity() {
+        const el = $('capacityNote');
+        if (el) { el.classList.add('over'); setTimeout(() => el.classList.remove('over'), 900); }
+      }
+      function playerLabelShort() {
+        const v = (($('playerName') && $('playerName').value) || '').trim();
+        if (!v) return 'your player';
+        const m = v.match(/^(.*?)\s*#/);
+        return m ? m[1].trim() : v;
+      }
+
       function totals() {
-        let subtotal = 0, credit = 0, units = 0;
-        for (const [sku, qty] of Object.entries(cart)) {
-          subtotal += BY_SKU[sku].price * qty;
-          credit += creditFor(sku, qty);
-          units += qty;
-        }
-        const tax = subtotal * TAX_RATE;
-        // Shipping only applies when the customer chose "Ship to me".
-        const shipping = (units > 0 && selectedFulfill === 'ship') ? SHIP_FLAT : 0;
-        return { subtotal, tax, shipping, total: subtotal + tax + shipping, credit, units };
+        const packQty  = packs[6] + packs[12];
+        const subtotal = packs[6] * PACK_PRICE[6] + packs[12] * PACK_PRICE[12];
+        const tax      = subtotal * TAX_RATE;                       // 8% on product total only
+        const shipping = (packQty > 0 && selectedFulfill === 'ship') ? SHIP_FLAT : 0;
+        const packCredit = packs[6] * PACK_CREDIT[6] + packs[12] * PACK_CREDIT[12];
+        const toTeam   = packCredit + tip;                          // fixed credit + tip
+        return { subtotal, tax, shipping, total: subtotal + tax + shipping + tip,
+                 packQty, cap: capacity(), picked: picked(), packCredit, tip, toTeam };
       }
+
       function updateCart() {
+        // flavor steppers
         for (const p of CATALOG) {
-          const q = cart[p.sku] || 0;
+          const q = flavors[p.sku] || 0;
           const bubble = $('qty-' + p.sku);
           if (bubble) bubble.textContent = q;
-          const field = $('f-' + p.sku);
-          if (field && document.activeElement !== field) field.value = q;
           const card = $('card-' + p.sku);
           if (card) card.classList.toggle('in-cart', q > 0);
         }
+        // pack steppers
+        $('pack6Qty').textContent = packs[6];
+        $('pack12Qty').textContent = packs[12];
+        $('pack-6').classList.toggle('active', packs[6] > 0);
+        $('pack-12').classList.toggle('active', packs[12] > 0);
 
         const t = totals();
-        const lines = Object.entries(cart).map(([sku, qty]) => {
-          const p = BY_SKU[sku];
-          return `<div class="cart-line">
-            <div class="cart-line-info"><strong>${p.sku} · ${esc(p.name)}</strong><span>${money(p.price)} each</span></div>
+
+        // capacity counter + bar
+        const capNote = $('capacityNote');
+        if (t.cap === 0) {
+          capNote.innerHTML = 'Choose a 6-pack or 12-pack above, then pick your flavors.';
+          capNote.className = 'capacity-note';
+        } else if (t.picked < t.cap) {
+          capNote.innerHTML = `Pick <strong>${t.cap - t.picked}</strong> more flavor kit${t.cap - t.picked === 1 ? '' : 's'} &mdash; <strong>${t.picked} / ${t.cap}</strong> selected.`;
+          capNote.className = 'capacity-note';
+        } else if (t.picked === t.cap) {
+          capNote.innerHTML = `✓ Packs full &mdash; <strong>${t.picked} / ${t.cap}</strong> kits selected.`;
+          capNote.className = 'capacity-note done';
+        } else {
+          capNote.innerHTML = `That's <strong>${t.picked - t.cap}</strong> too many &mdash; remove some or add a pack. <strong>${t.picked} / ${t.cap}</strong>.`;
+          capNote.className = 'capacity-note over';
+        }
+        $('capacityFill').style.width = (t.cap > 0 ? Math.min(100, t.picked / t.cap * 100) : 0) + '%';
+
+        // cart lines
+        const lines = [];
+        [6, 12].forEach((size) => {
+          if (packs[size] > 0) lines.push(`<div class="cart-line">
+            <div class="cart-line-info"><strong>${size}-Pack × ${packs[size]}</strong><span>${money(PACK_PRICE[size])} each · ${money(PACK_CREDIT[size])} to team</span></div>
             <div class="cart-stepper">
-              <button type="button" onclick="changeQty('${sku}',-1)" aria-label="Remove one">&minus;</button>
-              <span>${qty}</span>
-              <button type="button" onclick="changeQty('${sku}',1)" aria-label="Add one">+</button>
-              <strong style="margin-left:8px">${money(p.price * qty)}</strong>
+              <button type="button" onclick="changePack(${size},-1)" aria-label="Remove one ${size}-pack">&minus;</button>
+              <span>${packs[size]}</span>
+              <button type="button" onclick="changePack(${size},1)" aria-label="Add one ${size}-pack">+</button>
+              <strong style="margin-left:8px">${money(PACK_PRICE[size] * packs[size])}</strong>
             </div>
-          </div>`;
+          </div>`);
         });
+        const flavorList = Object.entries(flavors).map(([sku, q]) => `${esc(BY_SKU[sku].name)} ×${q}`).join(' · ');
+        if (flavorList) lines.push(`<div class="cart-line"><div class="cart-line-info" style="flex:1"><strong>Flavors</strong><span>${flavorList}</span></div></div>`);
         $('cartLines').innerHTML = lines.join('');
         $('cartHint').style.display = lines.length ? 'none' : 'block';
 
-        const breakdown = t.units === 0 ? '' : `
-          <div class="totals-row"><span>Subtotal</span><span>${money(t.subtotal)}</span></div>
+        const breakdown = t.packQty === 0 ? '' : `
+          <div class="totals-row"><span>Subtotal (${t.packQty} pack${t.packQty === 1 ? '' : 's'})</span><span>${money(t.subtotal)}</span></div>
           <div class="totals-row"><span>Sales tax (8%)</span><span>${money(t.tax)}</span></div>
           <div class="totals-row"><span>${selectedFulfill === 'ship' ? 'Shipping (flat)' : 'Local / pickup'}</span><span>${t.shipping > 0 ? money(t.shipping) : 'FREE'}</span></div>
+          ${t.tip > 0 ? `<div class="totals-row"><span>Tip to ${esc(playerLabelShort())}</span><span>${money(t.tip)}</span></div>` : ''}
           <div class="totals-row grand"><span>Total</span><span>${money(t.total)}</span></div>`;
         $('cartTotals').innerHTML = breakdown;
         $('formTotals').innerHTML =
-          t.units === 0
-            ? '<p class="order-cart-hint" style="margin:0">Add kits above to see your total.</p>'
+          t.packQty === 0
+            ? '<p class="order-cart-hint" style="margin:0">Add a pack above to see your total.</p>'
             : breakdown +
               (selectedPay === 'venmo'
                 ? `<p class="pay-info" style="margin-top:10px">💙 Send ${money(t.total)} to <strong>@GlowDaily</strong> on Venmo after ordering.</p>`
                 : '');
 
+        renderDonation(t);
+
         const impact = $('impactRow');
-        if (t.credit > 0) {
+        if (t.toTeam > 0) {
           impact.style.display = 'flex';
-          $('impactText').textContent = `This order sends about ${money(t.credit)} straight to ${TEAM_NAME}.`;
+          $('impactText').textContent = `${money(t.toTeam)} of this order goes to ${playerLabelShort()} & ${TEAM_NAME}.`;
         } else impact.style.display = 'none';
 
-        $('headerCartCount').textContent = t.units;
+        $('headerCartCount').textContent = t.packQty;
         const sticky = $('stickyCart');
-        sticky.hidden = t.units === 0;
-        document.body.classList.toggle('has-sticky-cart', t.units > 0);
+        sticky.hidden = t.packQty === 0;
+        document.body.classList.toggle('has-sticky-cart', t.packQty > 0);
         $('stickyCartTotal').textContent = money(t.total);
-        $('stickyCartSub').textContent = `${t.units} item${t.units === 1 ? '' : 's'} · ${money(t.credit)} to the team`;
+        $('stickyCartSub').textContent = `${t.packQty} pack${t.packQty === 1 ? '' : 's'} · ${money(t.toTeam)} to the team`;
+      }
+
+      function renderDonation(t) {
+        const el = $('donationBanner');
+        if (!el) return;
+        if (t.toTeam <= 0) { el.classList.remove('show'); return; }
+        el.classList.add('show');
+        $('donationAmt').textContent = money(t.toTeam);
+        $('donationWho').textContent = playerLabelShort();
+        $('donationBreak').textContent =
+          `${money(t.packCredit)} from ${t.packQty} pack${t.packQty === 1 ? '' : 's'}` + (t.tip > 0 ? ` + ${money(t.tip)} tip` : '');
       }
 
       /* ── PROGRESS TRACKER ─────────────────────────────────────── */
-      // Recompute credit from each order's stored line items using the CURRENT
-      // COST_PER_KIT, so every meter reflects the real cost — even for orders
-      // placed under an older cost estimate. Falls back to the stored value only
-      // if the order has no usable line items.
-      function creditFromItems(items) {
+      // Fixed team credit per pack: 6-pack = $10.50, 12-pack = $20.50.
+      // Recomputed from each order's stored line items so meters stay correct.
+      function packCreditFromItems(items) {
         if (!Array.isArray(items)) return null;
         return items.reduce((s, it) => {
-          const price = Number(it.price) || 0;
-          const packSize = Number(it.packSize) || 1;
+          const size = Number(it.packSize) || 0;
           const qty = Number(it.qty) || 0;
-          return s + Math.max(0, price - COST_PER_KIT * packSize) * TEAM_SHARE * qty;
+          return s + (PACK_CREDIT[size] || 0) * qty;
         }, 0);
       }
+      // Amount an order sends to the team = fixed pack credit + tip.
       function creditFromOrder(o) {
-        const c = creditFromItems(o.items);
-        if (c !== null) return c;
-        return (typeof o.fundraiserCredit === 'number' && isFinite(o.fundraiserCredit)) ? o.fundraiserCredit : 0;
+        const pc = packCreditFromItems(o.items);
+        const base = (pc !== null) ? pc
+          : ((typeof o.fundraiserCredit === 'number' && isFinite(o.fundraiserCredit)) ? o.fundraiserCredit : 0);
+        return base + (Number(o.fundraiserTip) || 0);
       }
 
       async function loadProgress(animate = true) {
@@ -1259,7 +1378,12 @@
         const note   = val('orderNote');
 
         const t = totals();
-        if (t.units === 0) return showErr('Please add at least one kit before placing your order.');
+        if (t.packQty === 0) return showErr('Please add a 6-pack or 12-pack to start your order.');
+        if (t.picked !== t.cap) {
+          return showErr(t.picked < t.cap
+            ? `Please pick ${t.cap - t.picked} more flavor kit${t.cap - t.picked === 1 ? '' : 's'} to fill your pack (${t.picked}/${t.cap}).`
+            : `You picked ${t.picked - t.cap} too many flavor kits — remove some (${t.picked}/${t.cap}).`);
+        }
         if (!player) return showErr('Please tell us which player this contribution supports.', 'playerName');
         if (!name)   return showErr('Please enter your first and last name.', 'custName');
         if (!phone)  return showErr('Phone number is required.', 'custPhone');
@@ -1277,11 +1401,16 @@
         btn.disabled = true;
         btn.textContent = 'Placing order…';
 
-        // items[] carries isPack/packSize so the dashboard's COGS and
-        // profit-per-order math works on these exactly like any other order.
-        const items = Object.entries(cart).map(([sku, qty]) => {
-          const p = BY_SKU[sku];
-          return { id: sku, sku, name: `${sku} · ${p.name}`, emoji: '🥎', price: p.price, qty, isPack: true, packSize: p.packSize };
+        // Flavor selection (mix & match) as a readable summary.
+        const flavorSummary = Object.entries(flavors).map(([sku, q]) => `${BY_SKU[sku].name} x${q}`).join(', ');
+        // items[] = one line per pack size, carrying isPack/packSize so the
+        // dashboard's COGS + fixed-credit math works exactly like any order.
+        const items = [];
+        [6, 12].forEach((size) => {
+          if (packs[size] > 0) items.push({
+            id: size + 'PACK', sku: size + 'PACK', name: `${size}-Pack`, emoji: '🥎',
+            price: PACK_PRICE[size], qty: packs[size], isPack: true, packSize: size, flavors: flavorSummary
+          });
         });
 
         const orderId = 'GD-' + Date.now().toString(36).toUpperCase();
@@ -1292,9 +1421,10 @@
         const noteStr =
           `FUNDRAISER: ${TEAM_NAME} | Player: ${player}` +
           (org ? ` | From: ${org}` : '') +
+          ` | Packs: ${packs[6]}x6 ${packs[12]}x12 | Flavors: ${flavorSummary || '—'}` +
           ` | Phone: ${phone} | Email: ${email} | Pay: ${payLabel} | Fulfillment: ${fulfillLabel}` +
-          ` | Subtotal: ${money(t.subtotal)} | Tax (8%): ${money(t.tax)} | Shipping: ${money(t.shipping)} | Total: ${money(t.total)}` +
-          ` | To team: ${money(t.credit)}` +
+          ` | Subtotal: ${money(t.subtotal)} | Tax (8%): ${money(t.tax)} | Shipping: ${money(t.shipping)} | Tip: ${money(t.tip)} | Total: ${money(t.total)}` +
+          ` | Pack credit: ${money(t.packCredit)} | To team (credit+tip): ${money(t.toTeam)}` +
           (selectedPay === 'venmo' ? ' | Please send payment via Venmo to @GlowDaily' : '') +
           (note ? ' | ' + note : '');
 
@@ -1307,6 +1437,7 @@
           subtotal: t.subtotal,
           tax: t.tax,
           shippingFee: t.shipping,
+          tip: Number(t.tip.toFixed(2)),
           total: t.total,
           status: 'Received',
           shipping,
@@ -1317,7 +1448,11 @@
           fundraiserPlayer: player,
           fundraiserPlayerNumber: (PLAYERS.find((p) => p.label === player) || {}).number || null,
           fundraiserOrg: org || null,
-          fundraiserCredit: Number(t.credit.toFixed(2)),
+          fundraiserPacks: { 6: packs[6], 12: packs[12] },
+          fundraiserFlavors: flavorSummary || null,
+          fundraiserCredit: Number(t.packCredit.toFixed(2)),   // fixed pack credit only
+          fundraiserTip: Number(t.tip.toFixed(2)),             // tip to the player/team
+          fundraiserToTeam: Number(t.toTeam.toFixed(2)),       // credit + tip (what meters sum)
           payment: selectedPay
         };
 
@@ -1333,15 +1468,17 @@
           if (writeErr) throw writeErr;
 
           try {
-            const itemLines = items.map((i) => `${i.name} x${i.qty} — ${money(i.price * i.qty)}`).join('\n');
+            const itemLines = items.map((i) => `${i.qty}× ${i.name} — ${money(i.price * i.qty)}`).join('\n');
             const breakdown =
+              `Flavors: ${flavorSummary || '—'}\n` +
               `Subtotal: ${money(t.subtotal)}\n` +
               `Tax (8%): ${money(t.tax)}\n` +
               `Shipping: ${money(t.shipping)}\n` +
+              (t.tip > 0 ? `Tip: ${money(t.tip)}\n` : '') +
               `Total: ${money(t.total)}\n\n` +
               `FUNDRAISER: ${TEAM_NAME}\nPlayer: ${player}\n` +
               (org ? `From: ${org}\n` : '') +
-              `Goes to team: ${money(t.credit)}\n` +
+              `Pack credit: ${money(t.packCredit)}${t.tip > 0 ? ` + tip ${money(t.tip)}` : ''} = ${money(t.toTeam)} to team\n` +
               (selectedPay === 'venmo'
                 ? '\nPlease send payment via Venmo to @GlowDaily'
                 : '\nSend the customer a card payment link.');
@@ -1387,11 +1524,11 @@
         $('confirmId').textContent = orderRow.id;
         $('confirmContact').textContent = `${orderRow.phone} / ${orderRow.email}`;
         $('confirmImpact').innerHTML =
-          `Your order sends about <strong>${money(t.credit)}</strong> straight to ${TEAM_NAME}` +
-          (orderRow.fundraiserPlayer
-            ? `, credited to <strong>${esc(orderRow.fundraiserPlayer.replace(/\.$/, ''))}</strong>.`
-            : '.');
-        cart = {};
+          `<strong>${money(t.toTeam)}</strong> from this order goes directly to ` +
+          `<strong>${esc(playerLabelShort())}</strong> &amp; ${TEAM_NAME}` +
+          (t.tip > 0 ? ` <span style="color:var(--muted)">(${money(t.packCredit)} pack credit + ${money(t.tip)} tip)</span>.` : '.');
+        packs = { 6: 0, 12: 0 }; flavors = {}; tip = 0;
+        const tipInput = $('tipInput'); if (tipInput) tipInput.value = '';
         updateCart();
         loadProgress(true);
         $('order').scrollIntoView({ behavior: 'smooth', block: 'start' });
