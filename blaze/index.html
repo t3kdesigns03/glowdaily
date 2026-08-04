@@ -391,45 +391,52 @@
       .capacity-note.done strong, .capacity-note strong { color:var(--teal2); }
       .capacity-note.over { color:#FCA5A5; }
       .capacity-note.over strong { color:#FCA5A5; }
-      /* ⭐ Exclusive Variety Pack — the hero product (flyer pink/purple energy) */
-      .variety-hero { position:relative; margin:22px 0 8px; border-radius:22px; overflow:hidden;
+      /* ⭐ Exclusive Variety Pack — hero product, harmonized to the cosmic system */
+      .variety-hero { position:relative; margin:20px 0 8px; border-radius:20px; overflow:hidden;
         background:
-          radial-gradient(120% 130% at 12% 0%, rgba(255,46,218,.28) 0%, transparent 55%),
-          radial-gradient(120% 130% at 100% 100%, rgba(155,61,255,.30) 0%, transparent 55%),
-          linear-gradient(135deg, #2a0f3d 0%, #1a0e2e 55%, #120a22 100%);
-        border:1px solid rgba(255,46,218,.5);
-        box-shadow:0 22px 60px -24px rgba(255,46,218,.55), 0 0 60px -18px rgba(155,61,255,.5); }
+          radial-gradient(120% 130% at 12% 0%, rgba(155,61,255,.26) 0%, transparent 58%),
+          radial-gradient(120% 130% at 100% 100%, rgba(0,232,212,.12) 0%, transparent 55%),
+          linear-gradient(140deg, rgba(26,15,46,.96) 0%, var(--card-bg) 62%);
+        border:1px solid rgba(155,61,255,.42);
+        box-shadow:0 20px 50px -26px rgba(0,0,0,.7), 0 0 46px -18px rgba(155,61,255,.45); }
       .variety-flag { position:absolute; top:0; left:0; z-index:3;
-        background:linear-gradient(135deg,#FF2EDA,#9B3DFF); color:#fff; font-weight:900;
-        font-size:.72rem; letter-spacing:.1em; text-transform:uppercase; padding:6px 15px 6px 13px;
-        border-radius:0 0 14px 0; box-shadow:0 4px 14px rgba(255,46,218,.5); }
+        background:linear-gradient(135deg,var(--purple),#6B21C4); color:#fff; font-weight:900;
+        font-size:.68rem; letter-spacing:.1em; text-transform:uppercase; padding:5px 14px 5px 12px;
+        border-radius:0 0 13px 0; box-shadow:0 3px 12px rgba(155,61,255,.5); }
       .variety-hero-grid { display:grid; grid-template-columns:1fr; align-items:center; }
-      @media(min-width:720px){ .variety-hero-grid{ grid-template-columns:.85fr 1.15fr; } }
-      .variety-hero-art { position:relative; padding:26px 22px 4px; display:flex; align-items:center; justify-content:center; }
+      @media(min-width:720px){ .variety-hero-grid{ grid-template-columns:.82fr 1.18fr; } }
+      .variety-hero-art { position:relative; padding:34px 20px 8px; display:flex; align-items:center; justify-content:center; }
       @media(min-width:720px){ .variety-hero-art{ padding:22px; } }
-      .variety-hero-art::before { content:''; position:absolute; inset:12%;
-        background:radial-gradient(circle,rgba(255,46,218,.4) 0%,transparent 65%); filter:blur(16px); }
-      .variety-hero-art img { position:relative; width:100%; max-width:280px; border-radius:14px; box-shadow:0 16px 44px rgba(0,0,0,.5); }
-      .variety-hero-copy { padding:6px 22px 26px; }
-      @media(min-width:720px){ .variety-hero-copy{ padding:26px 30px 26px 8px; } }
-      .variety-star { font-size:1.5rem; filter:drop-shadow(0 0 10px rgba(255,224,51,.75)); }
-      .variety-hero-copy h3 { font-family:'Space Grotesk',sans-serif; font-size:clamp(1.55rem,4.5vw,2.05rem); line-height:1.05; margin:4px 0 8px; }
-      .variety-pretty { display:inline-block; background:linear-gradient(100deg,#FF2EDA,#C47BFF);
-        -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent; color:#FF2EDA;
-        font-size:.62em; font-weight:800; }
-      .variety-tag { font-weight:800; color:var(--gold2); font-size:1rem; margin-bottom:8px; }
-      .variety-lede { color:var(--muted); font-size:.92rem; line-height:1.65; margin-bottom:14px; }
+      .variety-hero-art::before { content:''; position:absolute; inset:16%;
+        background:radial-gradient(circle,rgba(155,61,255,.35) 0%,transparent 66%); filter:blur(18px); }
+      /* image sits INSIDE the card — vignette + soft shadow contain the bright flyer bg */
+      .variety-img-wrap { position:relative; width:100%; max-width:210px; border-radius:14px; overflow:hidden;
+        border:1px solid rgba(255,255,255,.08); box-shadow:0 14px 34px rgba(0,0,0,.55); }
+      @media(min-width:720px){ .variety-img-wrap{ max-width:250px; } }
+      .variety-img-wrap img { display:block; width:100%; filter:saturate(.9) brightness(.96); }
+      .variety-img-wrap::after { content:''; position:absolute; inset:0; pointer-events:none; border-radius:14px;
+        box-shadow:inset 0 0 42px 12px rgba(12,8,24,.62);
+        background:radial-gradient(120% 120% at 50% 42%, transparent 52%, rgba(12,8,24,.55) 100%); }
+      .variety-hero-copy { padding:4px 20px 22px; }
+      @media(min-width:720px){ .variety-hero-copy{ padding:24px 28px 24px 8px; } }
+      .variety-star { font-size:1.35rem; filter:drop-shadow(0 0 9px rgba(255,184,0,.6)); }
+      .variety-hero-copy h3 { font-family:'Space Grotesk',sans-serif; font-size:clamp(1.4rem,4.4vw,2rem); line-height:1.06; margin:3px 0 6px; }
+      .variety-pretty { display:inline-block; background:linear-gradient(100deg,var(--purple2),var(--gold2));
+        -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent; color:var(--purple2);
+        font-size:.6em; font-weight:800; }
+      .variety-tag { font-weight:800; color:var(--gold2); font-size:.95rem; margin-bottom:7px; line-height:1.35; }
+      .variety-lede { color:var(--muted); font-size:.88rem; line-height:1.6; margin-bottom:12px; }
       .variety-lede strong { color:#fff; }
-      .variety-facts { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:16px; }
-      .variety-facts span { background:rgba(255,255,255,.06); border:1px solid rgba(255,46,218,.32);
-        border-radius:999px; padding:6px 13px; font-size:.82rem; font-weight:700; color:var(--white); white-space:nowrap; }
-      .variety-cta { width:100%; border:none; cursor:pointer; border-radius:14px; padding:16px 20px;
-        font-family:'Nunito',sans-serif; font-weight:900; font-size:1.08rem; color:#fff;
-        background:linear-gradient(135deg,#FF2EDA 0%,#9B3DFF 55%,#00E8D4 130%); background-size:180% auto;
-        box-shadow:0 12px 30px -8px rgba(255,46,218,.6); animation:shimmer 3s linear infinite;
+      .variety-facts { display:flex; flex-wrap:wrap; gap:7px; margin-bottom:14px; }
+      .variety-facts span { background:rgba(0,232,212,.07); border:1px solid rgba(155,61,255,.32);
+        border-radius:999px; padding:5px 12px; font-size:.8rem; font-weight:700; color:var(--white); white-space:nowrap; }
+      .variety-cta { width:100%; border:none; cursor:pointer; border-radius:13px; padding:15px 18px;
+        font-family:'Nunito',sans-serif; font-weight:900; font-size:1.05rem; color:#fff;
+        background:linear-gradient(135deg,#7B2FD6 0%,var(--purple) 45%,var(--teal) 130%); background-size:180% auto;
+        box-shadow:0 10px 26px -8px rgba(155,61,255,.55); animation:shimmer 3s linear infinite;
         transition:transform .18s ease, box-shadow .18s ease; }
-      .variety-cta:hover { transform:translateY(-2px); box-shadow:0 16px 42px -8px rgba(255,46,218,.85); }
-      .variety-fine { text-align:center; color:var(--muted); font-size:.76rem; margin-top:9px; }
+      .variety-cta:hover { transform:translateY(-2px); box-shadow:0 14px 36px -8px rgba(0,232,212,.55); }
+      .variety-fine { text-align:center; color:var(--muted); font-size:.74rem; margin-top:8px; }
       @media(prefers-reduced-motion:reduce){ .variety-cta{ animation:none; } }
 
       .build-divider { display:flex; align-items:center; gap:14px; margin:28px 0 4px;
@@ -880,7 +887,9 @@
             <span class="variety-flag">⚡ Fundraiser Exclusive</span>
             <div class="variety-hero-grid">
               <figure class="variety-hero-art">
-                <img src="./assets/ptk-variety-pack.jpg" alt="Power Tea Kits Exclusive Variety Pack — 12 kits, pre-selected mix" width="760" height="997" loading="lazy" />
+                <span class="variety-img-wrap">
+                  <img src="./assets/ptk-variety-pack.jpg" alt="Power Tea Kits Exclusive Variety Pack — 12 kits, pre-selected mix" width="760" height="997" loading="lazy" />
+                </span>
               </figure>
               <div class="variety-hero-copy">
                 <span class="variety-star" aria-hidden="true">⚡</span>
