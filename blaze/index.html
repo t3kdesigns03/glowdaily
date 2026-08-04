@@ -391,44 +391,47 @@
       .capacity-note.done strong, .capacity-note strong { color:var(--teal2); }
       .capacity-note.over { color:#FCA5A5; }
       .capacity-note.over strong { color:#FCA5A5; }
-      /* ⭐ Exclusive Variety Pack — hero product, harmonized to the cosmic system */
+      /* ⭐ Exclusive Variety Pack — typography-forward hero, native to the cosmic system */
       .variety-hero { position:relative; margin:20px 0 8px; border-radius:20px; overflow:hidden;
         background:
-          radial-gradient(120% 130% at 12% 0%, rgba(155,61,255,.26) 0%, transparent 58%),
-          radial-gradient(120% 130% at 100% 100%, rgba(0,232,212,.12) 0%, transparent 55%),
-          linear-gradient(140deg, rgba(26,15,46,.96) 0%, var(--card-bg) 62%);
-        border:1px solid rgba(155,61,255,.42);
-        box-shadow:0 20px 50px -26px rgba(0,0,0,.7), 0 0 46px -18px rgba(155,61,255,.45); }
+          radial-gradient(130% 120% at 0% 0%, rgba(155,61,255,.20) 0%, transparent 55%),
+          radial-gradient(130% 120% at 100% 100%, rgba(0,232,212,.12) 0%, transparent 55%),
+          var(--card-bg);
+        border:1px solid rgba(155,61,255,.4);
+        box-shadow:0 18px 44px -24px rgba(0,0,0,.7), 0 0 40px -20px rgba(155,61,255,.4); }
+      .variety-hero::before { content:''; position:absolute; top:0; left:0; right:0; height:2px; z-index:2;
+        background:linear-gradient(90deg, transparent, var(--gold), var(--teal), transparent); opacity:.7; }
       .variety-flag { position:absolute; top:0; left:0; z-index:3;
         background:linear-gradient(135deg,var(--purple),#6B21C4); color:#fff; font-weight:900;
-        font-size:.68rem; letter-spacing:.1em; text-transform:uppercase; padding:5px 14px 5px 12px;
-        border-radius:0 0 13px 0; box-shadow:0 3px 12px rgba(155,61,255,.5); }
-      .variety-hero-grid { display:grid; grid-template-columns:1fr; align-items:center; }
-      @media(min-width:720px){ .variety-hero-grid{ grid-template-columns:.82fr 1.18fr; } }
-      .variety-hero-art { position:relative; padding:34px 20px 8px; display:flex; align-items:center; justify-content:center; }
-      @media(min-width:720px){ .variety-hero-art{ padding:22px; } }
-      .variety-hero-art::before { content:''; position:absolute; inset:16%;
-        background:radial-gradient(circle,rgba(155,61,255,.35) 0%,transparent 66%); filter:blur(18px); }
-      /* image sits INSIDE the card — vignette + soft shadow contain the bright flyer bg */
-      .variety-img-wrap { position:relative; width:100%; max-width:210px; border-radius:14px; overflow:hidden;
-        border:1px solid rgba(255,255,255,.08); box-shadow:0 14px 34px rgba(0,0,0,.55); }
-      @media(min-width:720px){ .variety-img-wrap{ max-width:250px; } }
-      .variety-img-wrap img { display:block; width:100%; filter:saturate(.9) brightness(.96); }
-      .variety-img-wrap::after { content:''; position:absolute; inset:0; pointer-events:none; border-radius:14px;
-        box-shadow:inset 0 0 42px 12px rgba(12,8,24,.62);
-        background:radial-gradient(120% 120% at 50% 42%, transparent 52%, rgba(12,8,24,.55) 100%); }
-      .variety-hero-copy { padding:4px 20px 22px; }
-      @media(min-width:720px){ .variety-hero-copy{ padding:24px 28px 24px 8px; } }
-      .variety-star { font-size:1.35rem; filter:drop-shadow(0 0 9px rgba(255,184,0,.6)); }
-      .variety-hero-copy h3 { font-family:'Space Grotesk',sans-serif; font-size:clamp(1.4rem,4.4vw,2rem); line-height:1.06; margin:3px 0 6px; }
+        font-size:.66rem; letter-spacing:.11em; text-transform:uppercase; padding:5px 13px 5px 12px;
+        border-radius:0 0 12px 0; box-shadow:0 3px 12px rgba(155,61,255,.5); }
+      .variety-hero-inner { display:grid; grid-template-columns:1fr; gap:16px; align-items:center; padding:32px 22px 22px; }
+      @media(min-width:640px){ .variety-hero-inner{ grid-template-columns:auto 1fr; gap:26px; padding:30px; } }
+      /* "12 KITS" badge = the visual anchor, no poster image */
+      .variety-badge { position:relative; justify-self:center; width:116px; height:116px; border-radius:50%;
+        display:flex; flex-direction:column; align-items:center; justify-content:center;
+        background:radial-gradient(circle at 50% 34%, rgba(155,61,255,.38), rgba(4,12,24,.65));
+        border:1px solid rgba(155,61,255,.5);
+        box-shadow:0 0 0 6px rgba(155,61,255,.08), inset 0 0 30px rgba(0,232,212,.14); }
+      .variety-badge::after { content:'⚡'; position:absolute; top:-6px; right:-2px; font-size:1.3rem;
+        filter:drop-shadow(0 0 8px rgba(255,184,0,.75)); }
+      .variety-badge-num { font-family:'Space Grotesk',sans-serif; font-weight:800; font-size:2.7rem; line-height:1;
+        background:linear-gradient(135deg,var(--teal2),var(--purple2)); -webkit-background-clip:text; background-clip:text;
+        -webkit-text-fill-color:transparent; color:var(--teal2); }
+      .variety-badge-label { font-size:.7rem; font-weight:800; letter-spacing:.2em; color:var(--muted); margin-top:2px; }
+      .variety-hero-copy { text-align:center; }
+      @media(min-width:640px){ .variety-hero-copy{ text-align:left; } }
+      .variety-hero-copy h3 { font-family:'Space Grotesk',sans-serif; font-size:clamp(1.4rem,4.2vw,1.9rem); line-height:1.08; margin-bottom:6px; }
       .variety-pretty { display:inline-block; background:linear-gradient(100deg,var(--purple2),var(--gold2));
         -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent; color:var(--purple2);
         font-size:.6em; font-weight:800; }
-      .variety-tag { font-weight:800; color:var(--gold2); font-size:.95rem; margin-bottom:7px; line-height:1.35; }
-      .variety-lede { color:var(--muted); font-size:.88rem; line-height:1.6; margin-bottom:12px; }
+      .variety-tag { font-weight:800; color:var(--gold2); font-size:.95rem; margin-bottom:9px; line-height:1.35; }
+      .variety-flavors { font-size:1.05rem; letter-spacing:.16em; margin-bottom:10px; }
+      .variety-lede { color:var(--muted); font-size:.88rem; line-height:1.6; margin-bottom:14px; }
       .variety-lede strong { color:#fff; }
-      .variety-facts { display:flex; flex-wrap:wrap; gap:7px; margin-bottom:14px; }
-      .variety-facts span { background:rgba(0,232,212,.07); border:1px solid rgba(155,61,255,.32);
+      .variety-facts { display:flex; flex-wrap:wrap; gap:7px; justify-content:center; margin-bottom:16px; }
+      @media(min-width:640px){ .variety-facts{ justify-content:flex-start; } }
+      .variety-facts span { background:rgba(0,232,212,.07); border:1px solid rgba(155,61,255,.3);
         border-radius:999px; padding:5px 12px; font-size:.8rem; font-weight:700; color:var(--white); white-space:nowrap; }
       .variety-cta { width:100%; border:none; cursor:pointer; border-radius:13px; padding:15px 18px;
         font-family:'Nunito',sans-serif; font-weight:900; font-size:1.05rem; color:#fff;
@@ -436,7 +439,6 @@
         box-shadow:0 10px 26px -8px rgba(155,61,255,.55); animation:shimmer 3s linear infinite;
         transition:transform .18s ease, box-shadow .18s ease; }
       .variety-cta:hover { transform:translateY(-2px); box-shadow:0 14px 36px -8px rgba(0,232,212,.55); }
-      .variety-fine { text-align:center; color:var(--muted); font-size:.74rem; margin-top:8px; }
       @media(prefers-reduced-motion:reduce){ .variety-cta{ animation:none; } }
 
       .build-divider { display:flex; align-items:center; gap:14px; margin:28px 0 4px;
@@ -885,20 +887,18 @@
           <!-- ⭐ HERO: Exclusive Variety Pack (the pretty one) -->
           <div class="variety-hero">
             <span class="variety-flag">⚡ Fundraiser Exclusive</span>
-            <div class="variety-hero-grid">
-              <figure class="variety-hero-art">
-                <span class="variety-img-wrap">
-                  <img src="./assets/ptk-variety-pack.jpg" alt="Power Tea Kits Exclusive Variety Pack — 12 kits, pre-selected mix" width="760" height="997" loading="lazy" />
-                </span>
-              </figure>
+            <div class="variety-hero-inner">
+              <div class="variety-badge" aria-hidden="true">
+                <span class="variety-badge-num">12</span>
+                <span class="variety-badge-label">KITS</span>
+              </div>
               <div class="variety-hero-copy">
-                <span class="variety-star" aria-hidden="true">⚡</span>
                 <h3>Exclusive Variety Pack <span class="variety-pretty">— the pretty one</span></h3>
                 <p class="variety-tag">12 kits, ready to go — a pre-selected mix of every fundraiser flavor.</p>
+                <div class="variety-flavors" aria-hidden="true">🍒 🎆 🍇 🍍 🍋 🍉 🫐</div>
                 <p class="variety-lede">Exclusive flavors available <strong>only through this fundraiser</strong>. No picking required — we mixed the perfect assortment for you (tweak it after if you like).</p>
-                <div class="variety-facts"><span>🧋 12 kits</span><span>💵 $80.00</span><span>🥎 $20.50 to the team</span></div>
+                <div class="variety-facts"><span>💵 $80.00</span><span>🥎 $20.50 to the team</span><span>🚫 No picking needed</span></div>
                 <button type="button" class="variety-cta" onclick="addVariety12()">⚡ Add Exclusive Variety Pack — $80</button>
-                <p class="variety-fine">One tap fills all 12 kits with the official variety mix.</p>
               </div>
             </div>
           </div>
