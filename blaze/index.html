@@ -5,10 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <meta name="theme-color" content="#007991" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
-    <meta name="description" content="Power Tea Kit Fundraiser supporting the Blaze Remix 12U fastpitch softball team. Get energized and give back — 50% of net proceeds go directly back to the team." />
+    <meta name="description" content="Power Tea Kit Fundraiser supporting the Blaze Remix 12U fastpitch softball team. Get energized and give back — a fixed amount from every pack, plus 100% of tips, goes directly to the team." />
     <title>Power Tea Kit Fundraiser – Blaze Remix | GlowDaily Nutrition</title>
     <meta property="og:title" content="Power Tea Kit Fundraiser – Blaze Remix" />
-    <meta property="og:description" content="Get ENERGIZED and GIVE BACK! 50% of net proceeds go directly back to the Blaze Remix team." />
+    <meta property="og:description" content="Get ENERGIZED and GIVE BACK! A fixed amount from every pack, plus 100% of tips, goes directly to the Blaze Remix team." />
     <meta property="og:image" content="./assets/team-jerseys.webp" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -508,14 +508,26 @@
       .order-id { font-weight:900; color:var(--gold); }
 
       /* ═══ THANKS + FOOTER ═══ */
-      .thanks-block { text-align:center; padding:40px 24px; border-radius:var(--radius-lg);
-        background:linear-gradient(135deg, rgba(155,61,255,.13), rgba(0,232,212,.06));
+      .thanks-block { position:relative; overflow:hidden; text-align:center; padding:48px 26px; border-radius:var(--radius-lg);
+        background:
+          radial-gradient(130% 120% at 50% -15%, rgba(155,61,255,.24) 0%, transparent 62%),
+          linear-gradient(135deg, rgba(155,61,255,.12), rgba(0,232,212,.05));
         border:1px solid rgba(155,61,255,.4); box-shadow:var(--glow-purple); }
-      .thanks-block .thanks-logo { width:132px; margin:0 auto 18px; padding:8px; background:#fff;
-        border-radius:16px; box-shadow:0 0 34px rgba(155,61,255,.55); }
-      .thanks-block h2 { font-size:clamp(1.6rem,4vw,2.3rem); margin-bottom:12px; }
-      .thanks-lead { font-weight:800; color:var(--gold); margin-bottom:12px; font-size:1.05rem; }
-      .thanks-block p { color:var(--muted); line-height:1.75; max-width:58ch; margin:0 auto 10px; }
+      .thanks-block .thanks-logo { width:128px; height:128px; margin:0 auto 20px; padding:16px;
+        display:flex; align-items:center; justify-content:center;
+        background:radial-gradient(circle at 50% 38%, #ffffff 0%, #efeaff 100%);
+        border-radius:50%; box-shadow:0 0 0 4px rgba(155,61,255,.22), 0 10px 30px rgba(0,0,0,.4), 0 0 46px rgba(155,61,255,.5); }
+      .thanks-block .thanks-logo img { width:100%; height:100%; object-fit:contain; }
+      .thanks-block h2 { font-size:clamp(1.7rem,4vw,2.4rem); margin-bottom:10px; }
+      .thanks-lead { font-weight:800; color:var(--gold); margin-bottom:16px; font-size:1.05rem; }
+      .thanks-credits { display:flex; flex-wrap:wrap; gap:10px; justify-content:center; margin:0 auto 20px; max-width:520px; }
+      .credit-chip { background:rgba(0,232,212,.08); border:1px solid rgba(0,232,212,.3); color:var(--teal2);
+        border-radius:999px; padding:9px 17px; font-weight:700; font-size:.92rem; white-space:nowrap; }
+      .credit-chip strong { color:#fff; font-family:'Space Grotesk',sans-serif; }
+      .credit-chip--tip { background:rgba(255,184,0,.1); border-color:rgba(255,184,0,.38); color:var(--gold2); }
+      .credit-chip--tip strong { color:var(--gold2); }
+      .thanks-block p { color:var(--muted); line-height:1.75; max-width:56ch; margin:0 auto 10px; }
+      .thanks-contact { margin-top:16px; }
       .site-footer { text-align:center; padding:32px 24px 40px; border-top:1px solid rgba(0,232,212,.1);
         color:var(--muted); font-size:.88rem; }
       .footer-inner { display:flex; flex-direction:column; align-items:center; gap:10px; }
@@ -545,7 +557,7 @@
 
     <div class="page">
     <div class="announce">
-      <p><strong>Fundraiser</strong> &mdash; 50% of net proceeds go back to Blaze Remix 12U Fastpitch</p>
+      <p><strong>Fundraiser</strong> &mdash; a fixed amount from every pack goes straight to Blaze Remix 12U Fastpitch</p>
     </div>
 
     <header class="site-header" id="top">
@@ -592,7 +604,7 @@
             <p class="fund-sub">Get ENERGIZED and GIVE BACK!</p>
             <p class="fund-lead">
               We are raising money for <strong>new uniforms and team travel</strong>.
-              <strong>50% of net proceeds go directly back to the Blaze Remix team.</strong>
+              <strong>$10.50 from every 6-Pack and $20.50 from every 12-Pack — plus 100% of tips — go directly to the Blaze Remix team.</strong>
               Every kit you order helps these players compete in Des Moines metro, regional
               and national tournaments.
             </p>
@@ -887,15 +899,20 @@
         <div class="section-wrap">
           <div class="thanks-block">
             <div class="thanks-logo">
-              <img src="./assets/blaze-remix-logo.webp" alt="Blaze Remix team logo" width="456" height="453" loading="lazy" />
+              <img src="./assets/blaze-remix-logo.webp" alt="Blaze Remix team logo" width="612" height="620" loading="lazy" />
             </div>
             <h2>Thank you for your generous support!</h2>
-            <p class="thanks-lead">50% of net proceeds go directly back to Blaze Remix.</p>
+            <p class="thanks-lead">A fixed amount from every pack goes straight to the team.</p>
+            <div class="thanks-credits">
+              <span class="credit-chip"><strong>$10.50</strong> per 6-Pack</span>
+              <span class="credit-chip"><strong>$20.50</strong> per 12-Pack</span>
+              <span class="credit-chip credit-chip--tip"><strong>+ 100%</strong> of every tip</span>
+            </div>
             <p>
               Our small business is proud to give back to local organizations. Please think of
               <strong>GlowDaily Nutrition</strong> for future fundraising opportunities!
             </p>
-            <p style="margin-top: 16px">
+            <p class="thanks-contact">
               Questions? Email
               <a href="mailto:glowdailynutrition@gmail.com">glowdailynutrition@gmail.com</a>
             </p>
