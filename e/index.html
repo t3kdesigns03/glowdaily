@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>GlowDaily Nutrition – Loaded Teas & Nutrition</title>
+<title>Order for an Event – GlowDaily Nutrition</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Space+Grotesk:wght@400;600;700&display=swap" rel="stylesheet"/>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
@@ -758,14 +758,12 @@ footer a { color: var(--teal); text-decoration: none; }
 
 <!-- ── NAV ──────────────────────────────────────── -->
 <nav>
-  <a class="nav-logo" href="#home"><span class="nl-glow">Glow</span><span class="nl-daily">Daily</span></a>
+  <a class="nav-logo" href="/"><span class="nl-glow">Glow</span><span class="nl-daily">Daily</span></a>
   <ul class="nav-links">
+    <li><a href="/">Home</a></li>
     <li><a href="#menu">Menu</a></li>
-    <li><a href="#specials">Specials</a></li>
-    <li><a href="/popups/">Pop-Ups</a></li>
-    <li><a href="#about">About</a></li>
-    <li><a href="#contact">Contact</a></li>
-    <li><a href="./blaze/" class="nav-blaze">🥎 Support Blaze</a></li>
+    <li><a href="/popups/" class="active">Pop-Ups</a></li>
+    <li><a href="/blaze/" class="nav-blaze">🥎 Support Blaze</a></li>
     <li><a href="#order" class="nav-cta">Order Now ✨</a></li>
   </ul>
   <button class="hamburger" onclick="toggleMobile()" aria-label="Menu">
@@ -773,83 +771,63 @@ footer a { color: var(--teal); text-decoration: none; }
   </button>
 </nav>
 <div class="mobile-menu" id="mobileMenu">
+  <a href="/">Home</a>
   <a href="#menu"     onclick="closeMobile()">Menu</a>
-  <a href="#specials" onclick="closeMobile()">Specials</a>
-  <a href="/popups/">Pop-Ups</a>
-  <a href="#about"    onclick="closeMobile()">About</a>
-  <a href="#contact"  onclick="closeMobile()">Contact</a>
-  <a href="./blaze/"  class="nav-blaze">🥎 Support Blaze</a>
+  <a href="/popups/" class="active">Pop-Ups</a>
+  <a href="/blaze/"  class="nav-blaze">🥎 Support Blaze</a>
   <a href="#order"    onclick="closeMobile()" class="nav-cta" style="text-align:center;">Order Now ✨</a>
 </div>
 
-<!-- ── HERO ──────────────────────────────────────── -->
-<section id="home">
-  <div class="hero-inner">
-    <div class="hero-text">
-      <div class="hero-neon-sign">
-        <span class="neon-line1">GlowDaily</span>
-        <span class="neon-line2">Nutrition</span>
-      </div>
-      <h1>
-        Fuel Your <span class="glow-word">Glow</span> Every <span class="gold-word">Day</span>
-      </h1>
-      <p class="hero-tagline">
-        Loaded teas packed with nutrients, energy, and real flavor — crafted to keep you feeling great, not crash you like a soda. Your body deserves better than sugar bombs.
-      </p>
-      <div class="hero-btns">
-        <a href="#menu" class="btn-primary">🌌 View Menu</a>
-        <a href="#order" class="btn-outline">Place an Order</a>
-      </div>
-      <div class="hero-badges">
-        <span class="badge">💪 Protein</span>
-        <span class="badge">💧 Electrolytes</span>
-        <span class="badge">⚡ Natural Caffeine</span>
-        <span class="badge">🅱️ Vitamin B Complex</span>
-        <span class="badge">✨ Collagen</span>
-        <span class="badge">🍵 17+ Flavors</span>
-        <span class="badge">🚀 Ship Nationwide</span>
+<!-- ── EVENT BANNER ──────────────────────────────── -->
+<style>
+  #eventTop { padding: 6.5rem 1.5rem 1rem; }
+  .event-banner, .event-closed { max-width: 900px; margin: 0 auto; }
+  .event-banner {
+    background: linear-gradient(135deg, rgba(0,232,212,0.10), rgba(155,61,255,0.10));
+    border: 1px solid rgba(0,232,212,0.3); border-radius: 22px;
+    padding: 1.75rem 1.75rem; box-shadow: var(--glow);
+  }
+  .eb-badge {
+    display: inline-block; font-size: 0.72rem; font-weight: 800; letter-spacing: 0.1em;
+    text-transform: uppercase; padding: 0.3rem 0.85rem; border-radius: 999px;
+    background: rgba(0,232,212,0.15); color: var(--teal3); border: 1px solid rgba(0,232,212,0.35);
+  }
+  .eb-title { font-size: clamp(1.6rem, 5vw, 2.5rem); margin: 0.75rem 0 0.5rem; line-height: 1.15; }
+  .eb-meta { display: flex; flex-wrap: wrap; gap: 0.5rem 1.25rem; color: var(--teal3); font-weight: 700; font-size: 0.95rem; }
+  .eb-meta span { display: inline-flex; align-items: center; gap: 0.4rem; }
+  .eb-sub { color: var(--muted); margin-top: 0.85rem; font-size: 0.98rem; line-height: 1.5; }
+  .event-closed {
+    text-align: center; background: var(--card-bg); border: 1px dashed rgba(45,212,191,0.3);
+    border-radius: 22px; padding: 3rem 1.75rem;
+  }
+  .event-closed .big { font-size: 3rem; }
+  .event-closed h1 { font-size: 1.9rem; margin: 0.5rem 0; }
+  .event-closed p { color: var(--muted); line-height: 1.6; }
+  .ec-links { display: flex; gap: 0.9rem; justify-content: center; flex-wrap: wrap; margin-top: 1.5rem; }
+</style>
+<section id="eventTop">
+  <div class="section-inner" style="max-width:900px;margin:0 auto;">
+    <div id="eventBanner" class="event-banner" style="display:none">
+      <div class="eb-badge" id="ebBadge">Pop-Up</div>
+      <h1 class="eb-title" id="ebName">Ordering for this event</h1>
+      <div class="eb-meta" id="ebMeta"></div>
+      <p class="eb-sub">Build your order below — we'll have it packed and ready for pickup at the stop.</p>
+    </div>
+    <div id="eventClosed" class="event-closed" style="display:none">
+      <div class="big">🌙</div>
+      <h1>This event is closed</h1>
+      <p id="ecMsg">This pop-up isn't taking orders right now.</p>
+      <div class="ec-links">
+        <a href="/popups/" class="btn-primary">See open events →</a>
+        <a href="/" class="btn-outline">Back to menu</a>
       </div>
     </div>
-    <div class="hero-mascot">
-      <div class="mascot-wrap">
-        <div class="mascot-ring"></div>
-        <img src="mascot.jpg" alt="GlowDaily mascot" id="mascotImg"
-             onerror="this.style.display='none';document.getElementById('mascotPlaceholder').style.display='flex'"/>
-        <div class="mascot-placeholder" id="mascotPlaceholder" style="display:none">
-          <div class="big-emoji">🌌</div>
-          <div>Save your mascot image as <strong>mascot.jpg</strong> in this folder to display it here!</div>
-        </div>
-      </div>
-    </div>
+    <div id="eventLoading" style="text-align:center;color:var(--muted);padding:2rem;">🌌 Loading event…</div>
   </div>
 </section>
 
-<div class="cosmic-divider"></div>
-
-<!-- ── MONTHLY SPECIAL ───────────────────────────── -->
-<section id="specials">
-  <div class="section-inner">
-    <div class="special-card" id="specialCard">
-      <div class="special-left">
-        <div class="special-icon" id="specialIcon">🎁</div>
-        <div>
-          <div class="special-badge-label">⭐ Monthly Special</div>
-          <div class="special-name" id="specialName">Loading…</div>
-          <div class="special-desc" id="specialDesc">Check back for this month's featured deal</div>
-        </div>
-      </div>
-      <div class="special-price-wrap">
-        <div class="special-price" id="specialPrice">—</div>
-        <div class="special-price-note" id="specialNote"></div>
-        <button class="btn-primary" style="margin-top:0.75rem;font-size:0.9rem;padding:0.6rem 1.4rem;" onclick="openPackPicker()">
-          Get It ✨
-        </button>
-      </div>
-    </div>
-  </div>
-</section>
-
-
+<!-- Shop (menu + order) — revealed only when the event is live -->
+<div id="eventShop" style="display:none">
 <div class="cosmic-divider"></div>
 
 <!-- ── MENU ──────────────────────────────────────── -->
@@ -860,10 +838,12 @@ footer a { color: var(--teal); text-decoration: none; }
         <p class="section-label">What We're Serving</p>
         <h2 class="section-title">Our Menu</h2>
       </div>
-      <div class="price-toggle">
-        <button id="btnPickup" class="active" onclick="setPriceMode('pickup')">In-Person / Pickup</button>
-        <button id="btnShip" onclick="setPriceMode('ship')">Shipped</button>
-      </div>
+      <div class="event-chip"><span class="event-chip-ico">📍</span><span id="menuEventChip">Event pickup pricing</span></div>
+    </div>
+    <!-- Hidden price toggle: event door is locked to pickup pricing -->
+    <div class="price-toggle" style="display:none">
+      <button id="btnPickup" class="active">In-Person / Pickup</button>
+      <button id="btnShip">Shipped</button>
     </div>
     <div id="menuGrid" class="menu-grid">
       <div class="menu-loading">🌌 Loading menu from the cosmos…</div>
@@ -919,52 +899,17 @@ footer a { color: var(--teal); text-decoration: none; }
         <textarea id="custFlavorFriday" rows="2" placeholder="Strawberry Starburst, Cotton Candy, Wild Berry, etc."></textarea>
       </div>
 
-      <!-- FULFILLMENT -->
-      <div class="form-section-title">📦 Fulfillment</div>
-      <div class="form-group" style="max-width:360px">
-        <label for="fulfillment">How would you like to receive your order?</label>
-        <select id="fulfillment" onchange="onFulfillChange()">
-          <option value="pickup">In-Person Pickup</option>
-          <option value="event">Event / Pop-Up</option>
-          <option value="ship">Ship to Me</option>
-        </select>
-      </div>
-      <!-- Event / Pop-Up block (event only) -->
-      <div class="event-block" id="eventBlock">
-        <div class="form-group">
-          <label for="eventSelect">Which stop are you ordering for? *</label>
-          <select id="eventSelect" onchange="onEventSelectChange()">
-            <option value="">Select an event…</option>
-          </select>
-        </div>
-        <div class="form-group" id="eventCustomWrap" style="display:none">
-          <label for="eventCustomLocation">Tea drop / school / pop-up location *</label>
-          <input type="text" id="eventCustomLocation" placeholder="Tea drop / school / popup location"/>
-        </div>
-        <div class="event-hint" id="eventHint">
-          Don't see your stop? Pick <strong>Other / Tea Drop</strong> and tell us where.
-          Or <a href="/popups/">browse the calendar →</a>
-        </div>
-      </div>
-      <!-- Address block (ships only) -->
-      <div class="address-block" id="addressBlock">
-        <div class="form-group" style="grid-column:1/-1">
-          <label for="addrStreet">Street Address</label>
-          <input type="text" id="addrStreet" placeholder="123 Main St"/>
-        </div>
-        <div class="form-group">
-          <label for="addrCity">City</label>
-          <input type="text" id="addrCity" placeholder="City"/>
-        </div>
-        <div class="form-group">
-          <label for="addrState">State</label>
-          <input type="text" id="addrState" placeholder="State" style="max-width:120px"/>
-        </div>
-        <div class="form-group">
-          <label for="addrZip">ZIP</label>
-          <input type="text" id="addrZip" placeholder="ZIP"/>
-        </div>
-      </div>
+      <!-- FULFILLMENT — locked to this event -->
+      <div class="form-section-title">📦 Pickup at the Event</div>
+      <div class="event-chip" id="eventLockChip"><span class="event-chip-ico">📍</span><span id="eventLockText">This event</span></div>
+      <p class="event-hint" style="margin-top:0.5rem">
+        Your order will be packed for this event — no shipping. <a href="/popups/">See other events →</a>
+      </p>
+      <!-- Hidden fulfillment inputs: locked to event pickup pricing -->
+      <select id="fulfillment" style="display:none"><option value="event" selected>Event</option></select>
+      <select id="eventSelect" style="display:none"></select>
+      <input type="hidden" id="eventCustomLocation" value=""/>
+      <div class="address-block" id="addressBlock" style="display:none"></div>
 
       <!-- PAYMENT -->
       <div class="form-section-title">💳 Payment Method</div>
@@ -1023,90 +968,7 @@ footer a { color: var(--teal); text-decoration: none; }
   </div>
 </section>
 
-<div class="cosmic-divider"></div>
-
-<!-- ── ABOUT ──────────────────────────────────────── -->
-<section id="about">
-  <div class="section-inner">
-    <div class="about-grid">
-      <div>
-        <p class="section-label">Our Story</p>
-        <h2 class="section-title">Built on Real Nutrition</h2>
-        <p class="section-sub">
-          Think about how much soda and sugar-packed drinks people reach for every single day — it's practically screaming diabetes. We started GlowDaily because we believe you can have amazing flavor <em>and</em> actually fuel your body at the same time.
-        </p>
-        <p class="section-sub" style="margin-top:1rem">
-          Every loaded tea we make is built on Herbalife nutrition — real ingredients that support your energy, metabolism, and hydration. No sugar bombs. Just glow.
-        </p>
-        <div class="about-pills">
-          <div class="about-pill"><span class="pill-icon">⚡</span> Energy Support</div>
-          <div class="about-pill"><span class="pill-icon">💧</span> Hydration Boost</div>
-          <div class="about-pill"><span class="pill-icon">🌿</span> Herbal Ingredients</div>
-          <div class="about-pill"><span class="pill-icon">🚫</span> No Sugar Bombs</div>
-          <div class="about-pill"><span class="pill-icon">🎨</span> 17+ Flavors</div>
-          <div class="about-pill"><span class="pill-icon">📦</span> Ships Nationwide</div>
-        </div>
-      </div>
-      <div>
-        <div class="about-stats">
-          <div class="stat-card">
-            <div class="stat-num">17+</div>
-            <div class="stat-label">Unique Tea Flavors</div>
-          </div>
-          <div class="stat-card">
-            <div class="stat-num">$8</div>
-            <div class="stat-label">Starting Price</div>
-          </div>
-          <div class="stat-card">
-            <div class="stat-num">12pk</div>
-            <div class="stat-label">Monthly Bundle</div>
-          </div>
-          <div class="stat-card">
-            <div class="stat-num">🌌</div>
-            <div class="stat-label">Cosmic Flavor Vibes</div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<div class="cosmic-divider"></div>
-
-<!-- ── CONTACT ─────────────────────────────────────── -->
-<section id="contact">
-  <div class="section-inner">
-    <p class="section-label">Find Us</p>
-    <h2 class="section-title">Get in Touch</h2>
-    <p class="section-sub">We do in-person pickups, pop-up events, and ship 12-pack bundles nationwide. Reach out and we'll take care of you.</p>
-    <div class="contact-grid">
-      <div class="contact-card">
-        <div class="contact-icon">💙</div>
-        <div class="contact-type">Venmo</div>
-        <div class="contact-val venmo-handle">@GlowDaily</div>
-        <div class="contact-val muted" style="font-size:0.82rem;margin-top:0.3rem">Most orders paid here</div>
-      </div>
-      <div class="contact-card">
-        <div class="contact-icon">📞</div>
-        <div class="contact-type">Jennifer</div>
-        <div class="contact-val">402.217.1574</div>
-        <div class="contact-val muted" style="font-size:0.82rem;margin-top:0.3rem">Call or text anytime</div>
-      </div>
-      <div class="contact-card">
-        <div class="contact-icon">📧</div>
-        <div class="contact-type">Email</div>
-        <div class="contact-val">glowdailynutrition@gmail.com</div>
-        <div class="contact-val muted" style="font-size:0.82rem;margin-top:0.3rem">Orders &amp; questions</div>
-      </div>
-      <div class="contact-card">
-        <div class="contact-icon">📍</div>
-        <div class="contact-type">Pop-Ups &amp; Events</div>
-        <div class="contact-val venmo-handle" style="font-size:1rem"><a href="/popups/" style="color:var(--teal);text-decoration:none">See the calendar →</a></div>
-        <div class="contact-val muted" style="font-size:0.82rem;margin-top:0.3rem">Order ahead &amp; pick up at a stop</div>
-      </div>
-    </div>
-  </div>
-</section>
+</div><!-- end #eventShop -->
 
 <!-- ── FOOTER ─────────────────────────────────────── -->
 <footer>
@@ -1934,10 +1796,66 @@ window.addEventListener('scroll', () => {
 }, { passive: true });
 
 
-// ── INIT ──────────────────────────────────────────
-loadProducts();
-loadSpecial();
-loadEvents();
+// ── EVENT DOOR BOOT ───────────────────────────────
+let lockedEvent = null;
+
+function getParam(name){ return new URLSearchParams(location.search).get(name); }
+function fmtTime(t){ if(!t) return ''; const [h,m]=t.split(':').map(Number); if(isNaN(h)) return t;
+  const ap=h>=12?'PM':'AM'; const hr=((h+11)%12)+1; return `${hr}${m?':'+String(m).padStart(2,'0'):''}${ap}`; }
+function fmtLongDate(iso){ const d=new Date(iso+'T12:00:00'); if(isNaN(d)) return iso;
+  return d.toLocaleDateString(undefined,{weekday:'long',month:'long',day:'numeric'}); }
+
+function showClosed(msg){
+  document.getElementById('eventLoading').style.display='none';
+  document.getElementById('eventBanner').style.display='none';
+  document.getElementById('eventShop').style.display='none';
+  document.getElementById('eventClosed').style.display='block';
+  if(msg) document.getElementById('ecMsg').textContent=msg;
+}
+
+async function bootEventDoor(){
+  const slug = getParam('event');
+  if(!slug){ showClosed('No event was specified. Browse our open events instead.'); return; }
+
+  try {
+    const { data } = await sb.from('gd_store').select('value').eq('key','events').maybeSingle();
+    if(data?.value && Array.isArray(data.value)) events = data.value;
+  } catch(e) { events = []; }
+
+  const ev = events.find(e => e.slug === slug || e.id === slug);
+  if(!ev){ showClosed('We couldn’t find this event. It may have been removed.'); return; }
+  if(!isEventOrderable(ev)){ showClosed(`Ordering for “${ev.name}” is closed right now.`); return; }
+
+  lockedEvent = ev;
+
+  // Populate hidden #eventSelect so submitOrder()/resolveEventSelection() resolve THIS event.
+  const sel = document.getElementById('eventSelect');
+  sel.innerHTML = `<option value="${escapeHtml(ev.id)}" selected></option>`;
+  sel.value = ev.id;
+  document.getElementById('fulfillment').value = 'event';
+
+  // Banner
+  document.getElementById('eventLoading').style.display='none';
+  document.getElementById('eventBanner').style.display='block';
+  document.getElementById('ebBadge').textContent = EVENT_TYPE_LABEL[ev.type] || 'Event';
+  document.getElementById('ebName').textContent  = ev.name || 'Ordering for this event';
+  const meta = [];
+  if(ev.date) meta.push(`<span>📅 ${escapeHtml(fmtLongDate(ev.date))}</span>`);
+  const tw = [fmtTime(ev.startTime), fmtTime(ev.endTime)].filter(Boolean).join('–');
+  if(tw) meta.push(`<span>⏰ ${escapeHtml(tw)}</span>`);
+  if(ev.location) meta.push(`<span>📍 ${escapeHtml(ev.location)}</span>`);
+  document.getElementById('ebMeta').innerHTML = meta.join('');
+
+  // Locked pickup chip
+  document.getElementById('eventLockText').textContent =
+    `${ev.name}${ev.location ? ' · ' + ev.location : ''}`;
+
+  // Reveal shop, lock pricing to pickup
+  document.getElementById('eventShop').style.display='block';
+  setPriceMode('pickup');
+  loadProducts();
+}
+bootEventDoor();
 </script>
 </body>
 </html>
