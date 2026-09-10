@@ -190,6 +190,52 @@ const NEXT_STATUS = {
   Shipped:  "Delivered",
 };
 
+// ── Events / fulfillment ─────────────────────────────────
+const PUBLIC_BASE = 'https://glowdailynutrition.com';
+const EVENT_TYPES = [
+  { id:'popup',   label:'Pop-Up'   },
+  { id:'teadrop', label:'Tea Drop' },
+  { id:'school',  label:'School'   },
+];
+const EVENT_TYPE_LABEL = { popup:'Pop-Up', teadrop:'Tea Drop', school:'School' };
+const EVENT_TYPE_STYLE = {
+  popup:   'bg-teal-100 text-teal-700',
+  teadrop: 'bg-purple-100 text-purple-700',
+  school:  'bg-amber-100 text-amber-700',
+};
+
+function slugify(s) {
+  return String(s || '').toLowerCase().trim()
+    .replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 60) || 'event';
+}
+// Ensure a slug is unique across events (ignoring the event being edited).
+function uniqueSlug(base, events, ignoreId) {
+  let slug = base, n = 2;
+  const taken = s => events.some(e => e.slug === s && e.id !== ignoreId);
+  while (taken(slug)) slug = `${base}-${n++}`;
+  return slug;
+}
+
+// Normalize an order's fulfillment channel, with a fallback for legacy rows.
+function orderFulfillment(o) {
+  if (o.fulfillment === 'pickup' || o.fulfillment === 'event' || o.fulfillment === 'ship') return o.fulfillment;
+  if (o.eventId || o.eventName || o.eventCustomLocation) return 'event';
+  const s = (o.shipping || '').toLowerCase().trim();
+  if (s === 'pickup') return 'pickup';
+  if (s === 'event')  return 'event';
+  if (s.includes(','))return 'ship';   // formatted street address
+  return 'pickup';
+}
+function orderEventLabel(o) {
+  return o.eventName || o.eventCustomLocation || null;
+}
+function fulfillLabel(o) {
+  const f = orderFulfillment(o);
+  if (f === 'event') return `📍 ${orderEventLabel(o) || 'Event'}`;
+  if (f === 'ship')  return `🚚 ${o.shipping && o.shipping.includes(',') ? o.shipping : 'Ship'}`;
+  return '🏠 Pickup';
+}
+
 // Date range helpers
 function dateRangeStart(key) {
   const d = new Date();
@@ -876,17 +922,40 @@ function Dashboard({ ingredients, products, orders, transactions, setPage }) {
 
 function Orders({ ingredients, products, orders, setOrders, setTransactions }) {
   const [filter,   setFilter]   = useState('All');
+  const [fulfillFilter, setFulfillFilter] = useState('All');
+  const [eventFilter,   setEventFilter]   = useState('');
   const [search,   setSearch]   = useState('');
   const [showAdd,  setShowAdd]  = useState(false);
   const [expanded, setExpanded] = useState(null);
   const [editing,  setEditing]  = useState(null);
 
   const FILTERS = ['All','Backordered','Received','Packed','Shipped','Delivered'];
+  const FULFILL_FILTERS = [
+    { id:'All',    label:'All'    },
+    { id:'pickup', label:'Pickup' },
+    { id:'event',  label:'Event'  },
+    { id:'ship',   label:'Ship'   },
+  ];
+
+  // Events that have at least one order (keyed by eventId, or label for legacy rows).
+  const eventOrderOptions = (() => {
+    const map = new Map();
+    orders.forEach(o => {
+      if (orderFulfillment(o) !== 'event') return;
+      const label = orderEventLabel(o);
+      if (!label) return;
+      const key = o.eventId || label;
+      if (!map.has(key)) map.set(key, label);
+    });
+    return [...map.entries()].map(([id, label]) => ({ id, label }));
+  })();
 
   const visible = orders.filter(o => {
     const ms = filter==='All' || o.status===filter;
     const mq = !search || o.customer.toLowerCase().includes(search.toLowerCase()) || o.id.toLowerCase().includes(search.toLowerCase());
-    return ms && mq;
+    const mf = fulfillFilter==='All' || orderFulfillment(o)===fulfillFilter;
+    const me = !eventFilter || (o.eventId || orderEventLabel(o))===eventFilter;
+    return ms && mq && mf && me;
   });
 
   const counts = {};
@@ -1024,6 +1093,25 @@ function Orders({ ingredients, products, orders, setOrders, setTransactions }) {
         ))}
       </div>
 
+      {/* Fulfillment filter + event picker */}
+      <div className="flex gap-2 items-center flex-wrap">
+        <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
+          {FULFILL_FILTERS.map(f => (
+            <button key={f.id} onClick={()=>{ setFulfillFilter(f.id); if (f.id!=='event') setEventFilter(''); }}
+              className={`px-3 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap border transition-colors ${fulfillFilter===f.id?'bg-teal-500 text-white border-teal-500':'bg-white text-gray-600 border-gray-200 hover:border-teal-300'}`}>
+              {f.label}
+            </button>
+          ))}
+        </div>
+        {eventOrderOptions.length>0 && (
+          <select value={eventFilter} onChange={e=>{ setEventFilter(e.target.value); if (e.target.value) setFulfillFilter('event'); }}
+            className="border rounded-xl px-3 py-1.5 text-xs outline-none focus:ring-2 focus:ring-emerald-400 bg-white max-w-[60%]">
+            <option value="">All events</option>
+            {eventOrderOptions.map(o=><option key={o.id} value={o.id}>{o.label}</option>)}
+          </select>
+        )}
+      </div>
+
       {visible.length === 0
         ? <Empty icon={orders.length===0?'📭':'🔍'} text={orders.length===0?'No orders yet. Tap + New to log your first order.':'No orders match your filter.'}/>
         : <div className="space-y-3">
@@ -1039,7 +1127,7 @@ function Orders({ ingredients, products, orders, setOrders, setTransactions }) {
                           <p className="font-semibold text-gray-800">{o.customer}</p>
                           {o.isBackorder && <span className="text-xs bg-orange-100 text-orange-600 px-2 py-0.5 rounded-full font-semibold">backorder</span>}
                         </div>
-                        <p className="text-xs text-gray-400 mt-0.5">{o.id} · {o.date} · {o.shipping}</p>
+                        <p className="text-xs text-gray-400 mt-0.5">{o.id} · {o.date} · {fulfillLabel(o)}</p>
                       </div>
                       <div className="text-right ml-3 flex-shrink-0">
                         <p className="font-bold text-emerald-600">{fmt(o.total)}</p>
@@ -1487,7 +1575,7 @@ function Bookkeeping({ transactions, setTransactions, ingredients }) {
 //  BACKUP / RESTORE MODAL
 // ══════════════════════════════════════════════════════
 
-function BackupModal({ ingredients, products, orders, transactions, onRestore, onClear, onClose }) {
+function BackupModal({ ingredients, products, orders, transactions, events, onRestore, onClear, onClose }) {
   const [confirmClear, setConfirmClear] = useState(false);
   const [importStatus, setImportStatus] = useState(null); // null | 'ok' | 'err'
   const fileRef = useRef(null);
@@ -1495,7 +1583,7 @@ function BackupModal({ ingredients, products, orders, transactions, onRestore, o
   function doExport() {
     const payload = {
       _meta: { version: STORAGE_VERSION, exportedAt: new Date().toISOString(), business: 'GlowDaily Nutrition' },
-      ingredients, products, orders, transactions
+      ingredients, products, orders, transactions, events
     };
     const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
     const a = Object.assign(document.createElement('a'), {
@@ -1743,9 +1831,186 @@ function BlazeFundraiser({ orders }) {
 //  APP SHELL
 // ══════════════════════════════════════════════════════
 
+// ══════════════════════════════════════════════════════
+//  EVENTS  (pop-ups / tea drops / school stops)
+// ══════════════════════════════════════════════════════
+
+function EventModal({ existing, events, onSave, onClose }) {
+  const [name, setName]         = useState(existing?.name || '');
+  const [type, setType]         = useState(existing?.type || 'popup');
+  const [date, setDate]         = useState(existing?.date || today());
+  const [startTime, setStart]   = useState(existing?.startTime || '16:00');
+  const [endTime, setEnd]       = useState(existing?.endTime || '18:00');
+  const [location, setLoc]      = useState(existing?.location || '');
+  const [notes, setNotes]       = useState(existing?.notes || '');
+  const [active, setActive]     = useState(existing ? existing.active !== false : true);
+  const [slug, setSlug]         = useState(existing?.slug || '');
+  const [slugEdited, setSlugEd] = useState(!!existing);
+  const [err, setErr]           = useState('');
+
+  // Auto-slug from the name until the user edits the slug themselves.
+  useEffect(() => { if (!slugEdited) setSlug(slugify(name)); }, [name, slugEdited]);
+
+  function submit() {
+    const nm = name.trim();
+    if (!nm) { setErr('Event name is required.'); return; }
+    const finalSlug = uniqueSlug(slugify(slug || nm), events, existing?.id);
+    onSave({
+      id:        existing?.id || `evt_${Date.now().toString(36)}`,
+      slug:      finalSlug,
+      name:      nm,
+      type,
+      date,
+      startTime,
+      endTime,
+      location:  location.trim(),
+      notes:     notes.trim(),
+      active,
+      cutoffISO: existing?.cutoffISO ?? null,
+      flavorIds: existing?.flavorIds ?? [],
+      fundraiser:existing?.fundraiser ?? false,
+    });
+  }
+
+  return (
+    <Modal title={existing ? 'Edit Event' : 'New Event'} onClose={onClose}>
+      <div className="space-y-3">
+        <div>
+          <Lbl>Event name *</Lbl>
+          <Input value={name} onChange={e=>setName(e.target.value)} placeholder="Lincoln Elementary Fall Kickoff"/>
+        </div>
+        <div className="grid grid-cols-2 gap-3">
+          <div>
+            <Lbl>Type</Lbl>
+            <Sel value={type} onChange={e=>setType(e.target.value)}>
+              {EVENT_TYPES.map(t=><option key={t.id} value={t.id}>{t.label}</option>)}
+            </Sel>
+          </div>
+          <div>
+            <Lbl>Date</Lbl>
+            <Input type="date" value={date} onChange={e=>setDate(e.target.value)}/>
+          </div>
+        </div>
+        <div className="grid grid-cols-2 gap-3">
+          <div><Lbl>Start time</Lbl><Input type="time" value={startTime} onChange={e=>setStart(e.target.value)}/></div>
+          <div><Lbl>End time</Lbl><Input type="time" value={endTime} onChange={e=>setEnd(e.target.value)}/></div>
+        </div>
+        <div>
+          <Lbl>Location</Lbl>
+          <Input value={location} onChange={e=>setLoc(e.target.value)} placeholder="Gym entrance"/>
+        </div>
+        <div>
+          <Lbl>Notes (optional)</Lbl>
+          <Input value={notes} onChange={e=>setNotes(e.target.value)} placeholder="Order by Friday noon"/>
+        </div>
+        <div>
+          <Lbl>Link slug</Lbl>
+          <div className="flex items-center gap-1">
+            <span className="text-xs text-gray-400 whitespace-nowrap">/e/?event=</span>
+            <Input value={slug} onChange={e=>{ setSlug(e.target.value); setSlugEd(true); }} placeholder="lincoln-elem-fall"/>
+          </div>
+          <p className="text-xs text-gray-400 mt-1 break-all">Public link: {PUBLIC_BASE}/e/?event={slugify(slug || name)}</p>
+        </div>
+        <label className="flex items-center gap-2 text-sm text-gray-700">
+          <input type="checkbox" checked={active} onChange={e=>setActive(e.target.checked)} className="w-4 h-4 accent-emerald-500"/>
+          Active (visible on the hub &amp; homepage dropdown)
+        </label>
+        {err && <p className="text-xs text-red-500">{err}</p>}
+        <div className="flex gap-2 pt-2">
+          <Btn variant="outline" onClick={onClose} className="flex-1">Cancel</Btn>
+          <Btn onClick={submit} className="flex-1">{existing ? 'Save' : 'Add Event'}</Btn>
+        </div>
+      </div>
+    </Modal>
+  );
+}
+
+function Events({ events, setEvents, orders }) {
+  const [showAdd, setShowAdd]   = useState(false);
+  const [editing, setEditing]   = useState(null);
+  const [copiedId, setCopiedId] = useState(null);
+
+  const sorted = [...events].sort((a,b)=>(b.date||'').localeCompare(a.date||''));
+
+  function upsertEvent(ev) {
+    setEvents(prev => prev.some(e=>e.id===ev.id) ? prev.map(e=>e.id===ev.id?ev:e) : [ev, ...prev]);
+    setShowAdd(false); setEditing(null);
+  }
+  function deleteEvent(id) {
+    const ev = events.find(e=>e.id===id);
+    if (!window.confirm(`Delete "${ev?.name||'this event'}"? Orders already placed keep their event info.`)) return;
+    setEvents(prev => prev.filter(e => e.id !== id));
+  }
+  function toggleActive(id) {
+    setEvents(prev => prev.map(e => e.id===id ? {...e, active: !e.active} : e));
+  }
+  function copyLink(ev) {
+    const url = `${PUBLIC_BASE}/e/?event=${ev.slug}`;
+    const done = () => { setCopiedId(ev.id); setTimeout(()=>setCopiedId(null), 1500); };
+    if (navigator.clipboard?.writeText) navigator.clipboard.writeText(url).then(done, done);
+    else { window.prompt('Copy this link:', url); }
+  }
+  function orderCount(ev) {
+    return orders.filter(o => o.eventId===ev.id || (o.eventSlug && o.eventSlug===ev.slug)).length;
+  }
+
+  return (
+    <div className="space-y-4">
+      <div className="flex justify-between items-center">
+        <p className="text-sm text-gray-500">{events.length} event{events.length!==1?'s':''}</p>
+        <button onClick={()=>setShowAdd(true)} className="bg-emerald-500 hover:bg-emerald-600 text-white px-4 py-2 rounded-xl text-sm font-bold transition-colors">+ New Event</button>
+      </div>
+
+      {sorted.length===0
+        ? <Empty icon="📍" text="No events yet. Tap + New Event to add a pop-up, tea drop, or school stop."/>
+        : <div className="space-y-3">
+            {sorted.map(ev => {
+              const cnt = orderCount(ev);
+              return (
+                <div key={ev.id} className="bg-white rounded-2xl border shadow-sm p-4">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span className={`text-xs px-2 py-0.5 rounded-full font-semibold ${EVENT_TYPE_STYLE[ev.type]||'bg-gray-100 text-gray-600'}`}>{EVENT_TYPE_LABEL[ev.type]||'Event'}</span>
+                        {!ev.active && <span className="text-xs px-2 py-0.5 rounded-full font-semibold bg-gray-100 text-gray-500">Inactive</span>}
+                        {cnt>0 && <span className="text-xs px-2 py-0.5 rounded-full font-semibold bg-emerald-100 text-emerald-700">{cnt} order{cnt!==1?'s':''}</span>}
+                      </div>
+                      <p className="font-semibold text-gray-800 mt-1 truncate">{ev.name}</p>
+                      <p className="text-xs text-gray-400 mt-0.5">
+                        {[ev.date, [ev.startTime,ev.endTime].filter(Boolean).join('–'), ev.location].filter(Boolean).join(' · ')}
+                      </p>
+                      <p className="text-xs text-gray-400 mt-1 font-mono break-all">/e/?event={ev.slug}</p>
+                    </div>
+                    <button onClick={()=>toggleActive(ev.id)}
+                      className={`text-xs px-2.5 py-1 rounded-full font-semibold border transition-colors flex-shrink-0 ${ev.active?'bg-emerald-50 text-emerald-700 border-emerald-200':'bg-gray-50 text-gray-400 border-gray-200'}`}>
+                      {ev.active?'● Active':'○ Off'}
+                    </button>
+                  </div>
+                  <div className="flex gap-2 mt-3">
+                    <button onClick={()=>copyLink(ev)} className="flex-1 border border-gray-200 hover:border-emerald-400 text-gray-600 hover:text-emerald-600 text-sm font-semibold py-2 rounded-xl transition-colors">
+                      {copiedId===ev.id?'✓ Copied!':'🔗 Copy link'}
+                    </button>
+                    <button onClick={()=>setEditing(ev)} className="flex-1 border border-gray-200 hover:border-emerald-400 text-gray-500 hover:text-emerald-600 text-sm font-semibold py-2 rounded-xl transition-colors">✏️ Edit</button>
+                    <button onClick={()=>deleteEvent(ev.id)} className="border border-red-100 hover:border-red-400 text-red-400 hover:text-red-600 text-sm font-semibold py-2 px-3 rounded-xl transition-colors">🗑️</button>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+      }
+
+      {(showAdd || editing) && (
+        <EventModal existing={editing} events={events} onSave={upsertEvent}
+          onClose={()=>{ setShowAdd(false); setEditing(null); }}/>
+      )}
+    </div>
+  );
+}
+
 const NAV = [
   { id:'dashboard',   label:'Home',        icon:'🏠' },
   { id:'orders',      label:'Orders',      icon:'📦' },
+  { id:'events',      label:'Events',      icon:'📍' },
   { id:'blaze',       label:'Blaze',       icon:'🥎' },
   { id:'ingredients', label:'Ingredients', icon:'🧪' },
   { id:'margins',     label:'Margins',     icon:'📊' },
@@ -1755,6 +2020,7 @@ const NAV = [
 const TITLES = {
   dashboard:   'Dashboard',
   orders:      'Orders',
+  events:      'Pop-Ups & Events',
   blaze:       'Blaze Fundraiser',
   ingredients: 'Ingredients',
   margins:     'Profit & Margins',
@@ -1769,6 +2035,7 @@ function App() {
   const [products,     setProducts]     = useState(INIT_PRODUCTS);
   const [orders,       setOrders]       = useState(INIT_ORDERS);
   const [transactions, setTransactions] = useState(INIT_TRANSACTIONS);
+  const [events,       setEvents]       = useState([]);
   const [showExport,   setShowExport]   = useState(false);
   const [showBackup,   setShowBackup]   = useState(false);
   const [saveFlash,    setSaveFlash]    = useState(false);
@@ -1780,7 +2047,8 @@ function App() {
       loadFromCloud('products',    loadState('products',    INIT_PRODUCTS)),
       loadFromCloud('orders',      loadState('orders',      INIT_ORDERS)),
       loadFromCloud('transactions',loadState('transactions',INIT_TRANSACTIONS)),
-    ]).then(([ing, prod, ord, txn]) => {
+      loadFromCloud('events',      loadState('events',      [])),
+    ]).then(([ing, prod, ord, txn, evts]) => {
       // Merge: add any new products from INIT_PRODUCTS not in cloud
       const storedIds = new Set(prod.map(p => p.id));
       const merged = [...prod];
@@ -1790,6 +2058,7 @@ function App() {
       setProducts(merged);
       setOrders(ord);
       setTransactions(txn);
+      setEvents(Array.isArray(evts) ? evts : []);
       setCloudStatus('ok');
       setReady(true);
     }).catch(() => {
@@ -1802,6 +2071,7 @@ function App() {
       setProducts(merged);
       setOrders(loadState('orders', INIT_ORDERS));
       setTransactions(loadState('transactions', INIT_TRANSACTIONS));
+      setEvents(loadState('events', []));
       setCloudStatus('error');
       setReady(true);
     });
@@ -1812,6 +2082,7 @@ function App() {
   useEffect(() => { if (!ready) return; saveState('products',     products);     saveToCloud('products',     products);     flashSave(); }, [products, ready]);
   useEffect(() => { if (!ready) return; saveState('orders',       orders);       saveToCloud('orders',       orders);       flashSave(); }, [orders, ready]);
   useEffect(() => { if (!ready) return; saveState('transactions', transactions); saveToCloud('transactions', transactions); flashSave(); }, [transactions, ready]);
+  useEffect(() => { if (!ready) return; saveState('events',       events);       saveToCloud('events',       events);       flashSave(); }, [events, ready]);
 
   function flashSave() {
     setSaveFlash(true);
@@ -1836,17 +2107,19 @@ function App() {
     if (data.products)     setProducts(data.products);
     if (data.orders)       setOrders(data.orders);
     if (data.transactions) setTransactions(data.transactions);
+    if (data.events)       setEvents(data.events);
   }
 
   function handleClearAll() {
-    setOrders([]); setTransactions([]);
+    setOrders([]); setTransactions([]); setEvents([]);
     setIngredients(INIT_INGREDIENTS); setProducts(INIT_PRODUCTS);
-    ['orders','transactions','ingredients','products'].forEach(k => localStorage.removeItem(`gd_${k}`));
+    ['orders','transactions','ingredients','products','events'].forEach(k => localStorage.removeItem(`gd_${k}`));
   }
 
   const PAGE = {
     dashboard:   <Dashboard   ingredients={ingredients} products={products} orders={orders} transactions={transactions} setPage={setPage}/>,
     orders:      <Orders      ingredients={ingredients} products={products} orders={orders} setOrders={setOrders} setTransactions={setTransactions}/>,
+    events:      <Events      events={events} setEvents={setEvents} orders={orders}/>,
     blaze:       <BlazeFundraiser orders={orders}/>,
     ingredients: <Ingredients ingredients={ingredients} setIngredients={setIngredients}/>,
     margins:     <Margins     ingredients={ingredients} products={products} orders={orders} transactions={transactions} setProducts={setProducts}/>,
@@ -1931,7 +2204,7 @@ function App() {
       {showBackup && (
         <BackupModal
           ingredients={ingredients} products={products}
-          orders={orders} transactions={transactions}
+          orders={orders} transactions={transactions} events={events}
           onRestore={handleRestore}
           onClear={handleClearAll}
           onClose={()=>setShowBackup(false)}
