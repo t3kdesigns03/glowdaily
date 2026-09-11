@@ -929,21 +929,14 @@ footer a { color: var(--teal); text-decoration: none; }
           <option value="ship">Ship to Me</option>
         </select>
       </div>
-      <!-- Event / Pop-Up block (event only) -->
+      <!-- Event / Pop-Up block (event only) — just type where you're picking up -->
       <div class="event-block" id="eventBlock">
         <div class="form-group">
-          <label for="eventSelect">Which stop are you ordering for? *</label>
-          <select id="eventSelect" onchange="onEventSelectChange()">
-            <option value="">Select an event…</option>
-          </select>
+          <label for="eventCustomLocation">Which pop-up, tea drop, or school? *</label>
+          <input type="text" id="eventCustomLocation" placeholder="e.g. Lincoln Elementary, or Sunday tea drop at Salon X"/>
         </div>
-        <div class="form-group" id="eventCustomWrap" style="display:none">
-          <label for="eventCustomLocation">Tea drop / school / pop-up location *</label>
-          <input type="text" id="eventCustomLocation" placeholder="Tea drop / school / popup location"/>
-        </div>
-        <div class="event-hint" id="eventHint">
-          Don't see your stop? Pick <strong>Other / Tea Drop</strong> and tell us where.
-          Or <a href="/popups/">browse the calendar →</a>
+        <div class="event-hint">
+          Type where you'd like to pick up. Not sure what's coming up? <a href="/popups/">Browse the calendar →</a>
         </div>
       </div>
       <!-- Address block (ships only) -->
@@ -1571,47 +1564,21 @@ function onFulfillChange() {
   const evBlock = document.getElementById('eventBlock');
   addr.classList.toggle('show', val === 'ship');
   evBlock.classList.toggle('show', val === 'event');
-  if (val === 'event') { renderEventOptions(); onEventSelectChange(); }
   if (val === 'ship') setPriceMode('ship'); else setPriceMode('pickup');
 }
 
-// Show the custom-location input only when "Other / Tea Drop" is picked.
-function onEventSelectChange() {
-  const sel  = document.getElementById('eventSelect');
-  const wrap = document.getElementById('eventCustomWrap');
-  if (!sel || !wrap) return;
-  wrap.style.display = sel.value === 'other' ? 'block' : 'none';
-}
-
-// Read the event picker into a normalized result used by submitOrder().
-// Returns { error } on invalid input, otherwise the event fields to store.
+// Event / Pop-Up: the customer simply types where they're picking up.
+// Returns { error } if the box is empty/too short, otherwise the fields to store.
 function resolveEventSelection() {
-  const sel = document.getElementById('eventSelect');
-  const val = sel ? sel.value : '';
-  if (!val) return { error: 'Please choose which event / pop-up this order is for.' };
-
-  if (val === 'other') {
-    const custom = (document.getElementById('eventCustomLocation')?.value || '').trim();
-    if (custom.length < 3) return { error: 'Please type the tea drop / school / pop-up location.' };
-    return {
-      fields: {
-        fulfillment: 'event', eventId: null, eventSlug: null,
-        eventName: null, eventLocation: null, eventType: 'teadrop',
-        eventCustomLocation: custom,
-      },
-      label: custom, location: '', date: '',
-    };
-  }
-
-  const ev = events.find(e => e.id === val);
-  if (!ev || !isEventOrderable(ev)) return { error: 'That event is no longer open — please pick another.' };
+  const custom = (document.getElementById('eventCustomLocation')?.value || '').trim();
+  if (custom.length < 3) return { error: 'Please type the pop-up, tea drop, or school for pickup.' };
   return {
     fields: {
-      fulfillment: 'event', eventId: ev.id, eventSlug: ev.slug || null,
-      eventName: ev.name || null, eventLocation: ev.location || null,
-      eventType: ev.type || 'popup', eventCustomLocation: null,
+      fulfillment: 'event', eventId: null, eventSlug: null,
+      eventName: null, eventLocation: null, eventType: null,
+      eventCustomLocation: custom,
     },
-    label: ev.name || 'the event', location: ev.location || '', date: ev.date || '',
+    label: custom, location: '', date: '',
   };
 }
 
@@ -1965,7 +1932,6 @@ window.addEventListener('scroll', () => {
 // ── INIT ──────────────────────────────────────────
 loadProducts();
 loadSpecial();
-loadEvents();
 </script>
 </body>
 </html>
