@@ -960,6 +960,7 @@ footer a { color: var(--teal); text-decoration: none; }
         <span style="color:var(--teal)">Thanks for glowing with us! ✨</span>
       </p>
       <p id="confirmEvent" style="display:none;margin-top:1rem;color:var(--gold2);font-weight:700"></p>
+      <div id="confirmPay" style="margin:1rem 0"></div>
       <br/>
       <button class="btn-primary" onclick="newOrder()" style="border:none;cursor:pointer;font-family:'Nunito',sans-serif;">
         Place Another Order
@@ -1646,6 +1647,7 @@ async function submitOrder() {
     } catch(e2) {}
 
     showConfirm(orderId, `${phone} / ${email}`, eventConfirmMsg);
+    if (selectedPay === 'square') renderSquarePay(orderId, Math.round(total * 100));
   } catch(err) {
     // Save locally as fallback — user can restore via dashboard Backup/Restore
     try {
@@ -1653,6 +1655,7 @@ async function submitOrder() {
       localStorage.setItem('gd_web_orders', JSON.stringify([orderRow, ...prev]));
     } catch(e) {}
     showConfirm(orderId, `${phone} / ${email}`, eventConfirmMsg);
+    if (selectedPay === 'square') renderSquarePay(orderId, Math.round(total * 100));
     showToast('Order saved locally. Check Supabase connection.');
   }
 
@@ -1663,6 +1666,29 @@ async function submitOrder() {
 function showErr(msg) {
   const el = document.getElementById('formError');
   el.textContent = msg; el.style.display = 'block';
+}
+
+// Square: create a hosted payment link for this order and show a Pay button.
+// Fail-open — if Square isn't configured yet (or the call fails), show a manual note.
+async function renderSquarePay(orderId, totalCents) {
+  const el = document.getElementById('confirmPay');
+  if (!el) return;
+  const amount = `$${(totalCents/100).toFixed(2)}`;
+  el.innerHTML = `<span style="color:var(--muted);font-size:0.9rem">Preparing your Square payment link…</span>`;
+  try {
+    const res = await fetch('/.netlify/functions/create-square-payment', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ orderId, amountCents: totalCents, description: `GlowDaily order ${orderId}` }),
+    });
+    const data = await res.json().catch(() => ({}));
+    if (data && data.configured && data.url) {
+      el.innerHTML =
+        `<a href="${data.url}" target="_blank" rel="noopener" class="btn-primary" style="display:inline-block;border:none;text-decoration:none">💳 Pay ${amount} with Square →</a>` +
+        `<div style="color:var(--muted);font-size:0.8rem;margin-top:0.5rem">Opens Square's secure checkout in a new tab.</div>`;
+      return;
+    }
+  } catch (e) { /* fall through to manual note */ }
+  el.innerHTML = `<div style="color:var(--muted);font-size:0.9rem">🟦 We'll text you a Square link for ${amount} to finish your order. Questions? Text 402.217.1574.</div>`;
 }
 
 function showConfirm(id, contact, eventMsg) {
@@ -1676,6 +1702,8 @@ function showConfirm(id, contact, eventMsg) {
     if (eventMsg) { evEl.textContent = eventMsg; evEl.style.display = 'block'; }
     else { evEl.textContent = ''; evEl.style.display = 'none'; }
   }
+  const payEl = document.getElementById('confirmPay');
+  if (payEl) payEl.innerHTML = '';   // reset; filled by renderSquarePay for Square orders
   cart = {}; packFlavors = {};
   updateCart();
   document.getElementById('cartSummary').style.display = 'none';

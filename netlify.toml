@@ -1,0 +1,14 @@
+# GlowDaily — static site + serverless functions.
+# The site is plain static HTML served from the repo root; the only server-side
+# code is the Square payment-link function under netlify/functions/.
+
+[build]
+  publish = "."
+  functions = "netlify/functions"
+
+[functions]
+  node_bundler = "esbuild"
+
+# NOTE: Netlify Functions only ship on a real Git/CLI deploy — a manual
+# drag-and-drop of the folder does NOT include functions. Deploy this via
+# "Trigger deploy" (or `netlify deploy`) so /.netlify/functions/* exists.
